@@ -3,7 +3,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/create_account.dart';
-import 'package:open_password_manager/features/auth/infrastructure/auth_providers.dart';
+import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
 import 'package:open_password_manager/style/sizes.dart';
 import 'sign_in_page.dart';
 
