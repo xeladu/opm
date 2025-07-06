@@ -27,7 +27,7 @@ class ExportRepositoryImpl implements ExportRepository {
         entry.name,
         entry.createdAt.toIso8601String(),
         entry.updatedAt.toIso8601String(),
-        entry.user,
+        entry.username,
         entry.password,
         '"${entry.urls.join(';')}"',
         entry.comments.replaceAll('\n', ' '),

@@ -3,7 +3,7 @@ class PasswordEntry {
   final String name;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final String user;
+  final String username;
   final String password;
   final List<String> urls;
   final String comments;
@@ -13,7 +13,7 @@ class PasswordEntry {
     required this.name,
     required this.createdAt,
     required this.updatedAt,
-    required this.user,
+    required this.username,
     required this.password,
     required this.urls,
     required this.comments,
@@ -24,7 +24,7 @@ class PasswordEntry {
       name = '',
       createdAt = DateTime.now(),
       updatedAt = DateTime.now(),
-      user = '',
+      username = '',
       password = '',
       urls = const [],
       comments = '';
@@ -33,7 +33,7 @@ class PasswordEntry {
     String? id,
     String? name,
     DateTime? createdAt,
-    String? user,
+    String? username,
     String? password,
     List<String>? urls,
     String? comments,
@@ -43,7 +43,7 @@ class PasswordEntry {
       name: name ?? this.name,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: DateTime.now(),
-      user: user ?? this.user,
+      username: username ?? this.username,
       password: password ?? this.password,
       urls: urls ?? this.urls,
       comments: comments ?? this.comments,
@@ -56,14 +56,14 @@ class PasswordEntry {
       name: json.containsKey('name') && json['name'] is String
           ? json['name']
           : '',
-      createdAt: json.containsKey('createdAt') && json['createdAt'] is String
-          ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
+      createdAt: json.containsKey('created_at') && json['created_at'] is String
+          ? DateTime.tryParse(json['created_at']) ?? DateTime.now()
           : DateTime.now(),
-      updatedAt: json.containsKey('updatedAt') && json['updatedAt'] is String
-          ? DateTime.tryParse(json['updatedAt']) ?? DateTime.now()
+      updatedAt: json.containsKey('updated_at') && json['updated_at'] is String
+          ? DateTime.tryParse(json['updated_at']) ?? DateTime.now()
           : DateTime.now(),
-      user: json.containsKey('user') && json['user'] is String
-          ? json['user']
+      username: json.containsKey('username') && json['username'] is String
+          ? json['username']
           : '',
       password: json.containsKey('password') && json['password'] is String
           ? json['password']
@@ -81,9 +81,9 @@ class PasswordEntry {
     return {
       'id': id,
       'name': name,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
-      'user': user,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+      'username': username,
       'password': password,
       'urls': urls,
       'comments': comments,
@@ -99,7 +99,7 @@ class PasswordEntry {
           name == other.name &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
-          user == other.user &&
+          username == other.username &&
           password == other.password &&
           urls.length == other.urls.length &&
           urls.every((u) => other.urls.contains(u)) &&
@@ -111,7 +111,7 @@ class PasswordEntry {
       name.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode ^
-      user.hashCode ^
+      username.hashCode ^
       password.hashCode ^
       Object.hashAll(urls) ^
       comments.hashCode;

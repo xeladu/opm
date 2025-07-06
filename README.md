@@ -93,9 +93,31 @@ You can find the url in the *Connect* screen when choosing Flutter as a mobile f
 
 ### Database
 
-Create a database and put the name in the config file. Add the following columns:
+Create a database and put the name in the config file. Prepare the database with the following SQL script:
 
-// TODO
+```sql
+create table <db_name> (
+  id uuid primary key,
+  user_id uuid not null,
+  name text not null,
+  created_at timestamptz not null,
+  updated_at timestamptz not null,
+  username text not null,
+  password text not null,
+  urls text[],
+  comments text
+);
+```
+
+Change the default value of `user_id` to `auth.uid()` in the column editor.
+
+Enable [row level security](https://supabase.com/docs/guides/database/postgres/row-level-security) and create four policies with the commands `SELECT`, `INSERT`, `UPDATE`, and `DELETE` and the following using clause
+
+```sql
+(auth.uid() = user_id)
+```
+
+This will restrict data access to only the user that created the entry.
 
 ## Appwrite configuration steps
 
@@ -124,7 +146,18 @@ You can find the configuration values in your Appwrite dashboard under *Settings
 
 ### Database
 
-// TODO
+Create a database and a collection, put the names in the config file. Then, add the following attributes to the collection:
+
+| Key | Type | Length | Required |
+| --- | --- | --- | --- |
+| id | string | 36 | ✅ |
+| name | string | 256 | ✅ |
+| createdAt | datetime | - | ✅ |
+| updatedAt | datetime | - | ✅ |
+| username | string | 256 | ✅ |
+| password | string | 256 | ✅ |
+| urls | array of strings | 1024 | ❌ |
+| comments | string | 1024 | ❌ |
 
 ## How to deploy
 

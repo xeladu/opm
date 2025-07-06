@@ -44,7 +44,7 @@ class _State extends ConsumerState<PasswordListPage> {
     setState(() {
       _filteredEntries = _allEntries.where((entry) {
         return entry.name.toLowerCase().contains(query) ||
-            entry.user.toLowerCase().contains(query) ||
+            entry.username.toLowerCase().contains(query) ||
             entry.urls.any((url) => url.toLowerCase().contains(query));
       }).toList();
     });
@@ -83,7 +83,7 @@ class _State extends ConsumerState<PasswordListPage> {
                             final entry = _filteredEntries[index];
                             return ListTile(
                               title: Text(entry.name),
-                              subtitle: Text(entry.user),
+                              subtitle: Text(entry.username),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -130,10 +130,10 @@ class _State extends ConsumerState<PasswordListPage> {
                                               onPressed: () => Navigator.of(
                                                 context,
                                               ).pop(true),
-                                              child: const Text('Delete'),
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.red,
                                               ),
+                                              child: const Text('Delete'),
                                             ),
                                           ],
                                         ),
@@ -256,7 +256,7 @@ class _AddPasswordEntryDialogState extends State<_AddPasswordEntryDialog> {
                 name: _nameController.text,
                 createdAt: now,
                 updatedAt: now,
-                user: _userController.text,
+                username: _userController.text,
                 password: _passwordController.text,
                 urls: _urlsController.text
                     .split(';')
@@ -266,7 +266,9 @@ class _AddPasswordEntryDialogState extends State<_AddPasswordEntryDialog> {
                 comments: _commentsController.text,
               );
               await widget.onSave(entry);
-              Navigator.of(context).pop();
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
             }
           },
           child: const Text('Save'),
@@ -298,7 +300,7 @@ class _EditPasswordEntryDialogState extends State<_EditPasswordEntryDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.entry.name);
-    _userController = TextEditingController(text: widget.entry.user);
+    _userController = TextEditingController(text: widget.entry.username);
     _passwordController = TextEditingController(text: widget.entry.password);
     _urlsController = TextEditingController(text: widget.entry.urls.join(';'));
     _commentsController = TextEditingController(text: widget.entry.comments);
@@ -363,7 +365,7 @@ class _EditPasswordEntryDialogState extends State<_EditPasswordEntryDialog> {
             if (_formKey.currentState?.validate() ?? false) {
               final updatedEntry = widget.entry.copyWith(
                 name: _nameController.text,
-                user: _userController.text,
+                username: _userController.text,
                 password: _passwordController.text,
                 urls: _urlsController.text
                     .split(';')
@@ -373,7 +375,9 @@ class _EditPasswordEntryDialogState extends State<_EditPasswordEntryDialog> {
                 comments: _commentsController.text,
               );
               await widget.onSave(updatedEntry);
-              Navigator.of(context).pop();
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
             }
           },
           child: const Text('Save'),
