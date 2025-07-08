@@ -30,6 +30,11 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
+  @override
   Future<void> deleteAccount() async {
     try {
       final user = FirebaseAuth.instance.currentUser;

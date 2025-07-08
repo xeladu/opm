@@ -58,98 +58,105 @@ class _State extends ConsumerState<CreateAccountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Create Account')),
-      body: Padding(
-        padding: EdgeInsets.all(sizeS),
-        child: FormBuilder(
-          key: _formKey,
-          child: Column(
-            children: [
-              FormBuilderTextField(
-                name: 'email',
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(),
-                  FormBuilderValidators.email(),
-                ]),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              SizedBox(height: sizeS),
-              FormBuilderTextField(
-                name: 'password',
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(sizeS),
+            child: FormBuilder(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FormBuilderTextField(
+                    name: 'email',
+                    decoration: const InputDecoration(labelText: 'Email'),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.email(),
+                    ]),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  SizedBox(height: sizeS),
+                  FormBuilderTextField(
+                    name: 'password',
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
+                    obscureText: _obscurePassword,
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.minLength(8),
+                    ]),
+                  ),
+                  SizedBox(height: sizeS),
+                  FormBuilderTextField(
+                    name: 'confirm_password',
+                    decoration: InputDecoration(
+                      labelText: 'Confirm Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                    ),
+                    obscureText: _obscureConfirmPassword,
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return 'This field is required';
+                      }
+                      final password =
+                          _formKey.currentState?.fields['password']?.value;
+                      if (val != password) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
                     },
                   ),
-                ),
-                obscureText: _obscurePassword,
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(),
-                  FormBuilderValidators.minLength(8),
-                ]),
-              ),
-              SizedBox(height: sizeS),
-              FormBuilderTextField(
-                name: 'confirm_password',
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirmPassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureConfirmPassword = !_obscureConfirmPassword;
-                      });
-                    },
+                  SizedBox(height: sizeM),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _handleCreateAccount,
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Create Account'),
                   ),
-                ),
-                obscureText: _obscureConfirmPassword,
-                validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return 'This field is required';
-                  }
-                  final password =
-                      _formKey.currentState?.fields['password']?.value;
-                  if (val != password) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
+                  SizedBox(height: sizeS),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignInPage(),
+                        ),
+                      );
+                    },
+                    child: const Text('Already have an account? Sign in'),
+                  ),
+                ],
               ),
-              SizedBox(height: sizeM),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleCreateAccount,
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Create Account'),
-              ),
-              SizedBox(height: sizeS),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const SignInPage()),
-                  );
-                },
-                child: const Text('Already have an account? Sign in'),
-              ),
-            ],
+            ),
           ),
         ),
       ),

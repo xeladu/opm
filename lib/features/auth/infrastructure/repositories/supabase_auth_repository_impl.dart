@@ -32,6 +32,11 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> signOut() async {
+    await Supabase.instance.client.auth.signOut();
+  }
+
+  @override
   Future<void> deleteAccount() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {

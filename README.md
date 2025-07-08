@@ -152,12 +152,14 @@ Create a database and a collection, put the names in the config file. Then, add 
 | --- | --- | --- | --- |
 | id | string | 36 | ✅ |
 | name | string | 256 | ✅ |
-| createdAt | datetime | - | ✅ |
-| updatedAt | datetime | - | ✅ |
+| created_at | datetime | - | ✅ |
+| updated_at | datetime | - | ✅ |
 | username | string | 256 | ✅ |
 | password | string | 256 | ✅ |
 | urls | array of strings | 1024 | ❌ |
 | comments | string | 1024 | ❌ |
+
+Enable document security in your collection. Set the collection permission to `Create` for the role `Users`. That way, users can only see/edit/delete their own documents and any authenticated user can insert new documents.
 
 ## How to deploy
 

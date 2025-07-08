@@ -32,6 +32,15 @@ class AppwriteAuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> signOut() async {
+    try {
+      await _account.deleteSession(sessionId: 'current');
+    } on AppwriteException catch (e) {
+      throw Exception(e.message ?? 'Failed to sign out');
+    }
+  }
+
+  @override
   Future<void> deleteAccount() async {
     try {
       await _account.deleteSession(sessionId: 'current');

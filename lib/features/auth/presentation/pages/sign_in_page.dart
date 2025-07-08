@@ -58,69 +58,74 @@ class _State extends ConsumerState<SignInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Sign In')),
-      body: Padding(
-        padding: const EdgeInsets.all(sizeS),
-        child: FormBuilder(
-          key: _formKey,
-          child: Column(
-            children: [
-              FormBuilderTextField(
-                name: 'email',
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(),
-                  FormBuilderValidators.email(),
-                ]),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: sizeS),
-              FormBuilderTextField(
-                name: 'password',
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(sizeS),
+            child: FormBuilder(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FormBuilderTextField(
+                    name: 'email',
+                    decoration: const InputDecoration(labelText: 'Email'),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.email(),
+                    ]),
+                    keyboardType: TextInputType.emailAddress,
                   ),
-                ),
-                obscureText: _obscurePassword,
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(),
-                  FormBuilderValidators.minLength(8),
-                ]),
-              ),
-              const SizedBox(height: sizeM),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleSignIn,
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Sign In'),
-              ),
-              const SizedBox(height: sizeS),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CreateAccountPage(),
+                  const SizedBox(height: sizeS),
+                  FormBuilderTextField(
+                    name: 'password',
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
-                  );
-                },
-                child: const Text("Don't have an account? Sign up"),
+                    obscureText: _obscurePassword,
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.minLength(8),
+                    ]),
+                  ),
+                  const SizedBox(height: sizeM),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _handleSignIn,
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Sign In'),
+                  ),
+                  const SizedBox(height: sizeS),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateAccountPage(),
+                        ),
+                      );
+                    },
+                    child: const Text("Don't have an account? Sign up"),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

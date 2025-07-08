@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/password/infrastructure/providers/password_provider.dart';
+import 'package:open_password_manager/features/password/presentation/pages/password_entry_detail_page.dart';
+import 'package:open_password_manager/features/password/presentation/pages/edit_password_entry_page.dart';
+import 'package:open_password_manager/features/password/presentation/pages/add_password_entry_page.dart';
 import 'package:open_password_manager/style/sizes.dart';
 import 'package:open_password_manager/features/password/application/use_cases/get_all_password_entries.dart';
 import 'package:open_password_manager/features/password/domain/entities/password_entry.dart';
 import 'package:uuid/uuid.dart';
+import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
+import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 
 class PasswordListPage extends ConsumerStatefulWidget {
   const PasswordListPage({super.key});
@@ -59,7 +64,25 @@ class _State extends ConsumerState<PasswordListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Passwords')),
+      appBar: AppBar(
+        title: const Text('Passwords'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              final authRepo = ref.read(authRepositoryProvider);
+              await authRepo.signOut();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const SignInPage()),
+                  (route) => false,
+                );
+              }
+            },
+          ),
+        ],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -84,70 +107,90 @@ class _State extends ConsumerState<PasswordListPage> {
                             return ListTile(
                               title: Text(entry.name),
                               subtitle: Text(entry.username),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (entry.urls.isNotEmpty) Icon(Icons.link),
-                                  IconButton(
-                                    icon: Icon(Icons.edit),
-                                    onPressed: () async {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (context) =>
-                                            _EditPasswordEntryDialog(
-                                              entry: entry,
-                                              onSave: (updatedEntry) async {
-                                                final repo = ref.read(
-                                                  passwordRepositoryProvider,
-                                                );
-                                                await repo.editPasswordEntry(
-                                                  updatedEntry,
-                                                );
-                                                await _loadEntries();
-                                              },
-                                            ),
-                                      );
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete),
-                                    onPressed: () async {
-                                      final confirm = await showDialog<bool>(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: const Text('Delete Entry'),
-                                          content: const Text(
-                                            'Are you sure you want to delete this password entry?',
+                              trailing: PopupMenuButton<String>(
+                                onSelected: (value) async {
+                                  if (value == 'view') {
+                                    final updatedOrDeleted =
+                                        await Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                PasswordEntryDetailPage(
+                                                  entry: entry,
+                                                ),
                                           ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.of(
-                                                context,
-                                              ).pop(false),
-                                              child: const Text('Cancel'),
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () => Navigator.of(
-                                                context,
-                                              ).pop(true),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.red,
-                                              ),
-                                              child: const Text('Delete'),
-                                            ),
-                                          ],
+                                        );
+                                    if (updatedOrDeleted != null) {
+                                      await _loadEntries();
+                                    }
+                                  } else if (value == 'edit') {
+                                    final updated = await Navigator.of(context)
+                                        .push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                EditPasswordEntryPage(
+                                                  entry: entry,
+                                                  onSave: (updatedEntry) async {
+                                                    final repo = ref.read(
+                                                      passwordRepositoryProvider,
+                                                    );
+                                                    await repo
+                                                        .editPasswordEntry(
+                                                          updatedEntry,
+                                                        );
+                                                  },
+                                                ),
+                                          ),
+                                        );
+                                    if (updated != null) {
+                                      await _loadEntries();
+                                    }
+                                  } else if (value == 'delete') {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Delete Entry'),
+                                        content: const Text(
+                                          'Are you sure you want to delete this password entry?',
                                         ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(
+                                              context,
+                                            ).pop(false),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(true),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                            ),
+                                            child: const Text('Delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    if (confirm == true) {
+                                      final repo = ref.read(
+                                        passwordRepositoryProvider,
                                       );
-                                      if (confirm == true) {
-                                        final repo = ref.read(
-                                          passwordRepositoryProvider,
-                                        );
-                                        await repo.deletePasswordEntry(
-                                          entry.id,
-                                        );
-                                        await _loadEntries();
-                                      }
-                                    },
+                                      await repo.deletePasswordEntry(entry.id);
+                                      await _loadEntries();
+                                    }
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  const PopupMenuItem(
+                                    value: 'view',
+                                    child: Text('View'),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text('Edit'),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text('Delete'),
                                   ),
                                 ],
                               ),
@@ -159,16 +202,19 @@ class _State extends ConsumerState<PasswordListPage> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await showDialog(
-            context: context,
-            builder: (context) => _AddPasswordEntryDialog(
-              onSave: (entry) async {
-                final repo = ref.read(passwordRepositoryProvider);
-                await repo.addPasswordEntry(entry);
-                await _loadEntries();
-              },
+          final added = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => AddPasswordEntryPage(
+                onSave: (entry) async {
+                  final repo = ref.read(passwordRepositoryProvider);
+                  await repo.addPasswordEntry(entry);
+                },
+              ),
             ),
           );
+          if (added != null) {
+            await _loadEntries();
+          }
         },
         child: const Icon(Icons.add),
       ),

@@ -14,11 +14,21 @@ class AppwritePasswordRepositoryImpl implements PasswordRepository {
 
   @override
   Future<void> addPasswordEntry(PasswordEntry entry) async {
+    // Get the current user's ID
+    final account = Account(client);
+    final user = await account.get();
+    final userId = user.$id;
+
     await _db.createDocument(
       databaseId: config.databaseId,
       collectionId: config.collectionId,
       documentId: entry.id,
       data: entry.toJson(),
+      permissions: [
+        Permission.read(Role.user(userId)),
+        Permission.update(Role.user(userId)),
+        Permission.delete(Role.user(userId)),
+      ],
     );
   }
 
