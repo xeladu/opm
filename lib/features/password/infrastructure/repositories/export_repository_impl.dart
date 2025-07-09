@@ -25,8 +25,8 @@ class ExportRepositoryImpl implements ExportRepository {
       final row = [
         entry.id,
         entry.name,
-        entry.createdAt.toIso8601String(),
-        entry.updatedAt.toIso8601String(),
+        entry.createdAt,
+        entry.updatedAt,
         entry.username,
         entry.password,
         '"${entry.urls.join(';')}"',

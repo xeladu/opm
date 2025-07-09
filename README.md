@@ -100,8 +100,8 @@ create table <db_name> (
   id uuid primary key,
   user_id uuid not null,
   name text not null,
-  created_at timestamptz not null,
-  updated_at timestamptz not null,
+  created_at text not null,
+  updated_at text not null,
   username text not null,
   password text not null,
   urls text[],
@@ -152,14 +152,24 @@ Create a database and a collection, put the names in the config file. Then, add 
 | --- | --- | --- | --- |
 | id | string | 36 | ✅ |
 | name | string | 256 | ✅ |
-| created_at | datetime | - | ✅ |
-| updated_at | datetime | - | ✅ |
+| created_at | string | 256 | ✅ |
+| updated_at | string | 256 | ✅ |
 | username | string | 256 | ✅ |
 | password | string | 256 | ✅ |
 | urls | array of strings | 1024 | ❌ |
 | comments | string | 1024 | ❌ |
 
 Enable document security in your collection. Set the collection permission to `Create` for the role `Users`. That way, users can only see/edit/delete their own documents and any authenticated user can insert new documents.
+
+## Encryption
+
+See `cryptography_service.dart`.
+
+Based on the salted user's master password, a key is generated to encrypt all data fields in the database. Encryption and decryption happens on the device. Only encrypted data is transmitted to and from the backend.
+
+When the user's password is changed, all password entries need to be decrypted with the old password and encrypted again with the new password.
+
+A lost master password means all stored passwords are lost. There is no fallback mechanism to recover them.
 
 ## How to deploy
 

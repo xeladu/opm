@@ -79,8 +79,8 @@ class _AddPasswordEntryPageState extends State<AddPasswordEntryPage> {
                         final entry = PasswordEntry(
                           id: const Uuid().v4(),
                           name: _nameController.text,
-                          createdAt: now,
-                          updatedAt: now,
+                          createdAt: now.toIso8601String(),
+                          updatedAt: now.toIso8601String(),
                           username: _userController.text,
                           password: _passwordController.text,
                           urls: _urlsController.text

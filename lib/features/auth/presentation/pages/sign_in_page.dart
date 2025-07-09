@@ -5,6 +5,7 @@ import 'package:open_password_manager/features/auth/application/use_cases/sign_i
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
 import 'package:open_password_manager/features/password/presentation/pages/password_list_page.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/style/sizes.dart';
 import 'create_account_page.dart';
 
@@ -28,8 +29,13 @@ class _State extends ConsumerState<SignInPage> {
     final data = _formKey.currentState!.value;
     final authRepo = ref.read(authRepositoryProvider);
     final useCase = SignIn(authRepo);
+
     try {
       await useCase(email: data['email'], password: data['password']);
+
+      final cryptService = ref.read(cryptographyRepositoryProvider);
+      await cryptService.init(data["password"]);
+
       if (mounted) {
         ScaffoldMessenger.of(
           context,

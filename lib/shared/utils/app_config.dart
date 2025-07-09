@@ -1,5 +1,7 @@
+import 'package:open_password_manager/shared/utils/hosting_provider.dart';
+
 class AppConfig {
-  final String provider;
+  final HostingProvider provider;
   final FirebaseConfig? firebaseConfig;
   final SupabaseConfig? supabaseConfig;
   final AppwriteConfig? appwriteConfig;
@@ -13,7 +15,10 @@ class AppConfig {
 
   factory AppConfig.fromJson(Map<String, dynamic> json) {
     return AppConfig(
-      provider: json['provider'] as String,
+      provider: HostingProvider.values.firstWhere(
+        (provider) =>
+            (json['provider'] as String).toLowerCase() == provider.name,
+      ),
       firebaseConfig: json.containsKey("firebaseConfig")
           ? FirebaseConfig.fromJson(json["firebaseConfig"])
           : null,

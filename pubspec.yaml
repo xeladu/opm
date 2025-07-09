@@ -14,17 +14,20 @@ dependencies:
   flutter_riverpod: ^2.5.1
 
   appwrite: ^11.0.0
+  cloud_firestore: ^5.6.11
+  crypto: ^3.0.3
   cupertino_icons: ^1.0.8
+  firebase_auth: ^5.6.2
   firebase_core: ^3.15.1
   firebase_core_web: ^2.24.1
-  firebase_auth: ^5.6.2
   flutter_form_builder: ^10.0.1
+  flutter_secure_storage: ^9.0.0
   form_builder_validators: ^11.2.0
   google_fonts: ^6.2.1
+  pointycastle: ^3.7.3
   supabase_flutter: ^2.5.2
-  cloud_firestore: ^5.6.11
-  web: ^1.1.1
   uuid: ^4.5.1
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:

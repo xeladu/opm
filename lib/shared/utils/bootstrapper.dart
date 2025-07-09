@@ -2,98 +2,73 @@ import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart';
-import 'package:open_password_manager/features/auth/infrastructure/repositories/appwrite_auth_repository_impl.dart';
-import 'package:open_password_manager/features/auth/infrastructure/repositories/firebase_auth_repository_impl.dart';
-import 'package:open_password_manager/features/auth/infrastructure/repositories/supabase_auth_repository_impl.dart';
-import 'package:open_password_manager/features/password/domain/repositories/export_repository.dart';
-import 'package:open_password_manager/features/password/domain/repositories/password_repository.dart';
-import 'package:open_password_manager/features/password/infrastructure/repositories/appwrite/appwrite_password_repository_impl.dart';
-import 'package:open_password_manager/features/password/infrastructure/repositories/export_repository_impl.dart';
-import 'package:open_password_manager/features/password/infrastructure/repositories/firebase/firebase_password_repository_impl.dart';
-import 'package:open_password_manager/features/password/infrastructure/repositories/supabase/supabase_password_repository_impl.dart';
 import 'package:open_password_manager/shared/utils/app_config.dart';
+import 'package:open_password_manager/shared/utils/hosting_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Bootstrapper {
-  Future<AppConfig> loadConfig() async {
-    final configString = await rootBundle.loadString('config.json');
-    final configJson = json.decode(configString);
-    return AppConfig.fromJson(configJson);
+  AppConfig? _appConfig;
+  SupabaseClient? _supabaseClient;
+  Client? _appwriteClient;
+  HostingProvider? _provider;
+
+  SupabaseClient? get supabaseClient => _supabaseClient;
+
+  Client? get appwriteClient => _appwriteClient;
+
+  AppConfig get appConfig {
+    if (_appConfig == null) throw Exception("App not initialized");
+
+    return _appConfig!;
   }
 
-  Future<dynamic> initBackendFromConfig(AppConfig config) async {
+  HostingProvider get provider {
+    if (_provider == null) throw Exception("App not initialized");
+
+    return _provider!;
+  }
+
+  Future<void> initBackendFromConfig() async {
     try {
-      switch (config.provider) {
-        case "firebase":
+      _appConfig = await _loadConfig();
+      _provider = _appConfig!.provider;
+
+      switch (_provider!) {
+        case HostingProvider.firebase:
           await Firebase.initializeApp(
             options: FirebaseOptions(
-              apiKey: config.firebaseConfig!.apiKey,
-              appId: config.firebaseConfig!.appId,
-              messagingSenderId: config.firebaseConfig!.messagingSenderId,
-              projectId: config.firebaseConfig!.projectId,
-              authDomain: config.firebaseConfig!.authDomain,
-              measurementId: config.firebaseConfig!.measurementId,
-              storageBucket: config.firebaseConfig!.storageBucket,
+              apiKey: _appConfig!.firebaseConfig!.apiKey,
+              appId: _appConfig!.firebaseConfig!.appId,
+              messagingSenderId: _appConfig!.firebaseConfig!.messagingSenderId,
+              projectId: _appConfig!.firebaseConfig!.projectId,
+              authDomain: _appConfig!.firebaseConfig!.authDomain,
+              measurementId: _appConfig!.firebaseConfig!.measurementId,
+              storageBucket: _appConfig!.firebaseConfig!.storageBucket,
             ),
           );
           break;
-        case "supabase":
+        case HostingProvider.supabase:
           await Supabase.initialize(
-            url: config.supabaseConfig!.url,
-            anonKey: config.supabaseConfig!.anonKey,
+            url: _appConfig!.supabaseConfig!.url,
+            anonKey: _appConfig!.supabaseConfig!.anonKey,
           );
-          final supabaseClient = SupabaseClient(
-            config.supabaseConfig!.url,
-            config.supabaseConfig!.anonKey,
+          _supabaseClient = SupabaseClient(
+            _appConfig!.supabaseConfig!.url,
+            _appConfig!.supabaseConfig!.anonKey,
           );
-          return supabaseClient;
-        case "appwrite":
-          final appwriteClient = Client();
-          appwriteClient.setEndpoint(config.appwriteConfig!.endpoint);
-          appwriteClient.setProject(config.appwriteConfig!.projectId);
-          return appwriteClient;
-        default:
-          throw Exception("Invalid app configuration");
+        case HostingProvider.appwrite:
+          _appwriteClient = Client();
+          _appwriteClient!.setEndpoint(_appConfig!.appwriteConfig!.endpoint);
+          _appwriteClient!.setProject(_appConfig!.appwriteConfig!.projectId);
       }
     } on Exception catch (ex) {
       throw Exception("Invalid configuration file\r\n${ex.toString()}");
     }
   }
 
-  AuthRepository getAuthProvider(AppConfig config, dynamic client) {
-    switch (config.provider) {
-      case "firebase":
-        return FirebaseAuthRepositoryImpl();
-      case "supabase":
-        return SupabaseAuthRepositoryImpl();
-      case "appwrite":
-        return AppwriteAuthRepositoryImpl(client!);
-      default:
-        throw Exception("Invalid app configuration");
-    }
-  }
-
-  ExportRepository getExportProvider() {
-    return ExportRepositoryImpl();
-  }
-
-  PasswordRepository getPasswordProvider(AppConfig config, dynamic client) {
-    switch (config.provider) {
-      case "firebase":
-        return FirebasePasswordRepositoryImpl(config: config.firebaseConfig!);
-      case "supabase":
-        return SupabasePasswordRepositoryImpl(
-          client: client as SupabaseClient,
-          databaseName: config.supabaseConfig!.databaseName,
-        );
-      case "appwrite":
-        return AppwritePasswordRepositoryImpl(
-          client: client as Client,
-          config: config.appwriteConfig!,
-        );
-      default:
-        throw Exception("Invalid app configuration");
-    }
+  Future<AppConfig> _loadConfig() async {
+    final configString = await rootBundle.loadString('config.json');
+    final configJson = json.decode(configString);
+    return AppConfig.fromJson(configJson);
   }
 }
