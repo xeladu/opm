@@ -6,5 +6,3 @@ const double sizeM = 24;
 const double sizeL = 32;
 const double sizeXL = 48;
 const double sizeXXL = 64;
-
-// responsive breakpoint

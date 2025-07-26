@@ -4,12 +4,12 @@ import 'package:open_password_manager/shared/domain/repositories/cryptography_re
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class SupabasePasswordRepositoryImpl implements EntryRepository {
+class SupabaseEntryRepositoryImpl implements EntryRepository {
   final SupabaseClient client;
   final String databaseName;
   final CryptographyRepository cryptoRepo;
 
-  SupabasePasswordRepositoryImpl({
+  SupabaseEntryRepositoryImpl({
     required this.client,
     required this.databaseName,
     required this.cryptoRepo,

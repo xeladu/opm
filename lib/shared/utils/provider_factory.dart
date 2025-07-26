@@ -2,12 +2,12 @@ import 'package:open_password_manager/features/auth/domain/repositories/auth_rep
 import 'package:open_password_manager/features/auth/infrastructure/repositories/appwrite_auth_repository_impl.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/firebase_auth_repository_impl.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/supabase_auth_repository_impl.dart';
-import 'package:open_password_manager/features/password/domain/repositories/export_repository.dart';
-import 'package:open_password_manager/features/password/domain/repositories/password_repository.dart';
-import 'package:open_password_manager/features/password/infrastructure/repositories/appwrite/appwrite_password_repository_impl.dart';
-import 'package:open_password_manager/features/password/infrastructure/repositories/export_repository_impl.dart';
-import 'package:open_password_manager/features/password/infrastructure/repositories/firebase/firebase_password_repository_impl.dart';
-import 'package:open_password_manager/features/password/infrastructure/repositories/supabase/supabase_password_repository_impl.dart';
+import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
+import 'package:open_password_manager/features/vault/domain/repositories/entry_repository.dart';
+import 'package:open_password_manager/features/vault/infrastructure/repositories/appwrite/appwrite_entry_repository_impl.dart';
+import 'package:open_password_manager/features/vault/infrastructure/repositories/export_repository_impl.dart';
+import 'package:open_password_manager/features/vault/infrastructure/repositories/firebase/firebase_entry_repository_impl.dart';
+import 'package:open_password_manager/features/vault/infrastructure/repositories/supabase/supabase_entry_repository_impl.dart';
 import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 import 'package:open_password_manager/shared/infrastructure/repositories/clipboard_repository_impl.dart';
@@ -39,10 +39,10 @@ class ProviderFactory {
     return CryptographyRepositoryImpl.instance;
   }
 
-  static PasswordRepository getPasswordProvider(ProviderConfig config) {
+  static EntryRepository getPasswordProvider(ProviderConfig config) {
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
-        return FirebasePasswordRepositoryImpl(
+        return FirebaseEntryRepositoryImpl(
           config: config.appConfig.firebaseConfig!,
           cryptoRepo: getCryptoProvider(),
         );
@@ -51,7 +51,7 @@ class ProviderFactory {
           throw Exception("Invalid supabase client configuration");
         }
 
-        return SupabasePasswordRepositoryImpl(
+        return SupabaseEntryRepositoryImpl(
           client: config.supabaseClient!,
           databaseName: config.appConfig.supabaseConfig!.databaseName,
           cryptoRepo: getCryptoProvider(),
@@ -61,7 +61,7 @@ class ProviderFactory {
           throw Exception("Invalid appwrite client configuration");
         }
 
-        return AppwritePasswordRepositoryImpl(
+        return AppwriteEntryRepositoryImpl(
           client: config.appwriteClient!,
           config: config.appConfig.appwriteConfig!,
           cryptoRepo: getCryptoProvider(),

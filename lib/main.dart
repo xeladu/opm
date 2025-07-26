@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
-import 'package:open_password_manager/features/password/infrastructure/providers/export_provider.dart';
-import 'package:open_password_manager/features/password/infrastructure/providers/password_provider.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/utils/bootstrapper.dart';
@@ -35,7 +35,7 @@ void main() async {
     ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(authProvider),
-        passwordRepositoryProvider.overrideWithValue(passwordProvider),
+        vaultRepositoryProvider.overrideWithValue(passwordProvider),
         exportRepositoryProvider.overrideWithValue(exportProvider),
         cryptographyRepositoryProvider.overrideWithValue(cryptoProvider),
         clipboardRepositoryProvider.overrideWithValue(clipboardProvider),

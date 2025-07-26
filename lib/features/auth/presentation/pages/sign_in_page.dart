@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/sign_in.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
-import 'package:open_password_manager/features/password/presentation/pages/password_list_page.dart';
+import 'package:open_password_manager/features/vault/presentation/pages/vault_list_page.dart';
 import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
@@ -112,7 +112,7 @@ class _State extends ConsumerState<SignInPage> {
         ToastService.show(context, 'Sign in successful!');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const PasswordListPage()),
+          MaterialPageRoute(builder: (context) => const VaultListPage()),
         );
       }
     } catch (e) {

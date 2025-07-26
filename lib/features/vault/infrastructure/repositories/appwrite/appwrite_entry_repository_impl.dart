@@ -5,13 +5,13 @@ import 'package:open_password_manager/shared/domain/repositories/cryptography_re
 
 import 'package:open_password_manager/shared/utils/app_config.dart';
 
-class AppwritePasswordRepositoryImpl implements EntryRepository {
+class AppwriteEntryRepositoryImpl implements EntryRepository {
   final Client client;
   final AppwriteConfig config;
   final CryptographyRepository cryptoRepo;
   late Databases _db;
 
-  AppwritePasswordRepositoryImpl({
+  AppwriteEntryRepositoryImpl({
     required this.client,
     required this.config,
     required this.cryptoRepo,

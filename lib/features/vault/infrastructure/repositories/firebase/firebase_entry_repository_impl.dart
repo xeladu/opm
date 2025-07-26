@@ -6,14 +6,11 @@ import 'package:open_password_manager/shared/domain/repositories/cryptography_re
 
 import 'package:open_password_manager/shared/utils/app_config.dart';
 
-class FirebasePasswordRepositoryImpl implements EntryRepository {
+class FirebaseEntryRepositoryImpl implements EntryRepository {
   final FirebaseConfig config;
   final CryptographyRepository cryptoRepo;
 
-  FirebasePasswordRepositoryImpl({
-    required this.config,
-    required this.cryptoRepo,
-  });
+  FirebaseEntryRepositoryImpl({required this.config, required this.cryptoRepo});
 
   CollectionReference<Map<String, dynamic>> _userPasswordEntriesCollection() {
     final user = FirebaseAuth.instance.currentUser;
