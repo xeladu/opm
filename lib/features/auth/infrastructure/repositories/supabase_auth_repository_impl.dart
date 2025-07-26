@@ -1,3 +1,4 @@
+import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart';
 import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -48,5 +49,16 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
     throw UnimplementedError(
       'Delete account is not supported from client SDK.',
     );
+  }
+
+  @override
+  Future<OpmUser> getCurrentUser() async {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+
+      return OpmUser(id: user!.id, user: user.email!);
+    } on AuthException catch (e) {
+      throw Exception(e.message);
+    }
   }
 }

@@ -13,6 +13,15 @@ class CryptographyRepositoryImpl implements CryptographyRepository {
   Uint8List? _key;
   Uint8List? _salt;
 
+  static CryptographyRepositoryImpl? _instance;
+  static CryptographyRepositoryImpl get instance {
+    _instance ??= CryptographyRepositoryImpl._();
+
+    return _instance!;
+  }
+
+  CryptographyRepositoryImpl._();
+
   @override
   Future<void> init(String password) async {
     await _ensureSalt();

@@ -44,8 +44,12 @@ class SupabasePasswordRepositoryImpl implements PasswordRepository {
         .map((json) => PasswordEntry.fromJson(json as Map<String, dynamic>))
         .toList();
 
-    return Future.wait(
+    final list = await Future.wait(
       entries.map((entry) => entry.decrypt(cryptoRepo.decrypt)),
     );
+
+    list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    return list;
   }
 }

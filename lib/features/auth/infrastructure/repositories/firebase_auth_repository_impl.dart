@@ -1,5 +1,6 @@
-import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart';
+import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart';
 
 class FirebaseAuthRepositoryImpl implements AuthRepository {
   @override
@@ -45,6 +46,17 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       }
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message ?? 'Failed to delete account');
+    }
+  }
+
+  @override
+  Future<OpmUser> getCurrentUser() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      return OpmUser(id: user!.uid, user: user.email!);
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message ?? 'Failed to retrieve account');
     }
   }
 }

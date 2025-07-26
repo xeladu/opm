@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/create_account.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
-import 'package:open_password_manager/style/sizes.dart';
+import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
+import 'package:open_password_manager/shared/presentation/buttons/loading_button.dart';
+import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
+import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
+import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
+import 'package:open_password_manager/shared/presentation/inputs/password_form_field.dart';
+import 'package:open_password_manager/shared/utils/toast_service.dart';
+import 'package:open_password_manager/style/ui.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'sign_in_page.dart';
 
 class CreateAccountPage extends ConsumerStatefulWidget {
@@ -15,144 +21,82 @@ class CreateAccountPage extends ConsumerStatefulWidget {
 }
 
 class _State extends ConsumerState<CreateAccountPage> {
-  final _formKey = GlobalKey<FormBuilderState>();
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
+  final _formKey = GlobalKey<ShadFormState>();
   bool _isLoading = false;
-
-  Future<void> _handleCreateAccount() async {
-    if (!(_formKey.currentState?.saveAndValidate() ?? false)) return;
-    setState(() {
-      _isLoading = true;
-    });
-    final data = _formKey.currentState!.value;
-    final authRepo = ref.read(authRepositoryProvider);
-    final useCase = CreateAccount(authRepo);
-    try {
-      await useCase(email: data['email'], password: data['password']);
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Account created!')));
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const SignInPage()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to create account: $e')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Create Account')),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(sizeS),
-            child: FormBuilder(
-              key: _formKey,
+    return ResponsiveAppFrame(
+      content: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 480),
+          padding: EdgeInsets.all(sizeS),
+          child: ShadForm(
+            key: _formKey,
+            child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  FormBuilderTextField(
-                    name: 'email',
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.email(),
-                    ]),
-                    keyboardType: TextInputType.emailAddress,
+                  Text(
+                    "Open Password Manager",
+                    style: ShadTheme.of(context).textTheme.h3,
                   ),
-                  SizedBox(height: sizeS),
-                  FormBuilderTextField(
-                    name: 'password',
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-                    obscureText: _obscurePassword,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.minLength(8),
-                    ]),
+                  const SizedBox(height: sizeXS),
+                  Text(
+                    "Create a new account",
+                    textAlign: TextAlign.left,
+                    style: ShadTheme.of(context).textTheme.muted,
                   ),
-                  SizedBox(height: sizeS),
-                  FormBuilderTextField(
-                    name: 'confirm_password',
-                    decoration: InputDecoration(
-                      labelText: 'Confirm Password',
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
-                    ),
-                    obscureText: _obscureConfirmPassword,
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return 'This field is required';
-                      }
+                  const SizedBox(height: sizeXS),
+                  EmailFormField(),
+                  const SizedBox(height: sizeS),
+                  PasswordFormField(
+                    validator: (v) {
                       final password =
-                          _formKey.currentState?.fields['password']?.value;
-                      if (val != password) {
-                        return 'Passwords do not match';
-                      }
+                          _formKey
+                              .currentState
+                              ?.fields["password_confirm"]
+                              ?.value ??
+                          "";
+                      if (v != password) return "Passwords do not match";
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: sizeS),
+                  PasswordFormField(
+                    placeholder: "Confirm password",
+                    validator: (v) {
+                      final password =
+                          _formKey.currentState?.fields["password"]?.value ??
+                          "";
+                      if (v != password) return "Passwords do not match";
                       return null;
                     },
                   ),
                   SizedBox(height: sizeM),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _handleCreateAccount,
+                  Center(
                     child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Create Account'),
+                        ? LoadingButton.primary()
+                        : PrimaryButton(
+                            caption: "Create Account",
+                            icon: LucideIcons.squareUserRound,
+                            onPressed: _handleCreateAccount,
+                          ),
                   ),
                   SizedBox(height: sizeS),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignInPage(),
-                        ),
-                      );
-                    },
-                    child: const Text('Already have an account? Sign in'),
+                  Center(
+                    child: SecondaryButton(
+                      caption: 'Already have an account? Sign in',
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignInPage(),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -161,5 +105,41 @@ class _State extends ConsumerState<CreateAccountPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleCreateAccount() async {
+    if (!(_formKey.currentState?.saveAndValidate() ?? false)) return;
+
+    final data = _formKey.currentState!.value;
+    final password = data['password'] ?? '';
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final authRepo = ref.read(authRepositoryProvider);
+    final useCase = CreateAccount(authRepo);
+
+    try {
+      await useCase(email: data['email'], password: password);
+
+      if (mounted) {
+        ToastService.show(context, 'Account created!');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SignInPage()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ToastService.show(context, 'Failed to create account: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 }

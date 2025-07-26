@@ -3,10 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
 import 'package:open_password_manager/features/password/infrastructure/providers/export_provider.dart';
 import 'package:open_password_manager/features/password/infrastructure/providers/password_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/utils/bootstrapper.dart';
 import 'package:open_password_manager/shared/utils/provider_config.dart';
 import 'package:open_password_manager/shared/utils/provider_factory.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'features/auth/presentation/pages/sign_in_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,6 +29,7 @@ void main() async {
   final passwordProvider = ProviderFactory.getPasswordProvider(providerConfig);
   final cryptoProvider = ProviderFactory.getCryptoProvider();
   final exportProvider = ProviderFactory.getExportProvider();
+  final clipboardProvider = ProviderFactory.getClipboardProvider();
 
   runApp(
     ProviderScope(
@@ -35,6 +38,7 @@ void main() async {
         passwordRepositoryProvider.overrideWithValue(passwordProvider),
         exportRepositoryProvider.overrideWithValue(exportProvider),
         cryptographyRepositoryProvider.overrideWithValue(cryptoProvider),
+        clipboardRepositoryProvider.overrideWithValue(clipboardProvider),
       ],
       child: const OpmApp(),
     ),
@@ -46,12 +50,14 @@ class OpmApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ShadApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        textTheme: GoogleFonts.interTextTheme(),
+      themeMode: ThemeMode.dark,
+      theme: ShadThemeData(
+        colorScheme: const ShadNeutralColorScheme.dark(),
+        textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter),
+        brightness: Brightness.dark,
       ),
       home: const SignInPage(),
     );

@@ -5,6 +5,15 @@ import 'package:open_password_manager/features/password/domain/entities/password
 import 'package:open_password_manager/features/password/domain/repositories/export_repository.dart';
 
 class ExportRepositoryImpl implements ExportRepository {
+  static ExportRepositoryImpl? _instance;
+  static ExportRepositoryImpl get instance {
+    _instance ??= ExportRepositoryImpl._();
+
+    return _instance!;
+  }
+
+  ExportRepositoryImpl._();
+
   @override
   Future<void> exportPasswordEntries(List<PasswordEntry> entries) async {
     // Create CSV header

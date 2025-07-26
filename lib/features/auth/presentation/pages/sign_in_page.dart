@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/sign_in.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
 import 'package:open_password_manager/features/password/presentation/pages/password_list_page.dart';
+import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
-import 'package:open_password_manager/style/sizes.dart';
+import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
+import 'package:open_password_manager/shared/presentation/buttons/loading_button.dart';
+import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
+import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
+import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
+import 'package:open_password_manager/shared/presentation/inputs/password_form_field.dart';
+import 'package:open_password_manager/shared/utils/toast_service.dart';
+import 'package:open_password_manager/style/ui.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'create_account_page.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
@@ -17,15 +24,77 @@ class SignInPage extends ConsumerStatefulWidget {
 }
 
 class _State extends ConsumerState<SignInPage> {
-  final _formKey = GlobalKey<FormBuilderState>();
-  bool _obscurePassword = true;
+  final _formKey = GlobalKey<ShadFormState>();
   bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return ResponsiveAppFrame(
+      content: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 480),
+          padding: const EdgeInsets.all(sizeS),
+          child: ShadForm(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Open Password Manager",
+                    style: ShadTheme.of(context).textTheme.h3,
+                  ),
+                  const SizedBox(height: sizeXS),
+                  Text(
+                    "Sign in to your account",
+                    textAlign: TextAlign.left,
+                    style: ShadTheme.of(context).textTheme.muted,
+                  ),
+                  const SizedBox(height: sizeXS),
+                  EmailFormField(),
+                  const SizedBox(height: sizeS),
+                  PasswordFormField(),
+                  const SizedBox(height: sizeM),
+                  Center(
+                    child: _isLoading
+                        ? LoadingButton.primary()
+                        : PrimaryButton(
+                            caption: "Sign In",
+                            icon: LucideIcons.logIn,
+                            onPressed: _handleSignIn,
+                          ),
+                  ),
+                  const SizedBox(height: sizeS),
+                  Center(
+                    child: SecondaryButton(
+                      caption: "Don't have an account? Sign up",
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CreateAccountPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<void> _handleSignIn() async {
     if (!(_formKey.currentState?.saveAndValidate() ?? false)) return;
+
     setState(() {
       _isLoading = true;
     });
+
     final data = _formKey.currentState!.value;
     final authRepo = ref.read(authRepositoryProvider);
     final useCase = SignIn(authRepo);
@@ -36,10 +105,11 @@ class _State extends ConsumerState<SignInPage> {
       final cryptService = ref.read(cryptographyRepositoryProvider);
       await cryptService.init(data["password"]);
 
+      final activeUser = await authRepo.getCurrentUser();
+      ref.read(opmUserProvider.notifier).setUser(activeUser);
+
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
+        ToastService.show(context, 'Sign in successful!');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const PasswordListPage()),
@@ -47,9 +117,7 @@ class _State extends ConsumerState<SignInPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to sign in: $e')));
+        ToastService.show(context, 'Failed to sign in: $e');
       }
     } finally {
       if (mounted) {
@@ -58,83 +126,5 @@ class _State extends ConsumerState<SignInPage> {
         });
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(sizeS),
-            child: FormBuilder(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FormBuilderTextField(
-                    name: 'email',
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.email(),
-                    ]),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: sizeS),
-                  FormBuilderTextField(
-                    name: 'password',
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-                    obscureText: _obscurePassword,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.minLength(8),
-                    ]),
-                  ),
-                  const SizedBox(height: sizeM),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSignIn,
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Sign In'),
-                  ),
-                  const SizedBox(height: sizeS),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CreateAccountPage(),
-                        ),
-                      );
-                    },
-                    child: const Text("Don't have an account? Sign up"),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

@@ -8,7 +8,9 @@ import 'package:open_password_manager/features/password/infrastructure/repositor
 import 'package:open_password_manager/features/password/infrastructure/repositories/export_repository_impl.dart';
 import 'package:open_password_manager/features/password/infrastructure/repositories/firebase/firebase_password_repository_impl.dart';
 import 'package:open_password_manager/features/password/infrastructure/repositories/supabase/supabase_password_repository_impl.dart';
+import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
+import 'package:open_password_manager/shared/infrastructure/repositories/clipboard_repository_impl.dart';
 import 'package:open_password_manager/shared/infrastructure/repositories/cryptography_repository_impl.dart';
 import 'package:open_password_manager/shared/utils/hosting_provider.dart';
 import 'package:open_password_manager/shared/utils/provider_config.dart';
@@ -30,11 +32,11 @@ class ProviderFactory {
   }
 
   static ExportRepository getExportProvider() {
-    return ExportRepositoryImpl();
+    return ExportRepositoryImpl.instance;
   }
 
   static CryptographyRepository getCryptoProvider() {
-    return CryptographyRepositoryImpl();
+    return CryptographyRepositoryImpl.instance;
   }
 
   static PasswordRepository getPasswordProvider(ProviderConfig config) {
@@ -65,5 +67,9 @@ class ProviderFactory {
           cryptoRepo: getCryptoProvider(),
         );
     }
+  }
+
+  static ClipboardRepository getClipboardProvider() {
+    return ClipboardRepositoryImpl.instance;
   }
 }

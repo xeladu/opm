@@ -54,8 +54,12 @@ class FirebasePasswordRepositoryImpl implements PasswordRepository {
         .map((doc) => PasswordEntry.fromJson(doc.data()))
         .toList();
 
-    return Future.wait(
+    final list = await Future.wait(
       entries.map((entry) => entry.decrypt(cryptoRepo.decrypt)),
     );
+
+    list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    return list;
   }
 }
