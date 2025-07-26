@@ -5,7 +5,9 @@ import 'package:open_password_manager/features/password/application/providers/pa
 import 'package:open_password_manager/features/password/application/providers/selected_password_entry_provider.dart';
 import 'package:open_password_manager/features/password/application/use_cases/add_password_entry.dart';
 import 'package:open_password_manager/features/password/application/use_cases/delete_password_entry.dart';
+import 'package:open_password_manager/features/password/application/use_cases/export_password_entries.dart';
 import 'package:open_password_manager/features/password/domain/entities/password_entry.dart';
+import 'package:open_password_manager/features/password/infrastructure/providers/export_provider.dart';
 import 'package:open_password_manager/features/password/infrastructure/providers/password_provider.dart';
 import 'package:open_password_manager/features/password/presentation/widgets/add_edit_form.dart';
 import 'package:open_password_manager/features/password/presentation/widgets/password_entry_actions.dart';
@@ -14,6 +16,7 @@ import 'package:open_password_manager/features/password/presentation/widgets/pas
 import 'package:open_password_manager/features/password/presentation/widgets/password_list_entry.dart';
 import 'package:open_password_manager/features/password/presentation/widgets/password_search_field.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
+import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
@@ -52,6 +55,7 @@ class PasswordListDesktop extends ConsumerWidget {
         PasswordListActions(
           enabled: ref.watch(selectedPasswordEntryProvider) == null,
           onAdd: () => _addNewEntry(ref),
+          onExport: () => _exportVault(context, ref),
         ),
       ],
     );
@@ -113,6 +117,17 @@ class PasswordListDesktop extends ConsumerWidget {
     ref.read(selectedPasswordEntryProvider.notifier).setPasswordEntry(null);
 
     ref.read(addEditModeActiveProvider.notifier).setMode(true);
+  }
+
+  Future<void> _exportVault(BuildContext context, WidgetRef ref) async {
+    final pwRepo = ref.read(passwordRepositoryProvider);
+    final exportRepo = ref.read(exportRepositoryProvider);
+    final useCase = ExportPasswordEntries(pwRepo, exportRepo);
+    await useCase();
+
+    if (context.mounted) {
+      ToastService.show(context, "Vault exported");
+    }
   }
 
   void _save(WidgetRef ref) {

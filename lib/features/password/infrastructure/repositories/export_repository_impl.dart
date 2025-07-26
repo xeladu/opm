@@ -16,7 +16,6 @@ class ExportRepositoryImpl implements ExportRepository {
 
   @override
   Future<void> exportPasswordEntries(List<PasswordEntry> entries) async {
-    // Create CSV header
     final headers = [
       'id',
       'name',
@@ -38,7 +37,7 @@ class ExportRepositoryImpl implements ExportRepository {
         entry.updatedAt,
         entry.username,
         entry.password,
-        '"${entry.urls.join(';')}"',
+        entry.urls.join(';').replaceAll('\n', ''),
         entry.comments.replaceAll('\n', ' '),
       ];
       csvBuffer.writeln(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -21,21 +22,24 @@ class PasswordEntryActions extends StatelessWidget {
     return Row(
       spacing: sizeXS,
       children: [
-        ShadIconButton.secondary(
+        GlyphButton(
           enabled: enabled,
-          icon: const Icon(LucideIcons.pen),
-          onPressed: onEdit,
+          icon: LucideIcons.pen,
+          onTap: onEdit,
+          tooltip: "Edit this entry",
         ),
-        ShadIconButton.secondary(
+        GlyphButton(
           enabled: enabled,
-          icon: const Icon(LucideIcons.copy),
-          onPressed: onDuplicate,
+          icon: LucideIcons.copy,
+          onTap: onDuplicate,
+          tooltip: "Duplicate this entry",
         ),
         Spacer(),
-        ShadIconButton.destructive(
+        GlyphButton.important(
           enabled: enabled,
-          icon: const Icon(LucideIcons.trash),
-          onPressed: onDelete,
+          icon: LucideIcons.trash,
+          onTap: onDelete,
+          tooltip: "Delete this entry",
         ),
       ],
     );

@@ -6,6 +6,7 @@ class SecondaryButton extends StatelessWidget {
   final IconData? icon;
   final VoidCallback onPressed;
   final bool enabled;
+  final String? tooltip;
 
   const SecondaryButton({
     super.key,
@@ -13,15 +14,20 @@ class SecondaryButton extends StatelessWidget {
     required this.onPressed,
     this.enabled = true,
     this.icon,
+    this.tooltip,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ShadButton.secondary(
+    final button = ShadButton.secondary(
       onPressed: onPressed,
       leading: icon != null ? Icon(icon) : null,
       enabled: enabled,
       child: Text(caption),
     );
+
+    return tooltip != null
+        ? ShadTooltip(builder: (context) => Text(tooltip!), child: button)
+        : button;
   }
 }

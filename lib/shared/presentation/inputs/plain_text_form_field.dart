@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
+import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -12,6 +13,7 @@ class PlainTextFormField extends ConsumerStatefulWidget {
   final bool canCopy;
   final bool canToggle;
   final bool readOnly;
+  final int maxLines;
 
   const PlainTextFormField({
     super.key,
@@ -21,6 +23,7 @@ class PlainTextFormField extends ConsumerStatefulWidget {
     this.canCopy = false,
     this.canToggle = false,
     this.readOnly = false,
+    this.maxLines = 1,
   });
 
   const PlainTextFormField.readOnly({
@@ -30,6 +33,7 @@ class PlainTextFormField extends ConsumerStatefulWidget {
     required String? value,
     bool canCopy = false,
     bool canToggle = false,
+    int maxLines = 1,
   }) : this(
          key: key,
          label: label,
@@ -38,6 +42,7 @@ class PlainTextFormField extends ConsumerStatefulWidget {
          canCopy: canCopy,
          canToggle: canToggle,
          readOnly: true,
+         maxLines: maxLines,
        );
 
   @override
@@ -54,6 +59,7 @@ class _State extends ConsumerState<PlainTextFormField> {
       style: widget.readOnly
           ? ShadTheme.of(context).textTheme.muted
           : ShadTheme.of(context).textTheme.p,
+      maxLines: widget.maxLines,
       initialValue: widget.value,
       readOnly: widget.readOnly,
       obscureText: !widget.canToggle ? false : _obscured,
@@ -69,34 +75,36 @@ class _State extends ConsumerState<PlainTextFormField> {
           : Row(
               children: [
                 if (widget.canCopy)
-                  ShadButton.ghost(
+                  SizedBox(
                     width: sizeM,
                     height: sizeM,
-                    padding: EdgeInsets.zero,
-                    child: Icon(LucideIcons.copy),
-                    onPressed: () async {
-                      ref
-                          .read(clipboardRepositoryProvider)
-                          .copyToClipboard(widget.value ?? "");
+                    child: GlyphButton.ghost(
+                      icon: LucideIcons.copy,
+                      onTap: () async {
+                        ref
+                            .read(clipboardRepositoryProvider)
+                            .copyToClipboard(widget.value ?? "");
 
-                      if (context.mounted) {
-                        ToastService.show(context, "${widget.label} copied!");
-                      }
-                    },
+                        if (context.mounted) {
+                          ToastService.show(context, "${widget.label} copied!");
+                        }
+                      },
+                      tooltip: "Copy value",
+                    ),
                   ),
                 if (widget.canToggle)
-                  ShadButton.ghost(
+                  SizedBox(
                     width: sizeM,
                     height: sizeM,
-                    padding: EdgeInsets.zero,
-                    child: Icon(
-                      _obscured ? LucideIcons.eyeOff : LucideIcons.eye,
+                    child: GlyphButton.ghost(
+                      icon: _obscured ? LucideIcons.eyeOff : LucideIcons.eye,
+                      onTap: () {
+                        setState(() {
+                          _obscured = !_obscured;
+                        });
+                      },
+                      tooltip: "Show/hide value",
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscured = !_obscured;
-                      });
-                    },
                   ),
               ],
             ),

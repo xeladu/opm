@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -25,14 +26,16 @@ class _State extends State<PasswordFormField> {
         padding: EdgeInsets.all(sizeXXS),
         child: Icon(LucideIcons.lock),
       ),
-      trailing: ShadButton.ghost(
+      trailing: SizedBox(
         width: sizeM,
         height: sizeM,
-        padding: EdgeInsets.zero,
-        child: Icon(_obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye),
-        onPressed: () {
-          setState(() => _obscurePassword = !_obscurePassword);
-        },
+        child: GlyphButton.ghost(
+          icon: _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
+          onTap: () {
+            setState(() => _obscurePassword = !_obscurePassword);
+          },
+          tooltip: "Show/hide password",
+        ),
       ),
       validator: (v) {
         return v.isEmpty

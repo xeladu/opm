@@ -36,8 +36,13 @@ class PasswordEntryDetails extends StatelessWidget {
           PlainTextFormField.readOnly(
             label: "URLs",
             value: entry.urls.join('\n'),
+            maxLines: 3,
           ),
-          PlainTextFormField.readOnly(label: "Comments", value: entry.comments),
+          PlainTextFormField.readOnly(
+            label: "Comments",
+            value: entry.comments,
+            maxLines: 2,
+          ),
           PlainTextFormField.readOnly(
             label: "Created At",
             value:

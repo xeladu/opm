@@ -102,7 +102,7 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
             ShadInputFormField(
               controller: _userController,
               leading: Icon(LucideIcons.user),
-              label: const Text('User'),
+              label: const Text('Username'),
               placeholder: const Text(
                 "Your sign in name (will be autofilled on websites)",
               ),
@@ -129,9 +129,9 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
             ),
             ShadInputFormField(
               controller: _urlsController,
-              label: const Text('URLs (one per line)'),
+              label: const Text('URLs'),
               placeholder: const Text(
-                "List of URLs to offer autofill with these credentials",
+                "List of URLs to offer autofill with these credentials. One per line.",
               ),
               maxLines: 3,
             ),
