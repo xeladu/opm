@@ -12,7 +12,7 @@ class SelectedEntryState extends Notifier<VaultEntry?> {
     return null;
   }
 
-  void setPasswordEntry(VaultEntry? entry) {
+  void setEntry(VaultEntry? entry) {
     state = entry;
   }
 }

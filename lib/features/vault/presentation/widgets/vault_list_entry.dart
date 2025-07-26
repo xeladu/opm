@@ -49,47 +49,49 @@ class VaultListEntry extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     Offset? tapPosition;
 
-    return ShadDecorator(
-      focused: selected,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTapDown: (details) {
-          tapPosition = details.globalPosition;
-        },
-        onSecondaryTapDown: (details) {
-          tapPosition = details.globalPosition;
-        },
-        onLongPress: () async => await showPopup(context, ref, tapPosition),
-        onSecondaryTap: isMobile
-            ? null
-            : () async => await showPopup(context, ref, tapPosition),
-        onDoubleTap: () async => isMobile
-            ? await _handleEditMobile(context, ref, entry)
-            : await _handleEditDesktop(ref, entry),
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          minVerticalPadding: 0,
-          dense: true,
-          visualDensity: VisualDensity.compact,
-          title: Text(entry.name, style: ShadTheme.of(context).textTheme.p),
-          subtitle: Text(
-            entry.username,
-            style: ShadTheme.of(context).textTheme.muted,
-          ),
-          leading: Icon(
-            LucideIcons.earth400,
-            size: sizeM,
-            color: ShadTheme.of(context).colorScheme.mutedForeground,
-          ),
-          trailing: isMobile
-              ? VaultListEntryPopup(
-                  entry: entry,
-                  onSelected: (selection, entry) =>
-                      _handlePopupSelection(context, ref, selection, entry),
-                )
-              : null,
-          onTap: () async => await onTap(context, ref),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTapDown: (details) {
+        tapPosition = details.globalPosition;
+      },
+      onSecondaryTapDown: (details) {
+        tapPosition = details.globalPosition;
+      },
+      onLongPress: () async => await showPopup(context, ref, tapPosition),
+      onSecondaryTap: isMobile
+          ? null
+          : () async => await showPopup(context, ref, tapPosition),
+      onDoubleTap: () async => isMobile
+          ? await _handleEditMobile(context, ref, entry)
+          : await _handleEditDesktop(context, ref, entry),
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: ShadTheme.of(context).radius,
         ),
+        tileColor: selected ? ShadTheme.of(context).colorScheme.accent : null,
+        contentPadding: EdgeInsets.symmetric(horizontal: sizeXS),
+        splashColor: Colors.transparent,
+        minVerticalPadding: 0,
+        dense: true,
+        visualDensity: VisualDensity.compact,
+        title: Text(entry.name, style: ShadTheme.of(context).textTheme.p),
+        subtitle: Text(
+          entry.username,
+          style: ShadTheme.of(context).textTheme.muted,
+        ),
+        leading: Icon(
+          LucideIcons.earth400,
+          size: sizeM,
+          color: ShadTheme.of(context).colorScheme.mutedForeground,
+        ),
+        trailing: isMobile
+            ? VaultListEntryPopup(
+                entry: entry,
+                onSelected: (selection, entry) =>
+                    _handlePopupSelection(context, ref, selection, entry),
+              )
+            : null,
+        onTap: () async => await onTap(context, ref),
       ),
     );
   }
@@ -98,25 +100,15 @@ class VaultListEntry extends ConsumerWidget {
     if (isMobile) {
       // TODO navigate to selected entry
     } else {
-      final editModeActive = ref.read(addEditModeActiveProvider);
-      final hasChanges = ref.read(hasChangesProvider);
-
-      if (editModeActive || hasChanges) {
-        // ask for confirmation before leaving the edit mode
-        final confirm = await DialogService.showCancelDialog(context);
-
-        if (confirm != true) return;
-
-        ref.read(addEditModeActiveProvider.notifier).setMode(false);
-        ref.read(hasChangesProvider.notifier).setHasChanges(false);
-      }
+      final confirmed = await _confirmAction(context, ref);
+      if (!confirmed) return;
 
       // mark/unmark selected entry
       final currentSelectedEntry = ref.read(selectedEntryProvider);
       if (currentSelectedEntry == null || currentSelectedEntry != entry) {
-        ref.read(selectedEntryProvider.notifier).setPasswordEntry(entry);
+        ref.read(selectedEntryProvider.notifier).setEntry(entry);
       } else {
-        ref.read(selectedEntryProvider.notifier).setPasswordEntry(null);
+        ref.read(selectedEntryProvider.notifier).setEntry(null);
       }
     }
   }
@@ -162,11 +154,11 @@ class VaultListEntry extends ConsumerWidget {
       case PopupSelection.view:
         isMobile
             ? await _handleViewMobile(context, ref, entry)
-            : await _handleViewDesktop(ref, entry);
+            : await _handleViewDesktop(context, ref, entry);
       case PopupSelection.edit:
         isMobile
             ? await _handleEditMobile(context, ref, entry)
-            : await _handleEditDesktop(ref, entry);
+            : await _handleEditDesktop(context, ref, entry);
       case PopupSelection.delete:
         await _delete(context, ref, entry);
       case PopupSelection.copyUser:
@@ -200,8 +192,15 @@ class VaultListEntry extends ConsumerWidget {
     await launchUrl(uri);
   }
 
-  Future<void> _handleViewDesktop(WidgetRef ref, VaultEntry entry) async {
-    ref.read(selectedEntryProvider.notifier).setPasswordEntry(entry);
+  Future<void> _handleViewDesktop(
+    BuildContext context,
+    WidgetRef ref,
+    VaultEntry entry,
+  ) async {
+    final confirmed = await _confirmAction(context, ref);
+    if (!confirmed) return;
+
+    ref.read(selectedEntryProvider.notifier).setEntry(entry);
   }
 
   Future<void> _handleViewMobile(
@@ -209,19 +208,31 @@ class VaultListEntry extends ConsumerWidget {
     WidgetRef ref,
     VaultEntry entry,
   ) async {
-    final updatedOrDeleted = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => VaultEntryDetailPage(entry: entry),
-      ),
-    );
+    final confirmed = await _confirmAction(context, ref);
+    if (!confirmed) return;
 
-    if (updatedOrDeleted != null) {
-      ref.invalidate(allEntriesProvider);
+    if (context.mounted) {
+      final updatedOrDeleted = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => VaultEntryDetailPage(entry: entry),
+        ),
+      );
+
+      if (updatedOrDeleted != null) {
+        ref.invalidate(allEntriesProvider);
+      }
     }
   }
 
-  Future<void> _handleEditDesktop(WidgetRef ref, VaultEntry entry) async {
-    ref.read(selectedEntryProvider.notifier).setPasswordEntry(entry);
+  Future<void> _handleEditDesktop(
+    BuildContext context,
+    WidgetRef ref,
+    VaultEntry entry,
+  ) async {
+    final confirmed = await _confirmAction(context, ref);
+    if (!confirmed) return;
+
+    ref.read(selectedEntryProvider.notifier).setEntry(entry);
     ref
         .read(addEditModeActiveProvider.notifier)
         .setMode(!ref.read(addEditModeActiveProvider));
@@ -232,19 +243,25 @@ class VaultListEntry extends ConsumerWidget {
     WidgetRef ref,
     VaultEntry entry,
   ) async {
-    final updated = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => AddEditVaultEntryPage(
-          entry: entry,
-          onSave: (updatedEntry) async {
-            final repo = ref.read(vaultRepositoryProvider);
-            await repo.editEntry(updatedEntry);
-          },
+    final confirmed = await _confirmAction(context, ref);
+    if (!confirmed) return;
+
+    if (context.mounted) {
+      final updated = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => AddEditVaultEntryPage(
+            entry: entry,
+            onSave: (updatedEntry) async {
+              final repo = ref.read(vaultRepositoryProvider);
+              await repo.editEntry(updatedEntry);
+            },
+          ),
         ),
-      ),
-    );
-    if (updated != null) {
-      ref.invalidate(allEntriesProvider);
+      );
+
+      if (updated != null) {
+        ref.invalidate(allEntriesProvider);
+      }
     }
   }
 
@@ -253,15 +270,39 @@ class VaultListEntry extends ConsumerWidget {
     WidgetRef ref,
     VaultEntry entry,
   ) async {
-    final confirm = await DialogService.showDeleteDialog(context);
+    final confirmed = await _confirmAction(context, ref);
+    if (!confirmed) return;
 
-    if (confirm == true) {
-      final repo = ref.read(vaultRepositoryProvider);
-      final useCase = DeleteEntry(repo);
+    if (context.mounted) {
+      final confirm = await DialogService.showDeleteDialog(context);
 
-      await useCase.call(entry.id);
-      ref.read(selectedEntryProvider.notifier).setPasswordEntry(null);
-      ref.invalidate(allEntriesProvider);
+      if (confirm == true) {
+        final repo = ref.read(vaultRepositoryProvider);
+        final useCase = DeleteEntry(repo);
+
+        await useCase.call(entry.id);
+        ref.read(selectedEntryProvider.notifier).setEntry(null);
+        ref.invalidate(allEntriesProvider);
+      }
     }
+  }
+
+  Future<bool> _confirmAction(BuildContext context, WidgetRef ref) async {
+    final editModeActive = ref.read(addEditModeActiveProvider);
+    final hasChanges = ref.read(hasChangesProvider);
+
+    if (editModeActive || hasChanges) {
+      // ask for confirmation before leaving the edit mode
+      final confirm = await DialogService.showCancelDialog(context);
+
+      if (confirm != true) return false;
+
+      ref.read(addEditModeActiveProvider.notifier).setMode(false);
+      ref.read(hasChangesProvider.notifier).setHasChanges(false);
+
+      return true;
+    }
+
+    return true;
   }
 }

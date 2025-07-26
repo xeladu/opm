@@ -1,4 +1,6 @@
-class VaultEntry {
+import 'package:equatable/equatable.dart';
+
+class VaultEntry extends Equatable {
   final String id;
   final String name;
   final String createdAt;
@@ -94,30 +96,7 @@ class VaultEntry {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VaultEntry &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          name == other.name &&
-          createdAt == other.createdAt &&
-          updatedAt == other.updatedAt &&
-          username == other.username &&
-          password == other.password &&
-          urls.length == other.urls.length &&
-          urls.every((u) => other.urls.contains(u)) &&
-          comments == other.comments;
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      name.hashCode ^
-      createdAt.hashCode ^
-      updatedAt.hashCode ^
-      username.hashCode ^
-      password.hashCode ^
-      Object.hashAll(urls) ^
-      comments.hashCode;
+  List<Object?> get props => [id];
 }
 
 extension PasswordEntryEncryptionExtions on VaultEntry {

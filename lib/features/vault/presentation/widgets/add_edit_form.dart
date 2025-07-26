@@ -53,21 +53,7 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
       text: widget.entry?.comments ?? "",
     );
 
-    _nameController.addListener(() {
-      ref.read(hasChangesProvider.notifier).setHasChanges(_anyChangesMade);
-    });
-    _userController.addListener(() {
-      ref.read(hasChangesProvider.notifier).setHasChanges(_anyChangesMade);
-    });
-    _passwordController.addListener(() {
-      ref.read(hasChangesProvider.notifier).setHasChanges(_anyChangesMade);
-    });
-    _urlsController.addListener(() {
-      ref.read(hasChangesProvider.notifier).setHasChanges(_anyChangesMade);
-    });
-    _commentsController.addListener(() {
-      ref.read(hasChangesProvider.notifier).setHasChanges(_anyChangesMade);
-    });
+    _addListeners();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(hasChangesProvider.notifier).setHasChanges(false);
@@ -75,12 +61,31 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
   }
 
   @override
+  void didUpdateWidget(covariant AddEditForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.entry != oldWidget.entry) {
+      _removeListeners();
+
+      _nameController.text = widget.entry?.name ?? "";
+      _userController.text = widget.entry?.username ?? "";
+      _passwordController.text = widget.entry?.password ?? "";
+      _urlsController.text = widget.entry?.urls.join('\n') ?? "";
+      _commentsController.text = widget.entry?.comments ?? "";
+
+      _addListeners();
+    }
+  }
+
+  @override
   void dispose() {
+    _removeListeners();
+
     _nameController.dispose();
     _userController.dispose();
     _passwordController.dispose();
     _urlsController.dispose();
     _commentsController.dispose();
+    
     super.dispose();
   }
 
@@ -221,10 +226,30 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
       final confirm = await DialogService.showCancelDialog(context);
 
       if (confirm == true) {
-        ref.read(selectedEntryProvider.notifier).setPasswordEntry(null);
+        ref.read(selectedEntryProvider.notifier).setEntry(null);
         ref.read(hasChangesProvider.notifier).setHasChanges(false);
         widget.onCancel();
       }
     }
+  }
+
+  void _listenForChanges() {
+    ref.read(hasChangesProvider.notifier).setHasChanges(_anyChangesMade);
+  }
+
+  void _addListeners() {
+    _nameController.addListener(_listenForChanges);
+    _userController.addListener(_listenForChanges);
+    _passwordController.addListener(_listenForChanges);
+    _urlsController.addListener(_listenForChanges);
+    _commentsController.addListener(_listenForChanges);
+  }
+
+  void _removeListeners() {
+    _nameController.removeListener(_listenForChanges);
+    _userController.removeListener(_listenForChanges);
+    _passwordController.removeListener(_listenForChanges);
+    _urlsController.removeListener(_listenForChanges);
+    _commentsController.removeListener(_listenForChanges);
   }
 }

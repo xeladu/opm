@@ -114,7 +114,7 @@ class VaultListDesktop extends ConsumerWidget {
   void _addNewEntry(WidgetRef ref) {
     if (ref.read(addEditModeActiveProvider)) return;
 
-    ref.read(selectedEntryProvider.notifier).setPasswordEntry(null);
+    ref.read(selectedEntryProvider.notifier).setEntry(null);
 
     ref.read(addEditModeActiveProvider.notifier).setMode(true);
   }
@@ -131,7 +131,7 @@ class VaultListDesktop extends ConsumerWidget {
   }
 
   void _save(WidgetRef ref) {
-    ref.read(selectedEntryProvider.notifier).setPasswordEntry(null);
+    ref.read(selectedEntryProvider.notifier).setEntry(null);
 
     ref.invalidate(allEntriesProvider);
 
@@ -139,7 +139,7 @@ class VaultListDesktop extends ConsumerWidget {
   }
 
   void _cancel(WidgetRef ref) {
-    ref.read(selectedEntryProvider.notifier).setPasswordEntry(null);
+    ref.read(selectedEntryProvider.notifier).setEntry(null);
 
     ref.read(addEditModeActiveProvider.notifier).setMode(false);
   }
@@ -162,7 +162,7 @@ class VaultListDesktop extends ConsumerWidget {
     final useCase = AddEntry(repo);
     await useCase(selectedEntryCopy);
 
-    ref.read(selectedEntryProvider.notifier).setPasswordEntry(null);
+    ref.read(selectedEntryProvider.notifier).setEntry(null);
     ref.invalidate(allEntriesProvider);
   }
 
@@ -175,7 +175,7 @@ class VaultListDesktop extends ConsumerWidget {
       final selectedPasswordEntry = ref.read(selectedEntryProvider);
 
       await useCase.call(selectedPasswordEntry!.id);
-      ref.read(selectedEntryProvider.notifier).setPasswordEntry(null);
+      ref.read(selectedEntryProvider.notifier).setEntry(null);
       ref.invalidate(allEntriesProvider);
     }
   }
