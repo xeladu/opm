@@ -10,6 +10,7 @@ import 'package:open_password_manager/features/vault/domain/entities/vault_entry
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_edit_form.dart';
+import 'package:open_password_manager/features/vault/presentation/widgets/empty_list.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_entry_actions.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_entry_details.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_actions.dart';
@@ -23,8 +24,13 @@ import 'package:uuid/uuid.dart';
 
 class VaultListDesktop extends ConsumerWidget {
   final List<VaultEntry> passwords;
+  final bool vaultEmpty;
 
-  const VaultListDesktop({super.key, required this.passwords});
+  const VaultListDesktop({
+    super.key,
+    required this.passwords,
+    required this.vaultEmpty,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,17 +45,24 @@ class VaultListDesktop extends ConsumerWidget {
         VaultSearchField(),
         SizedBox(height: sizeS),
         Expanded(
-          child: ListView.builder(
-            itemCount: passwords.length,
-            itemBuilder: (context, index) {
-              final entry = passwords[index];
-              return VaultListEntry(
-                entry: entry,
-                selected: selectedPasswordEntry?.id == entry.id,
-                isMobile: false,
-              );
-            },
-          ),
+          child: vaultEmpty
+              ? Center(
+                  child: EmptyList(
+                    message:
+                        "Your vault is empty!\r\nStart by adding your first entry",
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: passwords.length,
+                  itemBuilder: (context, index) {
+                    final entry = passwords[index];
+                    return VaultListEntry(
+                      entry: entry,
+                      selected: selectedPasswordEntry?.id == entry.id,
+                      isMobile: false,
+                    );
+                  },
+                ),
         ),
         Divider(),
         VaultListActions(

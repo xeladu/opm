@@ -30,7 +30,6 @@ class SupabaseSaltRepositoryImpl implements SaltRepository {
     try {
       await client.from(tableName).upsert({'user_id': userId, 'salt': salt});
     } catch (e) {
-      print('Error saving user salt: $e');
       rethrow;
     }
   }

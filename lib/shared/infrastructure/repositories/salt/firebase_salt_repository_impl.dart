@@ -36,7 +36,6 @@ class FirebaseSaltRepositoryImpl implements SaltRepository {
             'updatedAt': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
     } catch (e) {
-      print('Error saving user salt: $e');
       rethrow;
     }
   }
