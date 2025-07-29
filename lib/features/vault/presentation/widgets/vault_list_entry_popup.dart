@@ -15,15 +15,22 @@ class VaultListEntryPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<PopupSelection>(
-      icon: Icon(LucideIcons.ellipsis),
-      shape: RoundedRectangleBorder(
-        borderRadius: ShadTheme.of(context).radius,
-        side: BorderSide(color: Colors.white, width: 1),
+    return ShadTooltip(
+      builder: (context) => Text("Show menu"),
+      child: PopupMenuButton<PopupSelection>(
+        tooltip: "",
+        icon: Icon(LucideIcons.ellipsis),
+        shape: RoundedRectangleBorder(
+          borderRadius: ShadTheme.of(context).radius,
+          side: BorderSide(
+            color: ShadTheme.of(context).colorScheme.border,
+            width: 1,
+          ),
+        ),
+        color: ShadTheme.of(context).cardTheme.backgroundColor,
+        onSelected: (selection) => onSelected(selection, entry),
+        itemBuilder: (context) => menuItems,
       ),
-      color: ShadTheme.of(context).cardTheme.backgroundColor,
-      onSelected: (selection) => onSelected(selection, entry),
-      itemBuilder: (context) => menuItems,
     );
   }
 

@@ -12,6 +12,7 @@ import 'package:open_password_manager/features/vault/presentation/pages/vault_en
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry_popup.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
+import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -45,6 +46,8 @@ class VaultListEntry extends ConsumerWidget {
     required this.isMobile,
   });
 
+  /// Returns the favicon URL for a given website URL.
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Offset? tapPosition;
@@ -74,16 +77,19 @@ class VaultListEntry extends ConsumerWidget {
         minVerticalPadding: 0,
         dense: true,
         visualDensity: VisualDensity.compact,
-        title: Text(entry.name, style: ShadTheme.of(context).textTheme.p),
+        title: Text(
+          entry.name,
+          style: ShadTheme.of(context).textTheme.p,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: Text(
           entry.username,
           style: ShadTheme.of(context).textTheme.muted,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        leading: Icon(
-          LucideIcons.earth400,
-          size: sizeM,
-          color: ShadTheme.of(context).colorScheme.mutedForeground,
-        ),
+        leading: Favicon(url: entry.urls.isEmpty ? "" : entry.urls.first),
         trailing: isMobile
             ? VaultListEntryPopup(
                 entry: entry,
@@ -98,7 +104,7 @@ class VaultListEntry extends ConsumerWidget {
 
   Future<void> onTap(BuildContext context, WidgetRef ref) async {
     if (isMobile) {
-      // TODO navigate to selected entry
+      await NavigationService.goTo(context, VaultEntryDetailPage(entry: entry));
     } else {
       final confirmed = await _confirmAction(context, ref);
       if (!confirmed) return;
@@ -212,15 +218,7 @@ class VaultListEntry extends ConsumerWidget {
     if (!confirmed) return;
 
     if (context.mounted) {
-      final updatedOrDeleted = await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => VaultEntryDetailPage(entry: entry),
-        ),
-      );
-
-      if (updatedOrDeleted != null) {
-        ref.invalidate(allEntriesProvider);
-      }
+      await NavigationService.goTo(context, VaultEntryDetailPage(entry: entry));
     }
   }
 
@@ -247,21 +245,15 @@ class VaultListEntry extends ConsumerWidget {
     if (!confirmed) return;
 
     if (context.mounted) {
-      final updated = await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => AddEditVaultEntryPage(
-            entry: entry,
-            onSave: (updatedEntry) async {
-              final repo = ref.read(vaultRepositoryProvider);
-              await repo.editEntry(updatedEntry);
-            },
-          ),
+      await NavigationService.goTo(
+        context,
+        AddEditVaultEntryPage(
+          entry: entry,
+          onSave: () async {
+            ref.invalidate(allEntriesProvider);
+          },
         ),
       );
-
-      if (updated != null) {
-        ref.invalidate(allEntriesProvider);
-      }
     }
   }
 
@@ -304,5 +296,39 @@ class VaultListEntry extends ConsumerWidget {
     }
 
     return true;
+  }
+}
+
+class Favicon extends StatefulWidget {
+  final String url;
+
+  const Favicon({super.key, required this.url});
+
+  @override
+  State<Favicon> createState() => _State();
+}
+
+class _State extends State<Favicon> {
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      _getFaviconUrl(widget.url),
+      width: sizeM,
+      height: sizeM,
+      errorBuilder: (context, error, stackTrace) => Icon(
+        LucideIcons.earth400,
+        size: sizeM,
+        color: ShadTheme.of(context).colorScheme.mutedForeground,
+      ),
+    );
+  }
+
+  String _getFaviconUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      return 'https://icons.duckduckgo.com/ip3/${uri.host}.ico';
+    } catch (_) {
+      return '';
+    }
   }
 }

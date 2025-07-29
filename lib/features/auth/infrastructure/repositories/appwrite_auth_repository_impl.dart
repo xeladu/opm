@@ -26,7 +26,7 @@ class AppwriteAuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> signIn({required String email, required String password}) async {
     try {
-      await _account.createEmailSession(email: email, password: password);
+      await _account.createEmailPasswordSession(email: email, password: password);
     } on AppwriteException catch (e) {
       throw Exception(e.message ?? 'Failed to sign in');
     }

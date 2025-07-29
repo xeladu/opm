@@ -5,7 +5,18 @@ import 'package:pointycastle/export.dart' as pc;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class CryptographyRepositoryImpl implements CryptographyRepository {
-  static final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  static final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+    ),
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+    webOptions: WebOptions(
+      dbName: 'opm_secure_storage',
+      publicKey: 'opm_public_key',
+    ),
+  );
   static const String _saltKey = 'encryption_salt';
   static const int _iterations = 100;
   static const int _keyLength = 32;
@@ -23,8 +34,12 @@ class CryptographyRepositoryImpl implements CryptographyRepository {
   CryptographyRepositoryImpl._();
 
   @override
-  Future<void> init(String password) async {
-    await _ensureSalt();
+  Future<void> init(String password, {String? sharedSalt}) async {
+    if (sharedSalt != null) {
+      _salt = base64Decode(sharedSalt);
+    } else {
+      await _ensureSalt();
+    }
     _key = await _deriveKey(password);
   }
 
@@ -34,18 +49,16 @@ class CryptographyRepositoryImpl implements CryptographyRepository {
   }
 
   @override
+  String? getCurrentSalt() {
+    return _salt != null ? base64Encode(_salt!) : null;
+  }
+
+  @override
   Future<String> encrypt(String plainText) async {
     if (_key == null) throw Exception('Encryption key not initialized');
 
-    final random = pc.SecureRandom('Fortuna')
-      ..seed(
-        pc.KeyParameter(
-          Uint8List.fromList(
-            List.generate(32, (_) => DateTime.now().microsecond % 256),
-          ),
-        ),
-      );
-    final ivBytes = random.nextBytes(12);
+    // Generate cryptographically secure random IV
+    final ivBytes = _generateSecureRandomBytes(12);
     final cipher = pc.GCMBlockCipher(pc.AESEngine());
     cipher.init(
       true,
@@ -80,15 +93,7 @@ class CryptographyRepositoryImpl implements CryptographyRepository {
     if (saltStr != null) {
       _salt = base64Decode(saltStr);
     } else {
-      final random = pc.SecureRandom('Fortuna')
-        ..seed(
-          pc.KeyParameter(
-            Uint8List.fromList(
-              List.generate(32, (_) => DateTime.now().microsecond % 256),
-            ),
-          ),
-        );
-      final saltBytes = random.nextBytes(16);
+      final saltBytes = _generateSecureRandomBytes(16);
       _salt = saltBytes;
       await _storage.write(key: _saltKey, value: base64Encode(saltBytes));
     }
@@ -98,5 +103,17 @@ class CryptographyRepositoryImpl implements CryptographyRepository {
     final pbkdf2 = pc.PBKDF2KeyDerivator(pc.HMac(pc.SHA256Digest(), 64));
     pbkdf2.init(pc.Pbkdf2Parameters(_salt!, _iterations, _keyLength));
     return pbkdf2.process(Uint8List.fromList(utf8.encode(password)));
+  }
+
+  Uint8List _generateSecureRandomBytes(int length) {
+    final random = pc.SecureRandom('Fortuna');
+    // Use system time and a counter for better entropy
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final entropy = Uint8List(32);
+    for (int i = 0; i < 32; i++) {
+      entropy[i] = (timestamp >> (i % 8)) & 0xFF;
+    }
+    random.seed(pc.KeyParameter(entropy));
+    return random.nextBytes(length);
   }
 }

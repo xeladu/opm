@@ -8,6 +8,7 @@ import 'package:open_password_manager/shared/presentation/buttons/primary_button
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
 import 'package:open_password_manager/shared/presentation/inputs/password_form_field.dart';
+import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -88,14 +89,11 @@ class _State extends ConsumerState<CreateAccountPage> {
                   Center(
                     child: SecondaryButton(
                       caption: 'Already have an account? Sign in',
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignInPage(),
+                      onPressed: () async =>
+                          await NavigationService.goToAndReplace(
+                            context,
+                            SignInPage(),
                           ),
-                        );
-                      },
                     ),
                   ),
                 ],

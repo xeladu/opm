@@ -3,12 +3,16 @@ import 'package:open_password_manager/features/auth/domain/repositories/auth_rep
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseAuthRepositoryImpl implements AuthRepository {
+  final SupabaseClient client;
+
+  const SupabaseAuthRepositoryImpl(this.client);
+
   @override
   Future<void> createAccount({
     required String email,
     required String password,
   }) async {
-    final response = await Supabase.instance.client.auth.signUp(
+    final response = await client.auth.signUp(
       email: email,
       password: password,
     );
@@ -20,7 +24,7 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> signIn({required String email, required String password}) async {
     try {
-      final response = await Supabase.instance.client.auth.signInWithPassword(
+      final response = await client.auth.signInWithPassword(
         email: email,
         password: password,
       );
@@ -34,18 +38,18 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await Supabase.instance.client.auth.signOut();
+    await client.auth.signOut();
   }
 
   @override
   Future<void> deleteAccount() async {
-    final user = Supabase.instance.client.auth.currentUser;
+    final user = client.auth.currentUser;
     if (user == null) {
       throw Exception('No user signed in');
     }
     // Supabase does not allow users to delete themselves directly from client SDK
     // You may want to sign out the user instead, or call a custom function on your backend
-    await Supabase.instance.client.auth.signOut();
+    await client.auth.signOut();
     throw UnimplementedError(
       'Delete account is not supported from client SDK.',
     );
@@ -54,8 +58,7 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
   @override
   Future<OpmUser> getCurrentUser() async {
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-
+      final user = client.auth.currentUser;
       return OpmUser(id: user!.id, user: user.email!);
     } on AuthException catch (e) {
       throw Exception(e.message);

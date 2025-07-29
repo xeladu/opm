@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
-import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/add_edit_vault_entry_page.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/desktop/vault_list_desktop.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/empty_list.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/mobile/vault_list_mobile.dart';
 import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
+import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -29,10 +29,27 @@ class _State extends ConsumerState<VaultListPage> {
       error: (error, stackTrace) => Text(error.toString()),
       data: (passwords) {
         if (passwords.isEmpty) {
-          return Center(
-            child: EmptyList(
-              message:
-                  "Your vault is empty!\r\nStart by adding your first entry",
+          return ResponsiveAppFrame(
+            title: "Your vault",
+            content: Center(
+              child: EmptyList(
+                message:
+                    "Your vault is empty!\r\nStart by adding your first entry",
+              ),
+            ),
+            mobileButton: ShadTooltip(
+              builder: (context) => Text("Add new entry"),
+              child: FloatingActionButton(
+                onPressed: () async {
+                  await NavigationService.goTo(
+                    context,
+                    AddEditVaultEntryPage(
+                      onSave: () => ref.invalidate(allEntriesProvider),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.add),
+              ),
             ),
           );
         }
@@ -54,23 +71,19 @@ class _State extends ConsumerState<VaultListPage> {
             padding: const EdgeInsets.all(sizeXS),
             child: VaultListDesktop(passwords: filteredPasswords),
           ),
-          mobileButton: FloatingActionButton(
-            onPressed: () async {
-              final added = await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => AddEditVaultEntryPage(
-                    onSave: (entry) async {
-                      final repo = ref.read(vaultRepositoryProvider);
-                      await repo.addEntry(entry);
-                    },
+          mobileButton: ShadTooltip(
+            builder: (context) => Text("Add new entry"),
+            child: FloatingActionButton(
+              onPressed: () async {
+                await NavigationService.goTo(
+                  context,
+                  AddEditVaultEntryPage(
+                    onSave: () => ref.invalidate(allEntriesProvider),
                   ),
-                ),
-              );
-              if (added != null) {
-                ref.invalidate(allEntriesProvider);
-              }
-            },
-            child: const Icon(Icons.add),
+                );
+              },
+              child: const Icon(Icons.add),
+            ),
           ),
         );
       },

@@ -71,13 +71,15 @@ class AppwriteConfig {
   final String endpoint;
   final String projectId;
   final String databaseId;
-  final String collectionId;
+  final String passwordCollectionId;
+  final String saltCollectionId;
 
   AppwriteConfig({
     required this.endpoint,
     required this.projectId,
     required this.databaseId,
-    required this.collectionId,
+    required this.saltCollectionId,
+    required this.passwordCollectionId,
   });
 
   factory AppwriteConfig.fromJson(Map<String, dynamic> json) {
@@ -85,7 +87,8 @@ class AppwriteConfig {
       endpoint: json['endpoint'] as String,
       projectId: json['projectId'] as String,
       databaseId: json["databaseId"] as String,
-      collectionId: json["collectionId"] as String,
+      passwordCollectionId: json["passwordCollectionId"] as String,
+      saltCollectionId: json["saltCollectionId"] as String,
     );
   }
 }
@@ -93,19 +96,22 @@ class AppwriteConfig {
 class SupabaseConfig {
   final String url;
   final String anonKey;
-  final String databaseName;
+  final String passwordDbName;
+  final String saltDbName;
 
   SupabaseConfig({
     required this.url,
     required this.anonKey,
-    required this.databaseName,
+    required this.passwordDbName,
+    required this.saltDbName,
   });
 
   factory SupabaseConfig.fromJson(Map<String, dynamic> json) {
     return SupabaseConfig(
       url: json['url'] as String,
       anonKey: json['anonKey'] as String,
-      databaseName: json["databaseName"] as String,
+      passwordDbName: json["passwordDbName"] as String,
+      saltDbName: json["saltDbName"] as String,
     );
   }
 }

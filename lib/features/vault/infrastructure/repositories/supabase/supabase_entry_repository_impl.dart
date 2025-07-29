@@ -6,12 +6,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseEntryRepositoryImpl implements EntryRepository {
   final SupabaseClient client;
-  final String databaseName;
+  final String tableName;
   final CryptographyRepository cryptoRepo;
 
   SupabaseEntryRepositoryImpl({
     required this.client,
-    required this.databaseName,
+    required this.tableName,
     required this.cryptoRepo,
   });
 
@@ -19,7 +19,7 @@ class SupabaseEntryRepositoryImpl implements EntryRepository {
   Future<void> addEntry(VaultEntry entry) async {
     final encryptedEntry = await entry.encrypt(cryptoRepo.encrypt);
 
-    await client.from(databaseName).insert(encryptedEntry.toJson());
+    await client.from(tableName).insert(encryptedEntry.toJson());
   }
 
   @override
@@ -27,19 +27,19 @@ class SupabaseEntryRepositoryImpl implements EntryRepository {
     final encryptedEntry = await entry.encrypt(cryptoRepo.encrypt);
 
     await client
-        .from(databaseName)
+        .from(tableName)
         .update(encryptedEntry.toJson())
         .eq('id', entry.id);
   }
 
   @override
   Future<void> deleteEntry(String id) async {
-    await client.from(databaseName).delete().eq('id', id);
+    await client.from(tableName).delete().eq('id', id);
   }
 
   @override
   Future<List<VaultEntry>> getAllEntries() async {
-    final response = await client.from(databaseName).select();
+    final response = await client.from(tableName).select();
     final entries = (response as List)
         .map((json) => VaultEntry.fromJson(json as Map<String, dynamic>))
         .toList();

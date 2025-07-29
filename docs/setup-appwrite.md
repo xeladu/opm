@@ -1,0 +1,223 @@
+# Appwrite Setup Guide
+
+## Overview
+This guide walks you through setting up Appwrite as the backend for Open Password Manager, including authentication, database collections, and cross-platform encryption salt storage.
+
+## Prerequisites
+- An Appwrite Cloud account or self-hosted Appwrite instance
+- Access to [Appwrite Console](https://cloud.appwrite.io/)
+
+## Step 1: Create Appwrite Project
+
+### Using Appwrite Cloud
+1. Go to [Appwrite Cloud](https://cloud.appwrite.io/)
+2. Sign up or log in to your account
+3. Click "Create Project"
+4. Enter project details:
+   - **Name**: open-password-manager (or your preferred name)
+   - **Project ID**: Will be auto-generated (note this down)
+5. Click "Create"
+
+### Using Self-Hosted Appwrite
+If you're using a self-hosted Appwrite instance, create a project through your Appwrite console.
+
+## Step 2: Configuration File
+
+Create a file `config.json` in the project root with the following content:
+
+```json
+{
+    "provider": "appwrite",
+    "appwriteConfig": {
+        "endpoint": "https://cloud.appwrite.io/v1",
+        "project": "your-project-id",
+        "databaseId": "your-database-id",
+        "passwordCollectionId": "your-collection-id",
+        "saltCollectionId": "your-collection-id",
+    }
+}
+```
+
+### Configuration Parameters
+
+| Key | Explanation |
+| --- | --- |
+| endpoint | Appwrite server endpoint (cloud or self-hosted) |
+| project | Your Appwrite project ID |
+| databaseId | ID of the database to store password entries |
+| collectionId | ID of the collection to store password entries |
+
+### Finding Your Configuration Values
+
+1. **Endpoint**: 
+   - For Appwrite Cloud: `https://cloud.appwrite.io/v1`
+   - For self-hosted: `https://your-domain.com/v1`
+
+2. **Project ID**: Available in your project dashboard under Settings → General
+
+3. **Database/Collection IDs**: You'll create these in the next steps
+
+## Step 3: Platform Setup
+
+1. In your Appwrite Console, go to **Settings** → **Platforms**
+2. Add platforms for your app:
+
+### Web Platform
+- **Platform Type**: Web
+- **Name**: Open Password Manager Web
+- **Hostname**: `localhost` (for development) and your production domain
+
+### Android Platform (if building for Android)
+- **Platform Type**: Android
+- **Name**: Open Password Manager Android
+- **Package Name**: `com.example.open_password_manager` (match your Flutter app)
+
+### iOS Platform (if building for iOS)
+- **Platform Type**: iOS  
+- **Name**: Open Password Manager iOS
+- **Bundle ID**: `com.example.openPasswordManager` (match your Flutter app)
+
+## Step 4: Authentication Setup
+
+1. Go to **Auth** in your Appwrite Console
+2. Authentication is enabled by default
+3. Configure settings under **Auth** → **Settings**:
+   - **User Registration**: Enable
+   - **Email/Password Login**: Enable
+   - **Email Verification**: Enable (optional)
+
+## Step 5: Database Setup
+
+### Create Database
+
+1. Go to **Databases** in your Appwrite Console
+2. Click "Create Database"
+3. Enter details:
+   - **Name**: OPM Database
+   - **Database ID**: `opm-database`
+4. Click "Create"
+
+### Create Password Entries Collection
+
+1. Inside your database, click "Create Collection"
+2. Enter details:
+   - **Name**: Passwords
+   - **Collection ID**: `passwords`
+3. Click "Create"
+
+#### Add Attributes to Passwords Collection
+
+Add these attributes one by one by clicking "Create Attribute":
+
+| Attribute | Type | Size | Required | Default |
+| --- | --- | --- | --- | --- |
+| `id` | String | 36 | ✅ | - |
+| `name` | String | 256 | ✅ | - |
+| `created_at` | String | 256 | ✅ | - |
+| `updated_at` | String | 256 | ✅ | - |
+| `username` | String | 256 | ✅ | - |
+| `password` | String | 256 | ✅ | - |
+| `urls` | String (Array) | 1024 | ❌ | - |
+| `comments` | String | 1024 | ❌ | - |
+
+#### Set Permissions for Passwords Collection
+
+1. Go to the **Settings** tab of your passwords collection
+2. Enable **Document Security**
+3. Set **Collection Permissions**:
+   - **Create**: Role `users` (any authenticated user can create)
+   - **Read**: Role `users` 
+   - **Update**: Role `users`
+   - **Delete**: Role `users`
+
+**Document-level permissions** will be automatically set by the app to restrict access to the document creator only.
+
+### Create User Salts Collection
+
+1. Create another collection:
+   - **Name**: User Salts  
+   - **Collection ID**: `user_salts`
+
+#### Add Attributes to User Salts Collection
+
+| Attribute | Type | Size | Required | Default |
+| --- | --- | --- | --- | --- |
+| `user_id` | String | 255 | ✅ | - |
+| `salt` | String | 255 | ✅ | - |
+| `created_at` | String | 255 | ❌ | - |
+| `updated_at` | String | 255 | ❌ | - |
+
+#### Set Permissions for User Salts Collection
+
+1. Enable **Document Security**
+2. Set **Collection Permissions**:
+   - **Create**: Role `users`
+   - **Read**: Role `users`
+   - **Update**: Role `users`
+   - **Delete**: Role `users`
+
+#### Create Index for User Salts
+
+1. Go to **Indexes** tab in the user_salts collection
+2. Click "Create Index"
+3. Set:
+   - **Index Key**: `user_id`
+   - **Index Type**: `key`
+   - **Order**: `ASC`
+
+## Step 6: Test Your Setup
+
+1. Save your `config.json` file in the project root
+2. Run the app: `flutter run -d chrome`
+3. Try to create an account
+4. Sign in with your new account
+5. Create a test password entry
+6. Sign out and sign in again to verify data persistence
+7. Test cross-platform by accessing from different devices/browsers
+
+## Database Collections Schema
+
+### Passwords Collection
+
+Stores encrypted password entries for users:
+
+```
+Collection: passwords
+├── id (String, 36 chars) - Unique entry identifier
+├── name (String, 256 chars) - Entry name (encrypted)
+├── username (String, 256 chars) - Username (encrypted)
+├── password (String, 256 chars) - Password (encrypted)
+├── urls (String Array, 1024 chars) - Associated URLs (encrypted)
+├── comments (String, 1024 chars) - Notes (encrypted)
+├── created_at (String, 256 chars) - Creation timestamp
+└── updated_at (String, 256 chars) - Last update timestamp
+```
+
+### User Salts Collection
+
+Stores encryption salts for cross-platform compatibility:
+
+```
+Collection: user_salts
+├── userId (String, 255 chars) - User ID (indexed)
+├── salt (String, 255 chars) - Base64 encoded salt
+├── createdAt (DateTime) - Creation timestamp
+└── updatedAt (DateTime) - Last update timestamp
+```
+
+## Permissions Model
+
+### Collection Level
+- **Create**: Any authenticated user can create documents
+- **Read/Update/Delete**: Only authenticated users with document permissions
+
+### Document Level (Applied by App)
+- **Passwords**: Only the user who created the entry can access it
+- **User Salts**: Only the user can access their own salt
+
+The app automatically sets document permissions like:
+- `user:user_id` for read access
+- `user:user_id` for update access
+- `user:user_id` for delete access
+
+Your Appwrite backend is now ready for Open Password Manager!

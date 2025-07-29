@@ -28,7 +28,7 @@ class AppwriteEntryRepositoryImpl implements EntryRepository {
 
     await _db.createDocument(
       databaseId: config.databaseId,
-      collectionId: config.collectionId,
+      collectionId: config.passwordCollectionId,
       documentId: entry.id,
       data: encryptedEntry.toJson(),
       permissions: [
@@ -45,7 +45,7 @@ class AppwriteEntryRepositoryImpl implements EntryRepository {
 
     await _db.updateDocument(
       databaseId: config.databaseId,
-      collectionId: config.collectionId,
+      collectionId: config.passwordCollectionId,
       documentId: entry.id,
       data: encryptedEntry.toJson(),
     );
@@ -55,7 +55,7 @@ class AppwriteEntryRepositoryImpl implements EntryRepository {
   Future<void> deleteEntry(String id) async {
     await _db.deleteDocument(
       databaseId: config.databaseId,
-      collectionId: config.collectionId,
+      collectionId: config.passwordCollectionId,
       documentId: id,
     );
   }
@@ -64,7 +64,7 @@ class AppwriteEntryRepositoryImpl implements EntryRepository {
   Future<List<VaultEntry>> getAllEntries() async {
     final docs = await _db.listDocuments(
       databaseId: config.databaseId,
-      collectionId: config.collectionId,
+      collectionId: config.passwordCollectionId,
     );
 
     final entries = docs.documents

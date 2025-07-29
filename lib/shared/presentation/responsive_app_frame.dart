@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
-import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
+import 'package:open_password_manager/shared/presentation/user_menu.dart';
+import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class ResponsiveAppFrame extends ConsumerStatefulWidget {
@@ -56,17 +57,17 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
           appBar: AppBar(
             title: widget.title != null ? Text(widget.title!) : null,
             actions: [
-              ShadAvatar(
-                "https://app.requestly.io/delay/2000/avatars.githubusercontent.com/u/124599?v=4",
-                placeholder: Text(
-                  ref.watch(opmUserProvider).user.substring(0, 2),
-                ),
+              Padding(
+                padding: EdgeInsets.only(right: sizeXS),
+                child: UserMenu(),
               ),
             ],
           ),
           body:
               widget.content ??
               (isMobile ? widget.mobileContent : widget.desktopContent),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
           floatingActionButton: (isMobile
               ? widget.mobileButton
               : widget.desktopButton),

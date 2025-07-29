@@ -5,6 +5,7 @@ import 'package:open_password_manager/features/vault/infrastructure/providers/ex
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
 import 'package:open_password_manager/shared/utils/bootstrapper.dart';
 import 'package:open_password_manager/shared/utils/provider_config.dart';
 import 'package:open_password_manager/shared/utils/provider_factory.dart';
@@ -30,6 +31,7 @@ void main() async {
   final cryptoProvider = ProviderFactory.getCryptoProvider();
   final exportProvider = ProviderFactory.getExportProvider();
   final clipboardProvider = ProviderFactory.getClipboardProvider();
+  final saltProvider = ProviderFactory.getSaltProvider(providerConfig);
 
   runApp(
     ProviderScope(
@@ -39,6 +41,7 @@ void main() async {
         exportRepositoryProvider.overrideWithValue(exportProvider),
         cryptographyRepositoryProvider.overrideWithValue(cryptoProvider),
         clipboardRepositoryProvider.overrideWithValue(clipboardProvider),
+        saltRepositoryProvider.overrideWithValue(saltProvider),
       ],
       child: const OpmApp(),
     ),

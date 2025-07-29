@@ -14,7 +14,7 @@ class VaultEntryDetailPage extends ConsumerWidget {
     return ResponsiveAppFrame(
       title: entry.name,
       content: Padding(
-        padding: const EdgeInsets.all(sizeXS),
+        padding: const EdgeInsets.all(sizeS),
         child: VaultEntryDetails(entry: entry),
       ),
     );

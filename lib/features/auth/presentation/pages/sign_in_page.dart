@@ -4,13 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_list_page.dart';
 import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
+import 'package:open_password_manager/shared/application/services/crypto_service.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
 import 'package:open_password_manager/shared/presentation/buttons/loading_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
 import 'package:open_password_manager/shared/presentation/inputs/password_form_field.dart';
+import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -69,14 +72,11 @@ class _State extends ConsumerState<SignInPage> {
                   Center(
                     child: SecondaryButton(
                       caption: "Don't have an account? Sign up",
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CreateAccountPage(),
+                      onPressed: () async =>
+                          await NavigationService.goToAndReplace(
+                            context,
+                            CreateAccountPage(),
                           ),
-                        );
-                      },
                     ),
                   ),
                 ],
@@ -102,10 +102,19 @@ class _State extends ConsumerState<SignInPage> {
     try {
       await useCase(email: data['email'], password: data['password']);
 
-      final cryptService = ref.read(cryptographyRepositoryProvider);
-      await cryptService.init(data["password"]);
-
+      // Get user info first
       final activeUser = await authRepo.getCurrentUser();
+      
+      // Initialize crypto with shared salt management
+      final cryptoRepo = ref.read(cryptographyRepositoryProvider);
+      final saltRepo = ref.read(saltRepositoryProvider);
+      final cryptoService = CryptoService(
+        cryptoRepo: cryptoRepo,
+        saltRepo: saltRepo,
+      );
+      
+      await cryptoService.initWithSharedSalt(data["password"], activeUser.id);
+      
       ref.read(opmUserProvider.notifier).setUser(activeUser);
 
       if (mounted) {

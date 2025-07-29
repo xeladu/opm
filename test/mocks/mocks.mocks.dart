@@ -112,9 +112,9 @@ class MockCryptographyRepository extends _i1.Mock
   }
 
   @override
-  _i4.Future<void> init(String? password) =>
+  _i4.Future<void> init(String? password, {String? sharedSalt}) =>
       (super.noSuchMethod(
-            Invocation.method(#init, [password]),
+            Invocation.method(#init, [password], {#sharedSalt: sharedSalt}),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )

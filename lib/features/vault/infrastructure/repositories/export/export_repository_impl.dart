@@ -1,8 +1,8 @@
-import 'dart:js_interop';
-
-import 'package:web/web.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
+
+import 'export_repository_web.dart'
+    if (dart.library.io) 'export_repository_io.dart';
 
 class ExportRepositoryImpl implements ExportRepository {
   static ExportRepositoryImpl? _instance;
@@ -48,19 +48,7 @@ class ExportRepositoryImpl implements ExportRepository {
     await _download(csvBuffer.toString(), 'export');
   }
 
-  Future _download(String csv, String fileName) async {
-    final blobParts = ([csv] as dynamic) as JSArray<BlobPart>;
-    final blob = Blob(blobParts, BlobPropertyBag(type: 'text/csv'));
-    final url = URL.createObjectURL(blob);
-
-    final anchor = HTMLAnchorElement()
-      ..href = url
-      ..download = '$fileName.csv';
-
-    document.body?.append(anchor);
-    anchor.click();
-    anchor.remove();
-
-    URL.revokeObjectURL(url);
+  Future<void> _download(String csv, String fileName) async {
+    await downloadFile(csv, fileName);
   }
 }

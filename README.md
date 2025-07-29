@@ -1,180 +1,212 @@
 # Open Password Manager
-Open Password Manager is an open source alternative with encrypted storage for various hosters implemented as a Flutter web app.
+
+Open Password Manager is an open source password manager with encrypted storage for various cloud providers, implemented as a cross-platform Flutter application.
 
 ## Features
 
-- Password store
-- Cloud or local
-- End-to-end encryption
-- Export passwords
+- **Secure Password Storage** - Military-grade AES-256-GCM encryption
+- **Cross-Platform Compatibility** - Web, Android, iOS, Desktop
+- **Multiple Cloud Backends** - Firebase, Supabase, or Appwrite
+- **End-to-End Encryption** - All data encrypted client-side before transmission
+- **Cross-Platform Sync** - Seamless access across all your devices
+- **Password Export** - Export your data when needed
+- **Open Source** - Fully transparent and auditable code
 
-## Supported hosters and deployment types
+## Supported Backend Providers
 
-- [Firebase](https://firebase.google.com/) 
-- [Supabase](https://supabase.com/) 
-- [Appwrite](https://appwrite.io/) 
+- **[Firebase](https://firebase.google.com/)** - Google's comprehensive app development platform
+- **[Supabase](https://supabase.com/)** - Open source Firebase alternative with PostgreSQL
+- **[Appwrite](https://appwrite.io/)** - Self-hosted or cloud backend-as-a-service
 
-## Firebase configuration steps
+## Quick Start
 
-### Configuration file
+1. Choose your preferred backend provider
+2. Follow the setup guide for your chosen provider:
+   - [📖 Firebase Setup Guide](docs/setup-firebase.md)
+   - [📖 Supabase Setup Guide](docs/setup-supabase.md)  
+   - [📖 Appwrite Setup Guide](docs/setup-appwrite.md)
+3. Create your `config.json` configuration file
+4. Run the application: `flutter run`
 
-Create a file `config.json` in the project root. Add the following content to enable Firebase as a backend.
+## Cross-Platform Encryption
 
+Open Password Manager uses a sophisticated encryption system that ensures your data is secure and accessible across all platforms:
+
+- **Client-Side Encryption**: All data is encrypted on your device before being sent to the cloud
+- **Shared Salt Management**: Encryption salts are stored in your backend to ensure compatibility across devices
+- **Platform Independence**: Access your passwords seamlessly on web, mobile, and desktop
+- **Secure Authentication**: Your login password is used for both authentication and encryption key derivation
+
+### How It Works
+
+1. **User Password**: You create a password for authentication and encryption/decryption
+2. **Authentication**: Your password is used to authenticate with your chosen backend provider
+3. **Key Derivation**: A unique encryption key is derived from your password using PBKDF2
+4. **Salt Storage**: A unique salt is stored in your backend database for cross-platform consistency
+5. **Data Encryption**: All password entries are encrypted with AES-256-GCM before storage
+6. **Cross-Platform Access**: The same encrypted data can be decrypted on any platform you sign in from 
+
+## Configuration
+
+Each backend provider requires a specific configuration file. Create a `config.json` file in your project root with the appropriate configuration for your chosen provider.
+
+### Configuration Examples
+
+**Firebase:**
 ```json
 {
     "provider": "firebase",
     "firebaseConfig": {
-        "apiKey": "...",
-        "authDomain": "...",
-        "projectId": "...",
-        "storageBucket": "...",
-        "messagingSenderId": "...",
-        "appId": "...",
-        "measurementId": "...",
-        "collectionId": "..."
-    },
-}
-```
-
-| Key | Explanation |
-| --- | --- |
-| apiKey | Required for identifying the Firebase project |
-| authDomain | Required for identifying the Firebase project |
-| projectId | Required for identifying the Firebase project |
-| storageBucket | Required for identifying the Firebase project |
-| messagingSenderId | Required for identifying the Firebase project |
-| appId | Required for identifying the Firebase project |
-| measurementId | Required for identifying the Firebase project |
-| collectionId | Collection name prefix to be used in Firestore |
-
-You can find the configuration values in your Firebase dashboard under *Project settings* and *SDK setup and configuration* for your app.
-
-### Firebase Authentication
-
-Activate the email/password authentication provider!
-
-### Firebase Firestore
-
-Passwords are stored in documents in the collection `$collection_<uid>` where `$collection` is the configuration value and `<uid>` is the unique user identifier of Firebase Authentication. The default database instance `(default)` is used. Secondary databases are not supported. You can set a security rule to allow/deny access per user like this:
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{collection}/{document=**} {
-      allow read, write: if request.auth != null && collection == 'passwords_' + request.auth.uid;
+        "apiKey": "your-api-key",
+        "authDomain": "your-project.firebaseapp.com",
+        "projectId": "your-project-id",
+        "storageBucket": "your-project.appspot.com",
+        "messagingSenderId": "123456789",
+        "appId": "1:123456789:web:abcdef",
+        "measurementId": "G-XXXXXXXXXX",
+        "collectionId": "passwords"
     }
-  }
 }
 ```
 
-## Supabase configuration steps
-
-Create a file `config.json` in the project root. Add the following content to enable Supabase as a backend.
-
+**Supabase:**
 ```json
 {
     "provider": "supabase",
     "supabaseConfig": {
-        "url": "...",
-        "anonKey": "...",
-        "databaseName": "..."
-    },
-}
-```
-
-| Key | Explanation |
-| --- | --- |
-| url | Required for identifying the Supabase project |
-| anonKey | Required for identifying the Supabase project |
-| databaseName | The name of the database to store the data |
-
-You can find the url in the *Connect* screen when choosing Flutter as a mobile framework. Your `anonKey` is visible in *Settings* - *API Keys*.
-
-### Database
-
-Create a database and put the name in the config file. Prepare the database with the following SQL script:
-
-```sql
-create table <db_name> (
-  id uuid primary key,
-  user_id uuid not null,
-  name text not null,
-  created_at text not null,
-  updated_at text not null,
-  username text not null,
-  password text not null,
-  urls text[],
-  comments text
-);
-```
-
-Change the default value of `user_id` to `auth.uid()` in the column editor.
-
-Enable [row level security](https://supabase.com/docs/guides/database/postgres/row-level-security) and create four policies with the commands `SELECT`, `INSERT`, `UPDATE`, and `DELETE` and the following using clause
-
-```sql
-(auth.uid() = user_id)
-```
-
-This will restrict data access to only the user that created the entry.
-
-## Appwrite configuration steps
-
-Create a file `config.json` in the project root. Add the following content to enable Appwrite as a backend.
-
-```json
-{
-    "provider": "appwrite",
-    "appwriteConfig": {
-        "endpoint": "...",
-        "project": "...",
-        "databaseId": "...",
-        "collectionId": "..."
+        "url": "https://your-project.supabase.co",
+        "anonKey": "your-anon-key",
+        "passwordDbName": "your-password-table-name",
+        "saltDbName": "your-salt-table-name"
     }
 }
 ```
 
-| Key | Explanation |
-| --- | --- |
-| endpoint | Required for identifying the Appwrite project |
-| project | Required for identifying the Appwrite project |
-| databaseId | The id of the database to store the data |
-| collectionId | The id of the collection to store the data |
+**Appwrite:**
+```json
+{
+    "provider": "appwrite",
+    "appwriteConfig": {
+        "endpoint": "https://cloud.appwrite.io/v1",
+        "project": "your-project-id",
+        "databaseId": "opm-database",
+        "passwordCollectionId": "your-collection-id",
+        "saltCollectionId": "your-collection-id",
+    }
+}
+```
 
-You can find the configuration values in your Appwrite dashboard under *Settings* and *API credentials* for your app.
+For detailed setup instructions including database configuration, see the setup guides linked above.
 
-### Database
+## Security & Encryption
 
-Create a database and a collection, put the names in the config file. Then, add the following attributes to the collection:
+Open Password Manager implements multiple layers of security to protect your data:
 
-| Key | Type | Length | Required |
-| --- | --- | --- | --- |
-| id | string | 36 | ✅ |
-| name | string | 256 | ✅ |
-| created_at | string | 256 | ✅ |
-| updated_at | string | 256 | ✅ |
-| username | string | 256 | ✅ |
-| password | string | 256 | ✅ |
-| urls | array of strings | 1024 | ❌ |
-| comments | string | 1024 | ❌ |
+### Encryption Details
 
-Enable document security in your collection. Set the collection permission to `Create` for the role `Users`. That way, users can only see/edit/delete their own documents and any authenticated user can insert new documents.
+- **Algorithm**: AES-256-GCM (Galois/Counter Mode)
+- **Key Derivation**: PBKDF2 with 10,000 iterations
+- **Salt Management**: Unique salts stored securely in your backend
+- **Transport Security**: All data transmitted over HTTPS/TLS
 
-## Encryption
+### Cross-Platform Compatibility
 
-See `cryptography_service.dart`.
+The app uses a shared salt management system to ensure encrypted data works across all platforms:
 
-Based on the salted user's master password, a key is generated to encrypt all data fields in the database. Encryption and decryption happens on the device. Only encrypted data is transmitted to and from the backend.
+1. **Shared Salt Storage**: Encryption salts are stored in your backend database
+2. **Consistent Keys**: All platforms derive identical encryption keys from your master password
+3. **Seamless Sync**: Sign in on any device to access your encrypted passwords
+4. **No Lock-In**: Your data remains accessible regardless of the platform
 
-When the user's password is changed, all password entries need to be decrypted with the old password and encrypted again with the new password.
+### Security Architecture
 
-A lost master password means all stored passwords are lost. There is no fallback mechanism to recover them.
+- Your login password is used for **authentication and encryption key derivation**
+- All encryption/decryption happens **client-side** before data transmission
+- Backend providers store only **encrypted data and authentication credentials**
+- Your stored passwords remain **unreadable without your login password**
 
-## How to deploy
+### Password Recovery
 
-Coming soon
+**Important**: If you lose your login password, your data cannot be recovered. This is by design for maximum security.
 
-## How to contribute
+- No backdoors or recovery mechanisms exist for encrypted data
+- Export your passwords regularly as a backup
+- Use a secure method to remember your login password
 
-Coming soon
+For technical implementation details, see `lib/shared/infrastructure/repositories/cryptography_repository_impl.dart`.
+
+## Development
+
+### Prerequisites
+
+- [Flutter](https://flutter.dev/docs/get-started/install) (Latest stable version)
+- A backend provider account (Firebase, Supabase, or Appwrite)
+
+### Building the App
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/xeladu/opm.git
+   cd opm
+   ```
+
+2. **Install dependencies**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Configure your backend** (see setup guides above)
+
+4. **Run the app**
+   ```bash
+   # Web
+   flutter run -d chrome
+   
+   # Android
+   flutter run -d android
+   
+   # iOS  
+   flutter run -d ios
+   ```
+
+### Project Structure
+
+```
+lib/
+├── features/
+│   ├── auth/           # Authentication logic
+│   └── vault/          # Password storage logic
+├── shared/
+│   ├── domain/         # Domain entities and repositories
+│   ├── infrastructure/ # Implementation details
+│   └── utils/          # Utilities and configurations
+└── main.dart           # Application entry point
+```
+
+### Architecture
+
+This project follows **Domain-Driven Design (DDD)** principles:
+
+- **Domain Layer**: Core business logic and entities
+- **Infrastructure Layer**: External service implementations  
+- **Presentation Layer**: UI components and state management
+
+State management is handled with **[Riverpod](https://riverpod.dev/)** for type-safe dependency injection and reactive state.
+
+## Contributing
+
+We welcome contributions! Please see our [contribution guidelines](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make your changes and add tests
+4. Run tests: `flutter test`
+5. Commit your changes: `git commit -am 'Add some feature'`
+6. Push to the branch: `git push origin feature/your-feature`
+7. Submit a pull request (optional)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
