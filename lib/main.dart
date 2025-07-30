@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
+import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
@@ -48,17 +49,26 @@ void main() async {
   );
 }
 
-class OpmApp extends StatelessWidget {
+class OpmApp extends ConsumerWidget {
   const OpmApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ShadApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
+      themeMode: ref.watch(appSettingsProvider.select((s) => s.themeMode)),
       theme: ShadThemeData(
-        colorScheme: const ShadNeutralColorScheme.dark(),
+        colorScheme: ref.watch(
+          appSettingsProvider.select((s) => s.lightColorScheme),
+        ),
+        textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter),
+        brightness: Brightness.light,
+      ),
+      darkTheme: ShadThemeData(
+        colorScheme: ref.watch(
+          appSettingsProvider.select((s) => s.darkColorScheme),
+        ),
         textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter),
         brightness: Brightness.dark,
       ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
-import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
 import 'package:open_password_manager/shared/application/providers/show_search_field_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/user_menu.dart';
@@ -47,13 +46,6 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
 
         if (_lastIsMobile == null || _lastIsMobile != isMobile) {
           _lastIsMobile = isMobile;
-
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final settings = ref.read(appSettingsProvider);
-            ref
-                .read(appSettingsProvider.notifier)
-                .setSettings(settings.copyWith(isMobile: isMobile));
-          });
         }
 
         final actionButtons = [
@@ -63,7 +55,7 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
               child: GlyphButton.ghost(
                 onTap: () {
                   final searchFieldVisible = ref.read(showSearchFieldProvider);
-                  if (searchFieldVisible){
+                  if (searchFieldVisible) {
                     // clear search query before hiding the search field
                     ref.read(filterQueryProvider.notifier).setQuery("");
                   }

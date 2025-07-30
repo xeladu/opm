@@ -11,45 +11,50 @@ class Sheet extends StatelessWidget {
   final Widget content;
   final String? primaryButtonCaption;
   final String? secondaryButtonCaption;
-  final Future<void> Function() onConfirm;
+  final bool hideSecondaryButton;
+  final Future<void> Function()? onConfirm;
   final Future<void> Function()? onCancel;
 
   const Sheet({
     super.key,
     required this.title,
     required this.content,
-    required this.onConfirm,
+    this.onConfirm,
     this.onCancel,
     this.description,
     this.primaryButtonCaption,
     this.secondaryButtonCaption,
+    this.hideSecondaryButton = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ShadSheet(
-      constraints: BoxConstraints(maxWidth: dialogMaxWidth),
-      title: Text(title),
-      description: description == null
-          ? null
-          : Text(description!, textAlign: TextAlign.left),
-      actions: [
-        SecondaryButton(
-          caption: secondaryButtonCaption ?? "Cancel",
-          onPressed: () async => await _cancel(context),
-        ),
-        PrimaryButton(
-          caption: primaryButtonCaption ?? "Save",
-          onPressed: () async => await _confirm(context),
-        ),
-      ],
-      
-      child: content,
+    return SafeArea(
+      child: ShadSheet(
+        constraints: BoxConstraints(maxWidth: dialogMaxWidth),
+        title: Text(title),
+        description: description == null
+            ? null
+            : Text(description!, textAlign: TextAlign.left),
+        actions: [
+          if (!hideSecondaryButton)
+            SecondaryButton(
+              caption: secondaryButtonCaption ?? "Cancel",
+              onPressed: () async => await _cancel(context),
+            ),
+          PrimaryButton(
+            caption: primaryButtonCaption ?? "Save",
+            onPressed: () async => await _confirm(context),
+          ),
+        ],
+
+        child: content,
+      ),
     );
   }
 
   Future<void> _confirm(BuildContext context) async {
-    await onConfirm();
+    if (onConfirm != null) await onConfirm!();
 
     if (context.mounted) {
       await NavigationService.goBack(context);

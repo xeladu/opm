@@ -8,6 +8,7 @@ import 'package:open_password_manager/features/vault/infrastructure/providers/ex
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
 import 'package:open_password_manager/shared/presentation/sheets/export_sheet.dart';
+import 'package:open_password_manager/shared/presentation/sheets/settings_sheet.dart';
 import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/popup_service.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
@@ -43,7 +44,13 @@ class UserMenu extends ConsumerWidget {
               await NavigationService.replaceAll(context, SignInPage());
             }
           case UserMenuSelection.settings:
-          // TODO
+            if (context.mounted) {
+              await showShadSheet(
+                side: ShadSheetSide.right,
+                context: context,
+                builder: (context) => SettingsSheet(),
+              );
+            }
           case UserMenuSelection.export:
             if (context.mounted) {
               await showShadSheet(
