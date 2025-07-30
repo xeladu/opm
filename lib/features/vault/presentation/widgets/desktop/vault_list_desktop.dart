@@ -5,9 +5,7 @@ import 'package:open_password_manager/features/vault/application/providers/add_e
 import 'package:open_password_manager/features/vault/application/providers/selected_entry_provider.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/add_entry.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/delete_entry.dart';
-import 'package:open_password_manager/features/vault/application/use_cases/export_vault.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
-import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_edit_form.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/empty_list.dart';
@@ -16,8 +14,8 @@ import 'package:open_password_manager/features/vault/presentation/widgets/vault_
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_actions.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_search_field.dart';
+import 'package:open_password_manager/shared/presentation/separator.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
-import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
@@ -64,11 +62,10 @@ class VaultListDesktop extends ConsumerWidget {
                   },
                 ),
         ),
-        Divider(),
+        Separator.horizontal(),
         VaultListActions(
           enabled: ref.watch(selectedEntryProvider) == null,
           onAdd: () => _addNewEntry(ref),
-          onExport: () => _exportVault(context, ref),
         ),
       ],
     );
@@ -90,7 +87,7 @@ class VaultListDesktop extends ConsumerWidget {
                         entry: selectedPasswordEntry,
                       ),
               ),
-              Divider(),
+              Separator.horizontal(),
               VaultEntryActions(
                 enabled: !addEditModeActive,
                 onDuplicate: () async => await _duplicate(ref),
@@ -130,17 +127,6 @@ class VaultListDesktop extends ConsumerWidget {
     ref.read(selectedEntryProvider.notifier).setEntry(null);
 
     ref.read(addEditModeActiveProvider.notifier).setMode(true);
-  }
-
-  Future<void> _exportVault(BuildContext context, WidgetRef ref) async {
-    final pwRepo = ref.read(vaultRepositoryProvider);
-    final exportRepo = ref.read(exportRepositoryProvider);
-    final useCase = ExportVault(pwRepo, exportRepo);
-    await useCase();
-
-    if (context.mounted) {
-      ToastService.show(context, "Vault exported");
-    }
   }
 
   void _save(WidgetRef ref) {

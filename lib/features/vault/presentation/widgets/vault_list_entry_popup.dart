@@ -41,7 +41,10 @@ class VaultListEntryPopup extends StatelessWidget {
       child: Row(
         spacing: sizeXS,
         mainAxisSize: MainAxisSize.min,
-        children: [Icon(LucideIcons.copy), Text('Copy username')],
+        children: [
+          Icon(LucideIcons.copy, size: sizeS),
+          Text('Copy username'),
+        ],
       ),
     ),
     const PopupMenuItem(
@@ -50,7 +53,10 @@ class VaultListEntryPopup extends StatelessWidget {
       child: Row(
         spacing: sizeXS,
         mainAxisSize: MainAxisSize.min,
-        children: [Icon(LucideIcons.copy), Text('Copy password')],
+        children: [
+          Icon(LucideIcons.copy, size: sizeS),
+          Text('Copy password'),
+        ],
       ),
     ),
     const PopupMenuItem(
@@ -59,7 +65,10 @@ class VaultListEntryPopup extends StatelessWidget {
       child: Row(
         spacing: sizeXS,
         mainAxisSize: MainAxisSize.min,
-        children: [Icon(LucideIcons.externalLink), Text('Open URL')],
+        children: [
+          Icon(LucideIcons.externalLink, size: sizeS),
+          Text('Open URL'),
+        ],
       ),
     ),
     const PopupMenuDivider(),
@@ -69,7 +78,10 @@ class VaultListEntryPopup extends StatelessWidget {
       child: Row(
         spacing: sizeXS,
         mainAxisSize: MainAxisSize.min,
-        children: [Icon(LucideIcons.view), Text('View')],
+        children: [
+          Icon(LucideIcons.view, size: sizeS),
+          Text('View'),
+        ],
       ),
     ),
     const PopupMenuItem(
@@ -78,7 +90,10 @@ class VaultListEntryPopup extends StatelessWidget {
       child: Row(
         spacing: sizeXS,
         mainAxisSize: MainAxisSize.min,
-        children: [Icon(LucideIcons.pen), Text('Edit')],
+        children: [
+          Icon(LucideIcons.pen, size: sizeS),
+          Text('Edit'),
+        ],
       ),
     ),
     const PopupMenuItem(
@@ -87,7 +102,10 @@ class VaultListEntryPopup extends StatelessWidget {
       child: Row(
         spacing: sizeXS,
         mainAxisSize: MainAxisSize.min,
-        children: [Icon(LucideIcons.delete), Text('Delete')],
+        children: [
+          Icon(LucideIcons.delete, size: sizeS),
+          Text('Delete'),
+        ],
       ),
     ),
   ];

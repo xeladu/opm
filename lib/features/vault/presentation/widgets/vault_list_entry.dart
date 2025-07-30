@@ -9,10 +9,12 @@ import 'package:open_password_manager/features/vault/domain/entities/vault_entry
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/add_edit_vault_entry_page.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_entry_detail_page.dart';
+import 'package:open_password_manager/features/vault/presentation/widgets/favicon.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry_popup.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
 import 'package:open_password_manager/shared/utils/navigation_service.dart';
+import 'package:open_password_manager/shared/utils/popup_service.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -45,8 +47,6 @@ class VaultListEntry extends ConsumerWidget {
     required this.selected,
     required this.isMobile,
   });
-
-  /// Returns the favicon URL for a given website URL.
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -124,23 +124,10 @@ class VaultListEntry extends ConsumerWidget {
     WidgetRef ref,
     Offset? tapPosition,
   ) async {
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
-    final position = tapPosition ?? Offset.zero;
-    final selection = await showMenu<PopupSelection>(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: ShadTheme.of(context).radius,
-        side: BorderSide(color: Colors.white, width: 1),
-      ),
-      color: ShadTheme.of(context).cardTheme.backgroundColor,
-      position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy,
-        overlay.size.width - position.dx,
-        overlay.size.height - position.dy,
-      ),
-      items: VaultListEntryPopup.menuItems,
+    final selection = await PopupService.showPopup<PopupSelection>(
+      context,
+      VaultListEntryPopup.menuItems,
+      tapPosition ?? Offset.zero,
     );
 
     if (selection != null) {
@@ -296,39 +283,5 @@ class VaultListEntry extends ConsumerWidget {
     }
 
     return true;
-  }
-}
-
-class Favicon extends StatefulWidget {
-  final String url;
-
-  const Favicon({super.key, required this.url});
-
-  @override
-  State<Favicon> createState() => _State();
-}
-
-class _State extends State<Favicon> {
-  @override
-  Widget build(BuildContext context) {
-    return Image.network(
-      _getFaviconUrl(widget.url),
-      width: sizeM,
-      height: sizeM,
-      errorBuilder: (context, error, stackTrace) => Icon(
-        LucideIcons.earth400,
-        size: sizeM,
-        color: ShadTheme.of(context).colorScheme.mutedForeground,
-      ),
-    );
-  }
-
-  String _getFaviconUrl(String url) {
-    try {
-      final uri = Uri.parse(url);
-      return 'https://icons.duckduckgo.com/ip3/${uri.host}.ico';
-    } catch (_) {
-      return '';
-    }
   }
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
 import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
+import 'package:open_password_manager/shared/application/providers/show_search_field_provider.dart';
+import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/user_menu.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -53,15 +56,36 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
           });
         }
 
+        final actionButtons = [
+          if (isMobile)
+            Padding(
+              padding: EdgeInsets.only(right: sizeXS),
+              child: GlyphButton.ghost(
+                onTap: () {
+                  final searchFieldVisible = ref.read(showSearchFieldProvider);
+                  if (searchFieldVisible){
+                    // clear search query before hiding the search field
+                    ref.read(filterQueryProvider.notifier).setQuery("");
+                  }
+
+                  ref
+                      .read(showSearchFieldProvider.notifier)
+                      .setState(!ref.read(showSearchFieldProvider));
+                },
+                icon: LucideIcons.search,
+                size: sizeM,
+              ),
+            ),
+          Padding(
+            padding: EdgeInsets.only(right: sizeXS),
+            child: UserMenu(),
+          ),
+        ];
+
         return Scaffold(
           appBar: AppBar(
             title: widget.title != null ? Text(widget.title!) : null,
-            actions: [
-              Padding(
-                padding: EdgeInsets.only(right: sizeXS),
-                child: UserMenu(),
-              ),
-            ],
+            actions: actionButtons,
           ),
           body:
               widget.content ??

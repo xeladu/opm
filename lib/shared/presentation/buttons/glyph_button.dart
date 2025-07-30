@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class GlyphButton extends StatelessWidget {
@@ -7,6 +8,7 @@ class GlyphButton extends StatelessWidget {
   final IconData icon;
   final IconButtonStyle style;
   final String? tooltip;
+  final double? size;
 
   const GlyphButton({
     super.key,
@@ -15,6 +17,7 @@ class GlyphButton extends StatelessWidget {
     this.enabled = true,
     this.tooltip,
     this.style = IconButtonStyle.standard,
+    this.size = sizeS,
   });
 
   const GlyphButton.ghost({
@@ -22,6 +25,7 @@ class GlyphButton extends StatelessWidget {
     required VoidCallback onTap,
     required IconData icon,
     bool enabled = true,
+    double? size = sizeS,
     String? tooltip,
   }) : this(
          key: key,
@@ -30,6 +34,7 @@ class GlyphButton extends StatelessWidget {
          icon: icon,
          style: IconButtonStyle.ghost,
          tooltip: tooltip,
+         size: size,
        );
 
   const GlyphButton.important({
@@ -37,6 +42,7 @@ class GlyphButton extends StatelessWidget {
     required VoidCallback onTap,
     required IconData icon,
     bool enabled = true,
+    double? size = sizeS,
     String? tooltip,
   }) : this(
          key: key,
@@ -45,6 +51,7 @@ class GlyphButton extends StatelessWidget {
          icon: icon,
          style: IconButtonStyle.important,
          tooltip: tooltip,
+         size: size,
        );
 
   @override
@@ -53,6 +60,7 @@ class GlyphButton extends StatelessWidget {
     switch (style) {
       case IconButtonStyle.standard:
         button = ShadIconButton.secondary(
+          iconSize: size,
           padding: EdgeInsets.zero,
           enabled: enabled,
           icon: Icon(icon),
@@ -60,6 +68,7 @@ class GlyphButton extends StatelessWidget {
         );
       case IconButtonStyle.ghost:
         button = ShadIconButton.ghost(
+          iconSize: size,
           padding: EdgeInsets.zero,
           enabled: enabled,
           icon: Icon(icon),
@@ -67,6 +76,7 @@ class GlyphButton extends StatelessWidget {
         );
       case IconButtonStyle.important:
         button = ShadIconButton.destructive(
+          iconSize: size,
           padding: EdgeInsets.zero,
           enabled: enabled,
           icon: Icon(icon),

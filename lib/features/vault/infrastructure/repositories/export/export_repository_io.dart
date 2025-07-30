@@ -6,5 +6,5 @@ Future<void> downloadFile(String csv, String fileName) async {
   final directory = await getApplicationDocumentsDirectory();
   final file = File('${directory.path}/$fileName.csv');
   await file.writeAsString(csv);
-  await Share.shareXFiles([XFile(file.path)], text: 'Exported vault data');
+  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
 }

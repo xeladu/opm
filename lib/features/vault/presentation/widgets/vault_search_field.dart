@@ -48,7 +48,7 @@ class _State extends ConsumerState<VaultSearchField> {
 
     return ShadInput(
       controller: _searchController,
-      placeholder: const Text('Search all entries'),
+      placeholder: const Text('Search your vault'),
       leading: Icon(LucideIcons.search),
       trailing: clearIcon,
     );

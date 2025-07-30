@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/create_account.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
-import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
 import 'package:open_password_manager/shared/presentation/buttons/loading_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
@@ -27,11 +26,11 @@ class _State extends ConsumerState<CreateAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveAppFrame(
-      content: Center(
+    return Scaffold(
+      body: Center(
         child: Container(
-          constraints: BoxConstraints(maxWidth: 480),
-          padding: EdgeInsets.all(sizeS),
+          constraints: BoxConstraints(maxWidth: dialogMaxWidth),
+          padding: EdgeInsets.all(sizeXL),
           child: ShadForm(
             key: _formKey,
             child: SingleChildScrollView(
@@ -89,11 +88,12 @@ class _State extends ConsumerState<CreateAccountPage> {
                   Center(
                     child: SecondaryButton(
                       caption: 'Already have an account? Sign in',
-                      onPressed: () async =>
-                          await NavigationService.goToAndReplace(
-                            context,
-                            SignInPage(),
-                          ),
+                      onPressed: () async => _isLoading
+                          ? null
+                          : await NavigationService.replaceCurrent(
+                              context,
+                              SignInPage(),
+                            ),
                     ),
                   ),
                 ],

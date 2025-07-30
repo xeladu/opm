@@ -3,12 +3,19 @@ import 'package:open_password_manager/features/vault/domain/repositories/entry_r
 
 class ExportVault {
   final ExportRepository exportRepo;
-  final EntryRepository passwordRepo;
+  final EntryRepository vaultRepo;
 
-  ExportVault(this.passwordRepo, this.exportRepo);
+  ExportVault(this.vaultRepo, this.exportRepo);
 
-  Future<void> call() async {
-    final allPasswords = await passwordRepo.getAllEntries();
-    await exportRepo.exportPasswordEntries(allPasswords);
+  Future<void> call(ExportOption option) async {
+    final allPasswords = await vaultRepo.getAllEntries();
+    switch (option) {
+      case ExportOption.json:
+        await exportRepo.exportPasswordEntriesJson(allPasswords);
+      case ExportOption.csv:
+        await exportRepo.exportPasswordEntriesCsv(allPasswords);
+    }
   }
 }
+
+enum ExportOption { json, csv }
