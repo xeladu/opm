@@ -7,7 +7,7 @@ class NavigationService {
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => target,
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            createSlideTransition(
+            _createSlideTransition(
               context,
               animation,
               secondaryAnimation,
@@ -27,7 +27,7 @@ class NavigationService {
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => target,
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            createSlideTransition(
+            _createSlideTransition(
               context,
               animation,
               secondaryAnimation,
@@ -45,7 +45,7 @@ class NavigationService {
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => target,
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            createSlideTransition(
+            _createSlideTransition(
               context,
               animation,
               secondaryAnimation,
@@ -65,7 +65,7 @@ class NavigationService {
     }
   }
 
-  static SlideTransition createSlideTransition(
+  static SlideTransition _createSlideTransition(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,

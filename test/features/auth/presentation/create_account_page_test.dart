@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
@@ -16,10 +17,12 @@ void main() {
   for (var sizeEntry in DisplaySizes.sizes.entries) {
     group('CreateAccountPage', () {
       late MockAuthRepository mockAuthRepository;
+      late MockSaltRepository mockSaltRepository;
       final deviceSizeName = sizeEntry.key;
 
       setUp(() {
         mockAuthRepository = MockAuthRepository();
+        mockSaltRepository = MockSaltRepository();
       });
 
       testWidgets('Test non matching passwords ($deviceSizeName)', (
@@ -59,7 +62,12 @@ void main() {
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
         ]);
 
-        await tester.tap(find.byType(SecondaryButton));
+        await tester.dragUntilVisible(
+          find.byType(SecondaryButton),
+          find.byType(SingleChildScrollView),
+          Offset(0, -1000),
+        );
+        await tester.tap(find.byType(SecondaryButton, skipOffstage: false));
         await tester.pumpAndSettle();
 
         expect(find.byType(SignInPage), findsOneWidget);
@@ -142,6 +150,10 @@ void main() {
             password: anyNamed('password'),
           ),
         ).thenAnswer((_) async {});
+
+        when(
+          mockSaltRepository.saveUserSalt(any, any),
+        ).thenAnswer((_) => Future.value(null));
 
         final sut = CreateAccountPage();
         await AppSetup.pumpPage(tester, sut, [

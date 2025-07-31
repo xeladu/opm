@@ -15,6 +15,10 @@ import 'package:open_password_manager/shared/domain/repositories/clipboard_repos
     as _i7;
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart'
     as _i5;
+import 'package:open_password_manager/shared/domain/repositories/salt_repository.dart'
+    as _i8;
+import 'package:open_password_manager/shared/utils/navigation_service.dart'
+    as _i9;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -170,4 +174,39 @@ class MockClipboardRepository extends _i1.Mock
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
           as _i4.Future<void>);
+}
+
+/// A class which mocks [SaltRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSaltRepository extends _i1.Mock implements _i8.SaltRepository {
+  MockSaltRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<String?> getUserSalt(String? userId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getUserSalt, [userId]),
+            returnValue: _i4.Future<String?>.value(),
+          )
+          as _i4.Future<String?>);
+
+  @override
+  _i4.Future<void> saveUserSalt(String? userId, String? salt) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveUserSalt, [userId, salt]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+}
+
+/// A class which mocks [NavigationService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockNavigationService extends _i1.Mock implements _i9.NavigationService {
+  MockNavigationService() {
+    _i1.throwOnMissingStub(this);
+  }
 }

@@ -4,6 +4,7 @@ import 'package:open_password_manager/features/auth/domain/entities/opm_user.dar
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
@@ -22,11 +23,13 @@ void main() {
     group('SignInPage', () {
       late MockAuthRepository mockAuthRepository;
       late MockCryptographyRepository mockCryptographyRepository;
+      late MockSaltRepository mockSaltRepository;
       final deviceSizeName = sizeEntry.key;
 
       setUp(() {
         mockAuthRepository = MockAuthRepository();
         mockCryptographyRepository = MockCryptographyRepository();
+        mockSaltRepository = MockSaltRepository();
       });
 
       testWidgets('Test navigation to create account page ($deviceSizeName)', (
@@ -111,12 +114,17 @@ void main() {
           mockAuthRepository.getCurrentUser(),
         ).thenAnswer((_) => Future.value(OpmUser.empty()));
 
+        when(
+          mockSaltRepository.getUserSalt(any),
+        ).thenAnswer((_) => Future.value(""));
+
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
           cryptographyRepositoryProvider.overrideWithValue(
             mockCryptographyRepository,
           ),
+          saltRepositoryProvider.overrideWithValue(mockSaltRepository),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
