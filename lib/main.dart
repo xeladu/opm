@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/password_generator_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
@@ -33,6 +34,8 @@ void main() async {
   final exportProvider = ProviderFactory.getExportProvider();
   final clipboardProvider = ProviderFactory.getClipboardProvider();
   final saltProvider = ProviderFactory.getSaltProvider(providerConfig);
+  final passwordGeneratorProvider =
+      ProviderFactory.getPasswordGeneratorProvider();
 
   runApp(
     ProviderScope(
@@ -43,6 +46,9 @@ void main() async {
         cryptographyRepositoryProvider.overrideWithValue(cryptoProvider),
         clipboardRepositoryProvider.overrideWithValue(clipboardProvider),
         saltRepositoryProvider.overrideWithValue(saltProvider),
+        passwordGeneratorRepositoryProvider.overrideWithValue(
+          passwordGeneratorProvider,
+        ),
       ],
       child: const OpmApp(),
     ),

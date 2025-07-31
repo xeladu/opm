@@ -12,15 +12,15 @@ class Sheet extends StatelessWidget {
   final String? primaryButtonCaption;
   final String? secondaryButtonCaption;
   final bool hideSecondaryButton;
-  final Future<void> Function()? onConfirm;
-  final Future<void> Function()? onCancel;
+  final Future<bool> Function()? onPrimaryButtonPressed;
+  final Future<bool> Function()? onSecondaryButtonPressed;
 
   const Sheet({
     super.key,
     required this.title,
     required this.content,
-    this.onConfirm,
-    this.onCancel,
+    this.onPrimaryButtonPressed,
+    this.onSecondaryButtonPressed,
     this.description,
     this.primaryButtonCaption,
     this.secondaryButtonCaption,
@@ -40,11 +40,11 @@ class Sheet extends StatelessWidget {
           if (!hideSecondaryButton)
             SecondaryButton(
               caption: secondaryButtonCaption ?? "Cancel",
-              onPressed: () async => await _cancel(context),
+              onPressed: () async => await _secondaryPressed(context),
             ),
           PrimaryButton(
             caption: primaryButtonCaption ?? "Save",
-            onPressed: () async => await _confirm(context),
+            onPressed: () async => await _primaryPressed(context),
           ),
         ],
 
@@ -53,16 +53,22 @@ class Sheet extends StatelessWidget {
     );
   }
 
-  Future<void> _confirm(BuildContext context) async {
-    if (onConfirm != null) await onConfirm!();
+  Future<void> _primaryPressed(BuildContext context) async {
+    if (onPrimaryButtonPressed != null) {
+      final result = await onPrimaryButtonPressed!();
+      if (!result) return;
+    }
 
     if (context.mounted) {
       await NavigationService.goBack(context);
     }
   }
 
-  Future<void> _cancel(BuildContext context) async {
-    if (onCancel != null) await onCancel!();
+  Future<void> _secondaryPressed(BuildContext context) async {
+    if (onSecondaryButtonPressed != null) {
+      final result = await onSecondaryButtonPressed!();
+      if (!result) return;
+    }
 
     if (context.mounted) {
       await NavigationService.goBack(context);

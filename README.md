@@ -195,17 +195,13 @@ State management is handled with **[Riverpod](https://riverpod.dev/)** for type-
 
 ## Contributing
 
-We welcome contributions! Please see our [contribution guidelines](CONTRIBUTING.md) for details.
+You can contribute by
 
-### Development Setup
+- suggesting new features
+- filing bug reports
+- work on existing tickets by creating a pull request
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make your changes and add tests
-4. Run tests: `flutter test`
-5. Commit your changes: `git commit -am 'Add some feature'`
-6. Push to the branch: `git push origin feature/your-feature`
-7. Submit a pull request (optional)
+Thank you for your help!
 
 ## License
 

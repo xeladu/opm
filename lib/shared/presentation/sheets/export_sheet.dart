@@ -20,7 +20,8 @@ class _State extends State<ExportSheet> {
   Widget build(BuildContext context) {
     return Sheet(
       title: "Choose Export Format",
-      description: "You are about to export your entire vault to a cleartext file. Do not share it via email or on social media. Make sure to delete it properly as soon as possible!\n\nPlease select your desired export format and confirm.",
+      description:
+          "You are about to export your entire vault to a cleartext file. Do not share it via email or on social media. Make sure to delete it properly as soon as possible!\n\nPlease select your desired export format and confirm.",
       primaryButtonCaption: "Export",
       content: ShadSelect<ExportOption>(
         maxWidth: selectSmallWidth,
@@ -38,8 +39,9 @@ class _State extends State<ExportSheet> {
           });
         },
       ),
-      onConfirm: () async {
+      onPrimaryButtonPressed: () async {
         widget.onSelected(_selectedOption);
+        return true;
       },
     );
   }

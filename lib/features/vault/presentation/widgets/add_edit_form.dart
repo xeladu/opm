@@ -6,8 +6,10 @@ import 'package:open_password_manager/features/vault/application/use_cases/add_e
 import 'package:open_password_manager/features/vault/application/use_cases/edit_entry.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
+import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
+import 'package:open_password_manager/shared/presentation/sheets/password_generator_sheet.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -85,7 +87,7 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
     _passwordController.dispose();
     _urlsController.dispose();
     _commentsController.dispose();
-    
+
     super.dispose();
   }
 
@@ -120,16 +122,44 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
                 "Your sign in password (will be autofilled on websites)",
               ),
               obscureText: _obscurePassword,
-              trailing: ShadButton.ghost(
-                width: sizeM,
-                height: sizeM,
-                padding: EdgeInsets.zero,
-                child: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: () {
-                  setState(() => _obscurePassword = !_obscurePassword);
-                },
+              trailing: Row(
+                spacing: sizeXS,
+                children: [
+                  SizedBox(
+                    width: sizeS,
+                    height: sizeS,
+                    child: GlyphButton.ghost(
+                      tooltip: "Generate password",
+                      icon: LucideIcons.packagePlus,
+                      onTap: () async {
+                        await showShadSheet(
+                          side: ShadSheetSide.right,
+                          context: context,
+                          builder: (context) => PasswordGeneratorSheet(
+                            onGeneratePassword: (newPassword) {
+                              setState(() {
+                                _passwordController.text = newPassword;
+                              });
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: sizeS,
+                    height: sizeS,
+                    child: GlyphButton.ghost(
+                      tooltip: "Show/hide value",
+                      icon: _obscurePassword
+                          ? LucideIcons.eyeOff
+                          : LucideIcons.eye,
+                      onTap: () {
+                        setState(() => _obscurePassword = !_obscurePassword);
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             ShadInputFormField(

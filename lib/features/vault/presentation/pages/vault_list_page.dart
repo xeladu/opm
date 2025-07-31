@@ -61,7 +61,7 @@ class _State extends ConsumerState<VaultListPage> {
                   ),
                 );
               },
-              child: const Icon(Icons.add),
+              child: Icon(LucideIcons.plus),
             ),
           ),
         );

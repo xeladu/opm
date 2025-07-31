@@ -10,4 +10,13 @@ class ToastService {
       ),
     );
   }
+
+  static void showError(BuildContext context, String message) {
+    ShadToaster.of(context).show(
+      ShadToast.destructive(
+        alignment: Alignment.bottomCenter,
+        description: SizedBox(width: double.infinity, child: Text(message)),
+      ),
+    );
+  }
 }

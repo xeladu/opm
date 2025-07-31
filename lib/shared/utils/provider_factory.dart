@@ -4,10 +4,12 @@ import 'package:open_password_manager/features/auth/infrastructure/repositories/
 import 'package:open_password_manager/features/auth/infrastructure/repositories/supabase_auth_repository_impl.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/entry_repository.dart';
-import 'package:open_password_manager/features/vault/infrastructure/repositories/appwrite/appwrite_entry_repository_impl.dart';
+import 'package:open_password_manager/features/vault/domain/repositories/password_generator_repository.dart';
+import 'package:open_password_manager/features/vault/infrastructure/repositories/appwrite_entry_repository_impl.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/export/export_repository_impl.dart';
-import 'package:open_password_manager/features/vault/infrastructure/repositories/firebase/firebase_entry_repository_impl.dart';
-import 'package:open_password_manager/features/vault/infrastructure/repositories/supabase/supabase_entry_repository_impl.dart';
+import 'package:open_password_manager/features/vault/infrastructure/repositories/firebase_entry_repository_impl.dart';
+import 'package:open_password_manager/features/vault/infrastructure/repositories/password_generator_repository_impl.dart';
+import 'package:open_password_manager/features/vault/infrastructure/repositories/supabase_entry_repository_impl.dart';
 import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/salt_repository.dart';
@@ -45,6 +47,10 @@ class ProviderFactory {
 
   static CryptographyRepository getCryptoProvider() {
     return CryptographyRepositoryImpl.instance;
+  }
+
+  static PasswordGeneratorRepository getPasswordGeneratorProvider() {
+    return PasswordGeneratorRepositoryImpl.instance;
   }
 
   static EntryRepository getPasswordProvider(ProviderConfig config) {
