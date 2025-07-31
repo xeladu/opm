@@ -11,14 +11,14 @@ import 'package:open_password_manager/features/auth/domain/entities/opm_user.dar
     as _i2;
 import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart'
     as _i3;
+import 'package:open_password_manager/features/vault/domain/repositories/password_generator_repository.dart'
+    as _i9;
 import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart'
     as _i7;
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart'
     as _i5;
 import 'package:open_password_manager/shared/domain/repositories/salt_repository.dart'
     as _i8;
-import 'package:open_password_manager/shared/utils/navigation_service.dart'
-    as _i9;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -202,11 +202,41 @@ class MockSaltRepository extends _i1.Mock implements _i8.SaltRepository {
           as _i4.Future<void>);
 }
 
-/// A class which mocks [NavigationService].
+/// A class which mocks [PasswordGeneratorRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockNavigationService extends _i1.Mock implements _i9.NavigationService {
-  MockNavigationService() {
+class MockPasswordGeneratorRepository extends _i1.Mock
+    implements _i9.PasswordGeneratorRepository {
+  MockPasswordGeneratorRepository() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  String generatePassword(
+    bool? useUppercase,
+    bool? useLowercase,
+    bool? useNumbers,
+    bool? useSpecialChars,
+    int? length,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#generatePassword, [
+              useUppercase,
+              useLowercase,
+              useNumbers,
+              useSpecialChars,
+              length,
+            ]),
+            returnValue: _i6.dummyValue<String>(
+              this,
+              Invocation.method(#generatePassword, [
+                useUppercase,
+                useLowercase,
+                useNumbers,
+                useSpecialChars,
+                length,
+              ]),
+            ),
+          )
+          as String);
 }

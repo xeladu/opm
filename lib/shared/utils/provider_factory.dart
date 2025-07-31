@@ -19,7 +19,7 @@ import 'package:open_password_manager/shared/infrastructure/repositories/cryptog
 import 'package:open_password_manager/shared/infrastructure/repositories/salt/firebase_salt_repository_impl.dart';
 import 'package:open_password_manager/shared/infrastructure/repositories/salt/supabase_salt_repository_impl.dart';
 import 'package:open_password_manager/shared/utils/hosting_provider.dart';
-import 'package:open_password_manager/shared/utils/provider_config.dart';
+import 'package:open_password_manager/shared/domain/entities/provider_config.dart';
 
 class ProviderFactory {
   static AuthRepository getAuthProvider(ProviderConfig config) {

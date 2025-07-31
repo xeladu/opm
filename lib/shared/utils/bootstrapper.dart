@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:open_password_manager/shared/utils/app_config.dart';
+import 'package:open_password_manager/shared/domain/entities/app_config.dart';
 import 'package:open_password_manager/shared/utils/hosting_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

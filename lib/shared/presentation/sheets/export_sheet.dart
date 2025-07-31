@@ -23,21 +23,27 @@ class _State extends State<ExportSheet> {
       description:
           "You are about to export your entire vault to a cleartext file. Do not share it via email or on social media. Make sure to delete it properly as soon as possible!\n\nPlease select your desired export format and confirm.",
       primaryButtonCaption: "Export",
-      content: ShadSelect<ExportOption>(
-        maxWidth: selectSmallWidth,
-        minWidth: selectSmallWidth,
-        initialValue: ExportOption.json,
-        selectedOptionBuilder: (context, selection) =>
-            Text(selection.name.toUpperCase()),
-        options: ExportOption.values.map(
-          (entry) =>
-              ShadOption(value: entry, child: Text(entry.name.toUpperCase())),
-        ),
-        onChanged: (option) {
-          setState(() {
-            _selectedOption = option!;
-          });
-        },
+      content: Column(
+        children: [
+          ShadSelect<ExportOption>(
+            maxWidth: selectSmallWidth,
+            minWidth: selectSmallWidth,
+            initialValue: ExportOption.json,
+            selectedOptionBuilder: (context, selection) =>
+                Text(selection.name.toUpperCase()),
+            options: ExportOption.values.map(
+              (entry) => ShadOption(
+                value: entry,
+                child: Text(entry.name.toUpperCase()),
+              ),
+            ),
+            onChanged: (option) {
+              setState(() {
+                _selectedOption = option!;
+              });
+            },
+          ),
+        ],
       ),
       onPrimaryButtonPressed: () async {
         widget.onSelected(_selectedOption);

@@ -3,7 +3,7 @@ import 'package:open_password_manager/features/vault/domain/repositories/entry_r
 import 'package:appwrite/appwrite.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 
-import 'package:open_password_manager/shared/utils/app_config.dart';
+import 'package:open_password_manager/shared/domain/entities/app_config.dart';
 
 class AppwriteEntryRepositoryImpl implements EntryRepository {
   final Client client;

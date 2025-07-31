@@ -9,7 +9,7 @@ import 'package:open_password_manager/shared/infrastructure/providers/clipboard_
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
 import 'package:open_password_manager/shared/utils/bootstrapper.dart';
-import 'package:open_password_manager/shared/utils/provider_config.dart';
+import 'package:open_password_manager/shared/domain/entities/provider_config.dart';
 import 'package:open_password_manager/shared/utils/provider_factory.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'features/auth/presentation/pages/sign_in_page.dart';
