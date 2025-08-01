@@ -19,6 +19,7 @@ class _State extends ConsumerState<VaultSearchField> {
     _searchController = TextEditingController();
     _searchController.addListener(() {
       ref.read(filterQueryProvider.notifier).setQuery(_searchController.text);
+      setState(() {});
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

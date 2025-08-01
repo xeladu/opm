@@ -10,7 +10,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../helper/app_setup.dart';
 import '../../helper/test_error_suppression.dart';
-import '../../mocks/mocks.mocks.dart';
+import '../../mocking/mocks.mocks.dart';
 
 void main() {
   group("UserMenu", () {
@@ -26,8 +26,6 @@ void main() {
       await tester.runAsync(
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
-
-      await tester.pumpAndSettle();
 
       expect(find.byType(UserMenu), findsOneWidget);
       expect(find.byType(CircleAvatar), findsOneWidget);
@@ -45,8 +43,6 @@ void main() {
       );
 
       when(mockAuthRepository.signOut()).thenAnswer((_) => Future.value());
-
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byType(UserMenu));
       await tester.pumpAndSettle();
@@ -66,8 +62,6 @@ void main() {
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
 
-      await tester.pumpAndSettle();
-
       await tester.tap(find.byType(UserMenu));
       await tester.pumpAndSettle();
 
@@ -83,8 +77,6 @@ void main() {
       await tester.runAsync(
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
-
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byType(UserMenu));
       await tester.pumpAndSettle();

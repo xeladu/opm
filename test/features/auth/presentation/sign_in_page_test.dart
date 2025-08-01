@@ -16,7 +16,7 @@ import '../../../helper/test_error_suppression.dart';
 import '../../../helper/display_size.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
 
-import '../../../mocks/mocks.mocks.dart';
+import '../../../mocking/mocks.mocks.dart';
 
 void main() {
   for (var sizeEntry in DisplaySizes.sizes.entries) {

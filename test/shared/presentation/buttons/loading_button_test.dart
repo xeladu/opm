@@ -11,7 +11,7 @@ void main() {
       final sut = Scaffold(body: LoadingButton.primary());
 
       await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
+        () async => await AppSetup.pumpPage(tester, sut, [], pump: true),
       );
 
       expect(find.text('Please wait'), findsOneWidget);
@@ -23,7 +23,7 @@ void main() {
       final sut = Scaffold(body: LoadingButton.secondary(caption: 'Wait'));
 
       await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
+        () async => await AppSetup.pumpPage(tester, sut, [], pump: true),
       );
 
       expect(find.text('Wait'), findsOneWidget);

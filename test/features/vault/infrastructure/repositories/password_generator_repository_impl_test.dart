@@ -29,10 +29,22 @@ void main() {
 
   group('generatePassword', () {
     test('throws if less than 2 character sets enabled', () {
-      expect(() => repo.generatePassword(true, false, false, false, 10), throwsA(isA<PasswordGeneratorException>()));
-      expect(() => repo.generatePassword(false, true, false, false, 10), throwsA(isA<PasswordGeneratorException>()));
-      expect(() => repo.generatePassword(false, false, true, false, 10), throwsA(isA<PasswordGeneratorException>()));
-      expect(() => repo.generatePassword(false, false, false, true, 10), throwsA(isA<PasswordGeneratorException>()));
+      expect(
+        () => repo.generatePassword(true, false, false, false, 10),
+        throwsA(isA<PasswordGeneratorException>()),
+      );
+      expect(
+        () => repo.generatePassword(false, true, false, false, 10),
+        throwsA(isA<PasswordGeneratorException>()),
+      );
+      expect(
+        () => repo.generatePassword(false, false, true, false, 10),
+        throwsA(isA<PasswordGeneratorException>()),
+      );
+      expect(
+        () => repo.generatePassword(false, false, false, true, 10),
+        throwsA(isA<PasswordGeneratorException>()),
+      );
     });
 
     test('all sets enabled', () {
@@ -123,6 +135,15 @@ void main() {
       expect(pw.contains(RegExp(r'[a-z]')), isTrue);
       expect(pw.contains(RegExp(r'[0-9]')), isFalse);
       expect(pw.contains(RegExp(r'[!@#\$%\^&*]')), isTrue);
+    });
+
+    test('uppercase, numbers', () {
+      final pw = repo.generatePassword(true, false, true, false, 10);
+      expect(pw.length, 10);
+      expect(pw.contains(RegExp(r'[A-Z]')), isTrue);
+      expect(pw.contains(RegExp(r'[a-z]')), isFalse);
+      expect(pw.contains(RegExp(r'[0-9]')), isTrue);
+      expect(pw.contains(RegExp(r'[!@#\$%\^&*]')), isFalse);
     });
   });
 }

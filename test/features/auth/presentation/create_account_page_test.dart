@@ -11,7 +11,7 @@ import 'package:open_password_manager/shared/presentation/inputs/password_form_f
 import '../../../helper/app_setup.dart';
 import '../../../helper/display_size.dart';
 import '../../../helper/test_error_suppression.dart';
-import '../../../mocks/mocks.mocks.dart';
+import '../../../mocking/mocks.mocks.dart';
 
 void main() {
   for (var sizeEntry in DisplaySizes.sizes.entries) {

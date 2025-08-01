@@ -11,7 +11,7 @@ import 'package:open_password_manager/shared/presentation/sheets/password_genera
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../helper/app_setup.dart';
-import '../../../mocks/mocks.mocks.dart';
+import '../../../mocking/mocks.mocks.dart';
 
 void main() {
   group("PasswordGeneratorSheet", () {
@@ -55,7 +55,6 @@ void main() {
         ]),
       );
 
-      await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 
@@ -109,7 +108,6 @@ void main() {
         ]),
       );
 
-      await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 
@@ -168,7 +166,6 @@ void main() {
         ]),
       );
 
-      await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 
@@ -219,7 +216,6 @@ void main() {
         ]),
       );
 
-      await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 

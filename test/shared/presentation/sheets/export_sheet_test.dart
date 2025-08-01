@@ -29,7 +29,6 @@ void main() {
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
 
-      await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 
@@ -66,7 +65,6 @@ void main() {
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
 
-      await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 

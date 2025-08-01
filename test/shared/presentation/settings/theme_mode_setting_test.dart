@@ -15,7 +15,6 @@ void main() {
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
 
-      await tester.pump();
       expect(find.byType(ShadSelect<ThemeMode>), findsOneWidget);
       expect(find.text("System mode"), findsOneWidget);
 
@@ -35,7 +34,6 @@ void main() {
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
 
-      await tester.pump();
       await tester.tap(find.text("System mode"));
       await tester.pumpAndSettle();
       await tester.tap(find.text("Light mode", skipOffstage: false));

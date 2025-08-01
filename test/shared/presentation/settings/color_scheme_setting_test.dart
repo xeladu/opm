@@ -15,7 +15,6 @@ void main() {
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
 
-      await tester.pump();
       expect(find.byType(ShadSelect<ColorSchemeObject>), findsOneWidget);
       expect(find.text("Neutral color scheme"), findsOneWidget);
 
@@ -39,7 +38,6 @@ void main() {
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
 
-      await tester.pump();
       await tester.tap(find.text("Neutral color scheme"));
       await tester.pumpAndSettle();
       await tester.tap(find.text("Rose color scheme", skipOffstage: false));

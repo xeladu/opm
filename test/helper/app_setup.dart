@@ -7,13 +7,15 @@ class AppSetup {
   static Future<void> pumpPage(
     WidgetTester tester,
     Widget child,
-    List<Override> overrides,
-  ) async {
+    List<Override> overrides, {
+    bool pump = false,
+  }) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides,
         child: ShadApp(home: child),
       ),
     );
+    pump ? await tester.pump() : await tester.pumpAndSettle();
   }
 }

@@ -15,8 +15,6 @@ void main() {
       final sut = ResponsiveAppFrame(content: Card());
       await AppSetup.pumpPage(tester, sut, []);
 
-      await tester.pumpAndSettle();
-
       expect(find.byType(ResponsiveAppFrame), findsOneWidget);
       expect(find.byType(Card), findsOneWidget);
     });
@@ -40,8 +38,6 @@ void main() {
         ),
       );
       await AppSetup.pumpPage(tester, sut, []);
-
-      await tester.pumpAndSettle();
 
       expect(find.byType(ResponsiveAppFrame), findsOneWidget);
       expect(find.text("mobile"), findsNWidgets(2));
@@ -69,8 +65,6 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, []);
 
-      await tester.pumpAndSettle();
-
       expect(find.byType(ResponsiveAppFrame), findsOneWidget);
       expect(find.text("desktop"), findsNWidgets(2));
       expect(find.byType(GlyphButton), findsNothing);
@@ -92,7 +86,6 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, []);
 
-      await tester.pumpAndSettle();
       final providerContainer = ProviderScope.containerOf(
         tester.element(find.byType(ResponsiveAppFrame)),
       );

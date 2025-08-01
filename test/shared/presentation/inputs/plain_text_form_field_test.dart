@@ -6,7 +6,7 @@ import 'package:open_password_manager/shared/presentation/inputs/plain_text_form
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../helper/app_setup.dart';
-import '../../../mocks/mocks.mocks.dart';
+import '../../../mocking/mocks.mocks.dart';
 
 void main() {
   group('PlainTextFormField', () {
@@ -30,7 +30,6 @@ void main() {
       await tester.runAsync(
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
-      await tester.pump();
 
       expect(find.text("123"), findsOneWidget);
       expect(find.text("dummy"), findsOneWidget);
@@ -48,7 +47,6 @@ void main() {
           clipboardRepositoryProvider.overrideWithValue(mockClipboardRepo),
         ]),
       );
-      await tester.pump();
 
       expect(find.byIcon(LucideIcons.copy), findsOneWidget);
       await tester.tap(find.byIcon(LucideIcons.copy));
@@ -64,7 +62,6 @@ void main() {
       await tester.runAsync(
         () async => await AppSetup.pumpPage(tester, sut, []),
       );
-      await tester.pump();
 
       final eyeOnButton = find.byIcon(LucideIcons.eye);
       final eyeOffButton = find.byIcon(LucideIcons.eyeOff);
