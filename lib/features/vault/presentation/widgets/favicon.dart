@@ -14,24 +14,37 @@ class Favicon extends StatefulWidget {
 class _State extends State<Favicon> {
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      _getFaviconUrl(widget.url),
-      width: sizeM,
-      height: sizeM,
-      errorBuilder: (context, error, stackTrace) => Icon(
+    try {
+      final uri = Uri.parse(widget.url);
+
+      if (uri.hasScheme) {
+        return Image.network(
+          _getFaviconUrl(uri.host),
+          width: sizeM,
+          height: sizeM,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            LucideIcons.earth400,
+            size: sizeM,
+            color: ShadTheme.of(context).colorScheme.mutedForeground,
+          ),
+        );
+      } else {
+        return Icon(
+          LucideIcons.earth400,
+          size: sizeM,
+          color: ShadTheme.of(context).colorScheme.mutedForeground,
+        );
+      }
+    } catch (_) {
+      return Icon(
         LucideIcons.earth400,
         size: sizeM,
         color: ShadTheme.of(context).colorScheme.mutedForeground,
-      ),
-    );
+      );
+    }
   }
 
-  String _getFaviconUrl(String url) {
-    try {
-      final uri = Uri.parse(url);
-      return 'https://icons.duckduckgo.com/ip3/${uri.host}.ico';
-    } catch (_) {
-      return '';
-    }
+  String _getFaviconUrl(String host) {
+    return 'https://icons.duckduckgo.com/ip3/${host}.ico';
   }
 }

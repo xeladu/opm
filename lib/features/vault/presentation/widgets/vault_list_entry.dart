@@ -53,6 +53,7 @@ class VaultListEntry extends ConsumerWidget {
     Offset? tapPosition;
 
     return GestureDetector(
+      key: ValueKey("entry-${entry.id}"),
       behavior: HitTestBehavior.translucent,
       onTapDown: (details) {
         tapPosition = details.globalPosition;
@@ -67,6 +68,7 @@ class VaultListEntry extends ConsumerWidget {
       onDoubleTap: () async => isMobile
           ? await _handleEditMobile(context, ref, entry)
           : await _handleEditDesktop(context, ref, entry),
+      onTap: () async => await onTap(context, ref),
       child: ListTile(
         shape: RoundedRectangleBorder(
           borderRadius: ShadTheme.of(context).radius,
@@ -97,7 +99,6 @@ class VaultListEntry extends ConsumerWidget {
                     _handlePopupSelection(context, ref, selection, entry),
               )
             : null,
-        onTap: () async => await onTap(context, ref),
       ),
     );
   }
