@@ -40,7 +40,8 @@ class FirebaseConfig {
   final String messagingSenderId;
   final String appId;
   final String measurementId;
-  final String collectionId;
+  final String passwordCollectionPrefix;
+  final String saltCollectionName;
 
   FirebaseConfig({
     required this.apiKey,
@@ -50,7 +51,8 @@ class FirebaseConfig {
     required this.messagingSenderId,
     required this.appId,
     required this.measurementId,
-    required this.collectionId,
+    required this.passwordCollectionPrefix,
+    required this.saltCollectionName,
   });
 
   factory FirebaseConfig.fromJson(Map<String, dynamic> json) {
@@ -62,7 +64,8 @@ class FirebaseConfig {
       messagingSenderId: json['messagingSenderId'] as String,
       appId: json['appId'] as String,
       measurementId: json['measurementId'] as String,
-      collectionId: json["collectionId"] as String,
+      passwordCollectionPrefix: json["passwordCollectionPrefix"] as String,
+      saltCollectionName: json["saltCollectionName"] as String,
     );
   }
 }

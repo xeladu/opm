@@ -30,7 +30,8 @@ Create a file `config.json` in the project root with the following content:
         "messagingSenderId": "...",
         "appId": "...",
         "measurementId": "...",
-        "collectionId": "passwords"
+        "passwordCollectionPrefix": "passwords",
+        "saltCollectionName": "salts",
     }
 }
 ```

@@ -90,7 +90,9 @@ class ProviderFactory {
   static SaltRepository getSaltProvider(ProviderConfig config) {
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
-        return const FirebaseSaltRepositoryImpl();
+        return FirebaseSaltRepositoryImpl(
+          collectionId: config.appConfig.firebaseConfig!.saltCollectionName,
+        );
       case HostingProvider.supabase:
         if (config.supabaseClient == null) {
           throw Exception("Invalid supabase client configuration");

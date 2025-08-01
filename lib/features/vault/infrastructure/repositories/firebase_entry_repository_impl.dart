@@ -18,7 +18,7 @@ class FirebaseEntryRepositoryImpl implements EntryRepository {
       throw Exception('No user signed in');
     }
 
-    return FirebaseFirestore.instance.collection('passwords_${user.uid}');
+    return FirebaseFirestore.instance.collection('${config.passwordCollectionPrefix}_${user.uid}');
   }
 
   @override

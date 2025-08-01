@@ -45,6 +45,6 @@ class _State extends State<Favicon> {
   }
 
   String _getFaviconUrl(String host) {
-    return 'https://icons.duckduckgo.com/ip3/${host}.ico';
+    return 'https://icons.duckduckgo.com/ip3/$host.ico';
   }
 }

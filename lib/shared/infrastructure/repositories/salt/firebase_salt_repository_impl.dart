@@ -2,15 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:open_password_manager/shared/domain/repositories/salt_repository.dart';
 
 class FirebaseSaltRepositoryImpl implements SaltRepository {
-  final String collectionName;
+  final String collectionId;
 
-  const FirebaseSaltRepositoryImpl({this.collectionName = 'user_salts'});
+  const FirebaseSaltRepositoryImpl({required this.collectionId});
 
   @override
   Future<String?> getUserSalt(String userId) async {
     try {
       final doc = await FirebaseFirestore.instance
-          .collection(collectionName)
+          .collection(collectionId)
           .doc(userId)
           .get();
 
@@ -28,7 +28,7 @@ class FirebaseSaltRepositoryImpl implements SaltRepository {
   Future<void> saveUserSalt(String userId, String salt) async {
     try {
       await FirebaseFirestore.instance
-          .collection(collectionName)
+          .collection(collectionId)
           .doc(userId)
           .set({
             'salt': salt,
