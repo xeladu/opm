@@ -1,5 +1,5 @@
 name: open_password_manager
-description: "Open source password managing tool"
+description: "Open source password manager tool"
 publish_to: "none"
 
 version: 1.0.0+1
@@ -35,6 +35,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
   mockito: ^5.5.0
   build_runner: ^2.6.0
 
@@ -45,3 +46,15 @@ flutter:
 
   assets:
     - config.json
+    - icons/opm-light.png
+    - icons/opm-dark.png
+
+flutter_launcher_icons:
+  android: true
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "icons/opm-dark.png"
+  adaptive_icon_monochrome: "icons/opm-dark.png"
+  image_path_android: "icons/opm-dark.png"
+  web:
+    generate: true
+    image_path: "icons/opm-dark.png"

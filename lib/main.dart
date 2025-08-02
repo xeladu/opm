@@ -61,7 +61,7 @@ class OpmApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ShadApp(
-      title: 'Flutter Demo',
+      title: 'OPM - Open Password Manager',
       debugShowCheckedModeBanner: false,
       themeMode: ref.watch(appSettingsProvider.select((s) => s.themeMode)),
       theme: ShadThemeData(

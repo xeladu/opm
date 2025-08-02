@@ -1,13 +1,10 @@
 {
-    "name": "open_password_manager",
-    "short_name": "open_password_manager",
+    "name": "Open Password Manager",
+    "short_name": "OPM",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
-    "prefer_related_applications": false,
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
     "icons": [
         {
             "src": "icons/Icon-192.png",
