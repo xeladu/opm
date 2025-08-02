@@ -2,15 +2,17 @@
 
 Open Password Manager is an open source password manager with encrypted storage for various cloud providers, implemented as a cross-platform Flutter application.
 
+![Open Password Manager](images/opm-splash-dark.png)
+
 ## Features
 
-- **Secure Password Storage** - Military-grade AES-256-GCM encryption
-- **Cross-Platform Compatibility** - Web, Android, iOS, Desktop
-- **Multiple Cloud Backends** - Firebase, Supabase, or Appwrite
-- **End-to-End Encryption** - All data encrypted client-side before transmission
-- **Cross-Platform Sync** - Seamless access across all your devices
-- **Password Export** - Export your data when needed
-- **Open Source** - Fully transparent and auditable code
+- Passwords are encrypted in the database
+- Works on iOS, Android, and the web
+- Can be self-hosted on Firebase, Supabase, or Appwrite
+- No password-related data leaves the device unencrypted
+- Data is synched across all your devices
+- Export function for local backups
+- Open source and transparent
 
 ## Supported Backend Providers
 

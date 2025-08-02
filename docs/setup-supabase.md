@@ -58,7 +58,7 @@ Create a file `config.json` in the project root with the following content:
 
 1. Go to the **SQL Editor** in your Supabase dashboard
 2. Click "New query"
-3. Run this SQL script to create the passwords table:
+3. Run this SQL script to create the passwords table (Remember to replace the table names if needed!):
 
 ```sql
 -- Create passwords table
@@ -177,31 +177,5 @@ Your tables should already have RLS enabled from the SQL scripts above. You can 
 5. Create a test password entry
 6. Sign out and sign in again to verify data persistence
 7. Test on different platforms to verify cross-platform encryption works
-
-## Database Schema
-
-### Tables Created
-
-1. **`passwords`** - Stores encrypted password entries
-   ```sql
-   - id (uuid, primary key)
-   - user_id (uuid, foreign key to auth.users)
-   - name (text, encrypted)
-   - username (text, encrypted) 
-   - password (text, encrypted)
-   - urls (text[], encrypted)
-   - comments (text, encrypted)
-   - created_at (text)
-   - updated_at (text)
-   ```
-
-2. **`user_salts`** - Stores encryption salts for cross-platform compatibility
-   ```sql
-   - id (uuid, primary key)
-   - user_id (uuid, foreign key to auth.users, unique)
-   - salt (text, base64 encoded salt)
-   - created_at (timestamp with time zone)
-   - updated_at (timestamp with time zone)
-   ```
 
 Your Supabase backend is now ready for Open Password Manager!

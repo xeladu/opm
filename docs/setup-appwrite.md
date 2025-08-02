@@ -45,7 +45,8 @@ Create a file `config.json` in the project root with the following content:
 | endpoint | Appwrite server endpoint (cloud or self-hosted) |
 | project | Your Appwrite project ID |
 | databaseId | ID of the database to store password entries |
-| collectionId | ID of the collection to store password entries |
+| passwordCollectionId | ID of the collection to store password entries |
+| saltCollectionId | ID of the collection to store encryption/decryption salts |
 
 ### Finding Your Configuration Values
 
@@ -102,7 +103,7 @@ Create a file `config.json` in the project root with the following content:
 1. Inside your database, click "Create Collection"
 2. Enter details:
    - **Name**: Passwords
-   - **Collection ID**: `passwords`
+   - **Collection ID**: `passwords` (your choice)
 3. Click "Create"
 
 #### Add Attributes to Passwords Collection
@@ -136,7 +137,7 @@ Add these attributes one by one by clicking "Create Attribute":
 
 1. Create another collection:
    - **Name**: User Salts  
-   - **Collection ID**: `user_salts`
+   - **Collection ID**: `user_salts` (your choice)
 
 #### Add Attributes to User Salts Collection
 
@@ -174,50 +175,5 @@ Add these attributes one by one by clicking "Create Attribute":
 5. Create a test password entry
 6. Sign out and sign in again to verify data persistence
 7. Test cross-platform by accessing from different devices/browsers
-
-## Database Collections Schema
-
-### Passwords Collection
-
-Stores encrypted password entries for users:
-
-```
-Collection: passwords
-├── id (String, 36 chars) - Unique entry identifier
-├── name (String, 256 chars) - Entry name (encrypted)
-├── username (String, 256 chars) - Username (encrypted)
-├── password (String, 256 chars) - Password (encrypted)
-├── urls (String Array, 1024 chars) - Associated URLs (encrypted)
-├── comments (String, 1024 chars) - Notes (encrypted)
-├── created_at (String, 256 chars) - Creation timestamp
-└── updated_at (String, 256 chars) - Last update timestamp
-```
-
-### User Salts Collection
-
-Stores encryption salts for cross-platform compatibility:
-
-```
-Collection: user_salts
-├── userId (String, 255 chars) - User ID (indexed)
-├── salt (String, 255 chars) - Base64 encoded salt
-├── createdAt (DateTime) - Creation timestamp
-└── updatedAt (DateTime) - Last update timestamp
-```
-
-## Permissions Model
-
-### Collection Level
-- **Create**: Any authenticated user can create documents
-- **Read/Update/Delete**: Only authenticated users with document permissions
-
-### Document Level (Applied by App)
-- **Passwords**: Only the user who created the entry can access it
-- **User Salts**: Only the user can access their own salt
-
-The app automatically sets document permissions like:
-- `user:user_id` for read access
-- `user:user_id` for update access
-- `user:user_id` for delete access
 
 Your Appwrite backend is now ready for Open Password Manager!

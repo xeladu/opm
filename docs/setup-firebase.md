@@ -47,7 +47,8 @@ Create a file `config.json` in the project root with the following content:
 | messagingSenderId | Required for identifying the Firebase project |
 | appId | Required for identifying the Firebase project |
 | measurementId | Required for identifying the Firebase project |
-| collectionId | Collection name prefix to be used in Firestore |
+| passwordCollectionPrefix | Collection name prefix for passwords to be used in Firestore |
+| saltCollectionName | Collection name for salts to be used in Firestore |
 
 You can find these configuration values in your Firebase dashboard:
 1. Go to Project Settings (⚙️ icon)
@@ -96,30 +97,7 @@ service cloud.firestore {
 
 Click "Publish" to deploy the rules.
 
-### Database Collections
-
-The app will automatically create these collections:
-
-1. **`user_salts`** - Stores encryption salts for cross-platform compatibility
-   - Documents: `{userId}` 
-   - Fields: `salt`, `createdAt`, `updatedAt`
-
-2. **`passwords_{userId}`** - Stores encrypted password entries for each user
-   - Documents: Individual password entries
-   - Fields: `id`, `name`, `username`, `password`, `urls`, `comments`, `created_at`, `updated_at`
-
-## Step 5: Add Platform Support (Optional)
-
-If you plan to build mobile apps:
-
-1. In Firebase Console, go to Project Settings
-2. Scroll down to "Your apps"
-3. Add apps for each platform you want to support:
-   - Click the Android icon for Android app
-   - Click the iOS icon for iOS app
-   - Follow the setup instructions for each platform
-
-## Step 6: Test Your Setup
+## Step 5: Test Your Setup
 
 1. Save your `config.json` file in the project root
 2. Run the app: `flutter run -d chrome`
