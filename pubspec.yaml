@@ -19,6 +19,7 @@ dependencies:
   firebase_auth: ^6.0.0
   firebase_core: ^4.0.0
   firebase_core_web: ^3.0.0
+  firebase_crashlytics: ^5.0.0
   flutter_secure_storage: ^9.2.4
   flutter_riverpod: ^2.6.1
   google_fonts: ^6.2.1
@@ -57,6 +58,8 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "images/opm-dark.png"
   adaptive_icon_monochrome: "images/opm-dark.png"
   image_path_android: "images/opm-dark.png"
+  ios: true
+  image_path_ios: "images/opm-dark.png"
   web:
     generate: true
     image_path: "images/opm-dark.png"

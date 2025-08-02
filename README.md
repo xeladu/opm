@@ -2,7 +2,7 @@
 
 Open Password Manager is an open source password manager with encrypted storage for various cloud providers, implemented as a cross-platform Flutter application.
 
-![Open Password Manager](images/opm-splash-dark.png)
+![Open Password Manager](images/opm-banner-dark.png)
 
 ## Features
 
@@ -143,6 +143,7 @@ For technical implementation details, see `lib/shared/infrastructure/repositorie
 ### Prerequisites
 
 - [Flutter](https://flutter.dev/docs/get-started/install) (Latest stable version)
+- Xcode (for iOS development)
 - A backend provider account (Firebase, Supabase, or Appwrite)
 
 ### Building the App
@@ -160,7 +161,12 @@ For technical implementation details, see `lib/shared/infrastructure/repositorie
 
 3. **Configure your backend** (see setup guides above)
 
-4. **Run the app**
+4. **Add Firebase Crashlytics** (optional)
+   ```
+   Firebase Crashlytics is used to monitor crash reports. It's already included in the code. All you need to do to is provide a Firebase configuration. If you already use Firebase as a backend, it will work out of the box. For other backend providers it is required to add the Firebase configuration additionally.
+   ```
+
+5. **Run the app**
    ```bash
    # Web
    flutter run -d chrome
@@ -168,7 +174,7 @@ For technical implementation details, see `lib/shared/infrastructure/repositorie
    # Android
    flutter run -d android
    
-   # iOS  
+   # iOS
    flutter run -d ios
    ```
 
