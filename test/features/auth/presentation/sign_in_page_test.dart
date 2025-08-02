@@ -32,6 +32,29 @@ void main() {
         mockSaltRepository = MockSaltRepository();
       });
 
+      testWidgets('Test default elements ($deviceSizeName)', (tester) async {
+        await DisplaySizeHelper.setSize(tester, sizeEntry.value);
+        suppressOverflowErrors();
+
+        final sut = SignInPage();
+        await AppSetup.pumpPage(tester, sut, [
+          authRepositoryProvider.overrideWithValue(mockAuthRepository),
+        ]);
+
+        expect(
+          find.byType(SignInPageMobile),
+          DisplaySizeHelper.isMobile(sizeEntry.value)
+              ? findsOneWidget
+              : findsNothing,
+        );
+        expect(
+          find.byType(SignInPageDesktop),
+          DisplaySizeHelper.isMobile(sizeEntry.value)
+              ? findsNothing
+              : findsOneWidget,
+        );
+      });
+
       testWidgets('Test navigation to create account page ($deviceSizeName)', (
         tester,
       ) async {

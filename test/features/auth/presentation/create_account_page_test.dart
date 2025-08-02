@@ -25,6 +25,29 @@ void main() {
         mockSaltRepository = MockSaltRepository();
       });
 
+      testWidgets('Test default elements ($deviceSizeName)', (tester) async {
+        await DisplaySizeHelper.setSize(tester, sizeEntry.value);
+        suppressOverflowErrors();
+
+        final sut = CreateAccountPage();
+        await AppSetup.pumpPage(tester, sut, [
+          authRepositoryProvider.overrideWithValue(mockAuthRepository),
+        ]);
+
+        expect(
+          find.byType(CreateAccoutPageMobile),
+          DisplaySizeHelper.isMobile(sizeEntry.value)
+              ? findsOneWidget
+              : findsNothing,
+        );
+        expect(
+          find.byType(CreateAccoutPageDesktop),
+          DisplaySizeHelper.isMobile(sizeEntry.value)
+              ? findsNothing
+              : findsOneWidget,
+        );
+      });
+
       testWidgets('Test non matching passwords ($deviceSizeName)', (
         tester,
       ) async {

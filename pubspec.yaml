@@ -51,6 +51,8 @@ flutter:
     - images/opm-dark.png
     - images/opm-splash-light.png
     - images/opm-splash-dark.png
+    - images/opm-banner-light.png
+    - images/opm-banner-dark.png
 
 flutter_launcher_icons:
   android: true
