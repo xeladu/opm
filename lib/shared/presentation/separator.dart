@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class Separator extends StatelessWidget {
@@ -13,11 +14,11 @@ class Separator extends StatelessWidget {
   Widget build(BuildContext context) {
     return horizontal
         ? ShadSeparator.horizontal(
-            thickness: 2,
+            thickness: sizeXXXS,
             radius: ShadTheme.of(context).radius,
           )
         : ShadSeparator.vertical(
-            thickness: 2,
+            thickness: sizeXXXS,
             radius: ShadTheme.of(context).radius,
           );
   }

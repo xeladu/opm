@@ -1,28 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_entry_details.dart';
 import 'package:open_password_manager/shared/presentation/inputs/plain_text_form_field.dart';
 
 import '../../../../helper/app_setup.dart';
+import '../../../../helper/test_data_generator.dart';
 
 void main() {
   group("VaultEntryDetails", () {
     testWidgets("Test default elements", (tester) async {
       final sut = Material(
         child: Scaffold(
-          body: VaultEntryDetails(
-            entry: VaultEntry(
-              id: "1",
-              name: "my-name",
-              comments: "my-comments",
-              createdAt: DateTime(2020, 1, 1, 1, 1, 1).toIso8601String(),
-              updatedAt: DateTime(2021, 1, 1, 1, 1, 1).toIso8601String(),
-              password: "my-pass",
-              urls: ["url1", "url2"],
-              username: "my-user",
-            ),
-          ),
+          body: VaultEntryDetails(entry: TestDataGenerator.vaultEntry()),
         ),
       );
       await AppSetup.pumpPage(tester, sut, []);

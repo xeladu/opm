@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:open_password_manager/features/vault/application/providers/add_edit_mode_active_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/selected_entry_provider.dart';
-import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/add_edit_vault_entry_page.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_entry_detail_page.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/favicon.dart';
@@ -13,6 +12,7 @@ import 'package:open_password_manager/features/vault/presentation/widgets/vault_
 
 import '../../../../helper/app_setup.dart';
 import '../../../../helper/display_size.dart';
+import '../../../../helper/test_data_generator.dart';
 
 void main() {
   group("VaultListEntry", () {
@@ -20,16 +20,7 @@ void main() {
       final deviceSize = sizeEntry.key;
       final isMobile =
           sizeEntry.value == DisplaySizes.sizes.entries.first.value;
-      final vaultEntry = VaultEntry(
-        id: "1",
-        name: "my-name",
-        createdAt: DateTime(2020, 1, 1, 1, 1, 1).toIso8601String(),
-        updatedAt: DateTime(2021, 1, 1, 1, 1, 1).toIso8601String(),
-        username: "my-user",
-        password: "my-pass",
-        urls: ["url1", "url2"],
-        comments: "my-comments",
-      );
+      final vaultEntry = TestDataGenerator.vaultEntry();
 
       testWidgets("Test default elements ($deviceSize)", (tester) async {
         final sut = Material(

@@ -99,5 +99,24 @@ void main() {
       expect(find.byType(GlyphButton), findsOneWidget);
       expect(providerContainer.read(showSearchFieldProvider), isTrue);
     });
+
+    testWidgets("Test hide mobile search field", (tester) async {
+      await DisplaySizeHelper.setSize(
+        tester,
+        DisplaySizes.sizes.entries.first.value,
+      );
+
+      final sut = ResponsiveAppFrame(
+        content: Text("mobile"),
+        mobileButton: FloatingActionButton(
+          child: Text("mobile"),
+          onPressed: () {},
+        ),
+        hideSearchButton: true,
+      );
+      await AppSetup.pumpPage(tester, sut, []);
+
+      expect(find.byType(GlyphButton), findsNothing);
+    });
   });
 }

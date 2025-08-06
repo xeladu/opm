@@ -47,8 +47,8 @@ flutter:
 
   assets:
     - config.json
-    - images/opm-light.png
-    - images/opm-dark.png
+    - images/opm-light-128.png
+    - images/opm-dark-128.png
     - images/opm-splash-light.png
     - images/opm-splash-dark.png
     - images/opm-banner-light.png
@@ -57,14 +57,14 @@ flutter:
 flutter_launcher_icons:
   android: true
   adaptive_icon_background: "#ffffff"
-  adaptive_icon_foreground: "images/opm-dark.png"
-  adaptive_icon_monochrome: "images/opm-dark.png"
-  image_path_android: "images/opm-dark.png"
+  adaptive_icon_foreground: "images/opm-dark-128.png"
+  adaptive_icon_monochrome: "images/opm-dark-128.png"
+  image_path_android: "images/opm-dark-128.png"
   ios: true
-  image_path_ios: "images/opm-dark.png"
+  image_path_ios: "images/opm-dark-128.png"
   web:
     generate: true
-    image_path: "images/opm-dark.png"
+    image_path: "images/opm-dark-128.png"
 
 flutter_native_splash:
   android: true

@@ -32,6 +32,7 @@ class AddEditVaultEntryPage extends ConsumerWidget {
             onCancel: () async => await _cancel(context, ref),
           ),
         ),
+        hideSearchButton: true,
       ),
     );
   }

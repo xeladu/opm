@@ -1,4 +1,5 @@
 // paddings, margins, icon sizes
+const double sizeXXXS = 2;
 const double sizeXXS = 4;
 const double sizeXS = 8;
 const double sizeS = 16;

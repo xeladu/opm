@@ -14,6 +14,7 @@ class ResponsiveAppFrame extends ConsumerStatefulWidget {
   final Widget? desktopButton;
   final Widget? mobileContent;
   final Widget? desktopContent;
+  final bool hideSearchButton;
 
   const ResponsiveAppFrame({
     super.key,
@@ -23,6 +24,7 @@ class ResponsiveAppFrame extends ConsumerStatefulWidget {
     this.mobileButton,
     this.content,
     this.title,
+    this.hideSearchButton = false,
   }) : assert(
          (content != null && mobileContent == null && desktopContent == null) ||
              (content == null &&
@@ -49,7 +51,7 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
         }
 
         final actionButtons = [
-          if (isMobile)
+          if (isMobile && !widget.hideSearchButton)
             Padding(
               padding: EdgeInsets.only(right: sizeXS),
               child: GlyphButton.ghost(
