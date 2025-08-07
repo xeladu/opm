@@ -18,6 +18,8 @@ import 'package:open_password_manager/features/vault/domain/entities/vault_entry
 import 'package:open_password_manager/features/vault/domain/repositories/entry_repository.dart'
     as _i7;
 import 'package:open_password_manager/features/vault/domain/repositories/password_generator_repository.dart'
+    as _i14;
+import 'package:open_password_manager/shared/application/services/storage_service.dart'
     as _i13;
 import 'package:open_password_manager/shared/domain/entities/credentials.dart'
     as _i3;
@@ -297,11 +299,42 @@ class MockSaltRepository extends _i1.Mock implements _i12.SaltRepository {
           as _i5.Future<void>);
 }
 
+/// A class which mocks [StorageService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockStorageService extends _i1.Mock implements _i13.StorageService {
+  MockStorageService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<void> storeAuthCredentials(_i3.Credentials? credentials) =>
+      (super.noSuchMethod(
+            Invocation.method(#storeAuthCredentials, [credentials]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<_i3.Credentials> loadAuthCredentials() =>
+      (super.noSuchMethod(
+            Invocation.method(#loadAuthCredentials, []),
+            returnValue: _i5.Future<_i3.Credentials>.value(
+              _FakeCredentials_1(
+                this,
+                Invocation.method(#loadAuthCredentials, []),
+              ),
+            ),
+          )
+          as _i5.Future<_i3.Credentials>);
+}
+
 /// A class which mocks [PasswordGeneratorRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPasswordGeneratorRepository extends _i1.Mock
-    implements _i13.PasswordGeneratorRepository {
+    implements _i14.PasswordGeneratorRepository {
   MockPasswordGeneratorRepository() {
     _i1.throwOnMissingStub(this);
   }
