@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/application/providers/biometric_auth_available_provider.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/sign_out.dart';
-import 'package:open_password_manager/features/auth/infrastructure/auth_repository_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/export_vault.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';

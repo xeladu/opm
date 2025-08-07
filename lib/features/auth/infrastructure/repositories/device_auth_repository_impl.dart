@@ -2,6 +2,9 @@ import 'package:local_auth/local_auth.dart';
 import 'package:open_password_manager/shared/application/services/storage_service.dart';
 import 'package:open_password_manager/shared/domain/entities/credentials.dart';
 import 'package:open_password_manager/features/auth/domain/repositories/device_auth_repository.dart';
+import 'package:local_auth_android/local_auth_android.dart';
+import 'package:local_auth_darwin/local_auth_darwin.dart';
+import 'package:local_auth_windows/local_auth_windows.dart';
 
 class DeviceAuthRepositoryImpl implements DeviceAuthRepository {
   final StorageService _storageService;
@@ -13,8 +16,17 @@ class DeviceAuthRepositoryImpl implements DeviceAuthRepository {
   Future<Credentials> authenticate() async {
     try {
       final result = await auth.authenticate(
-        localizedReason: "Please authenticate to access your vault!",
-        options: AuthenticationOptions(biometricOnly: true, stickyAuth: true),
+        localizedReason: "Authenticate to unlock",
+        authMessages: const <AuthMessages>[
+          AndroidAuthMessages(signInTitle: "Unlock OPM"),
+          IOSAuthMessages(localizedFallbackTitle: "Unlock OPM"),
+          WindowsAuthMessages(),
+        ],
+        options: AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+          sensitiveTransaction: true,
+        ),
       );
 
       if (!result) return Credentials.empty();

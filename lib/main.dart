@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:open_password_manager/features/auth/infrastructure/auth_repository_provider.dart';
-import 'package:open_password_manager/features/auth/infrastructure/device_auth_repository_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/providers/device_auth_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/password_generator_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';

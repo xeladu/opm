@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_password_manager/features/auth/infrastructure/device_auth_repository_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/providers/device_auth_repository_provider.dart';
 
 final biometricAuthAvailableProvider =
     AsyncNotifierProvider<BiometricAuthAvailableState, bool>(
