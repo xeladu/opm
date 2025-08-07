@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart';
+import 'package:open_password_manager/features/auth/infrastructure/device_auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:open_password_manager/features/auth/infrastructure/auth_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
@@ -22,12 +23,14 @@ void main() {
   for (var sizeEntry in DisplaySizes.sizes.entries) {
     group('SignInPage', () {
       late MockAuthRepository mockAuthRepository;
+      late MockDeviceAuthRepository mockDeviceAuthRepository;
       late MockCryptographyRepository mockCryptographyRepository;
       late MockSaltRepository mockSaltRepository;
       final deviceSizeName = sizeEntry.key;
 
       setUp(() {
         mockAuthRepository = MockAuthRepository();
+        mockDeviceAuthRepository = MockDeviceAuthRepository();
         mockCryptographyRepository = MockCryptographyRepository();
         mockSaltRepository = MockSaltRepository();
       });
@@ -43,21 +46,15 @@ void main() {
 
         expect(
           find.byType(SignInPageMobile),
-          DisplaySizeHelper.isMobile(sizeEntry.value)
-              ? findsOneWidget
-              : findsNothing,
+          DisplaySizeHelper.isMobile(sizeEntry.value) ? findsOneWidget : findsNothing,
         );
         expect(
           find.byType(SignInPageDesktop),
-          DisplaySizeHelper.isMobile(sizeEntry.value)
-              ? findsNothing
-              : findsOneWidget,
+          DisplaySizeHelper.isMobile(sizeEntry.value) ? findsNothing : findsOneWidget,
         );
       });
 
-      testWidgets('Test navigation to create account page ($deviceSizeName)', (
-        tester,
-      ) async {
+      testWidgets('Test navigation to create account page ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
         suppressOverflowErrors();
 
@@ -128,25 +125,22 @@ void main() {
         suppressOverflowErrors();
 
         when(
-          mockAuthRepository.signIn(
-            email: anyNamed('email'),
-            password: anyNamed('password'),
-          ),
+          mockAuthRepository.signIn(email: anyNamed('email'), password: anyNamed('password')),
         ).thenAnswer((_) async {});
-        when(
-          mockAuthRepository.getCurrentUser(),
-        ).thenAnswer((_) => Future.value(OpmUser.empty()));
+        when(mockAuthRepository.getCurrentUser()).thenAnswer((_) => Future.value(OpmUser.empty()));
 
+        when(mockSaltRepository.getUserSalt(any)).thenAnswer((_) => Future.value(""));
+
+        when(mockDeviceAuthRepository.isSupported()).thenAnswer((_) => Future.value(false));
         when(
-          mockSaltRepository.getUserSalt(any),
-        ).thenAnswer((_) => Future.value(""));
+          mockDeviceAuthRepository.hasStoredCredentials(),
+        ).thenAnswer((_) => Future.value(false));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          cryptographyRepositoryProvider.overrideWithValue(
-            mockCryptographyRepository,
-          ),
+          deviceAuthRepositoryProvider.overrideWithValue(mockDeviceAuthRepository),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
           saltRepositoryProvider.overrideWithValue(mockSaltRepository),
         ]);
 
@@ -156,27 +150,19 @@ void main() {
         await tester.pump();
 
         verify(
-          mockAuthRepository.signIn(
-            email: 'test@example.com',
-            password: 'password123',
-          ),
+          mockAuthRepository.signIn(email: 'test@example.com', password: 'password123'),
         ).called(1);
         verify(mockAuthRepository.getCurrentUser()).called(1);
         expect(find.byType(ShadToast), findsOneWidget);
         expect(find.textContaining("Sign in successful"), findsOneWidget);
       });
 
-      testWidgets('Test repository throws error ($deviceSizeName)', (
-        tester,
-      ) async {
+      testWidgets('Test repository throws error ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
         suppressOverflowErrors();
 
         when(
-          mockAuthRepository.signIn(
-            email: anyNamed('email'),
-            password: anyNamed('password'),
-          ),
+          mockAuthRepository.signIn(email: anyNamed('email'), password: anyNamed('password')),
         ).thenThrow(Exception('Sign in failed'));
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
