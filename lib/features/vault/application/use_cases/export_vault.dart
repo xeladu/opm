@@ -1,9 +1,9 @@
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
-import 'package:open_password_manager/features/vault/domain/repositories/entry_repository.dart';
+import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
 
 class ExportVault {
   final ExportRepository exportRepo;
-  final EntryRepository vaultRepo;
+  final VaultRepository vaultRepo;
 
   ExportVault(this.vaultRepo, this.exportRepo);
 

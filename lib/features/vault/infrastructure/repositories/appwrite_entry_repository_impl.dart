@@ -1,11 +1,11 @@
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
-import 'package:open_password_manager/features/vault/domain/repositories/entry_repository.dart';
+import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 
 import 'package:open_password_manager/shared/domain/entities/app_config.dart';
 
-class AppwriteEntryRepositoryImpl implements EntryRepository {
+class AppwriteEntryRepositoryImpl implements VaultRepository {
   final Client client;
   final AppwriteConfig config;
   final CryptographyRepository cryptoRepo;

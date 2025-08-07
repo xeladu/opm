@@ -27,11 +27,7 @@ void main() {
     testWidgets("Test edit form", (tester) async {
       final sut = Material(
         child: Scaffold(
-          body: AddEditForm(
-            entry: TestDataGenerator.vaultEntry(),
-            onCancel: () {},
-            onSave: () {},
-          ),
+          body: AddEditForm(entry: TestDataGenerator.vaultEntry(), onCancel: () {}, onSave: () {}),
         ),
       );
       await AppSetup.pumpPage(tester, sut, []);
@@ -71,7 +67,7 @@ void main() {
     testWidgets("Test save", (tester) async {
       bool saved = false;
 
-      final mockEntryRepository = MockEntryRepository();
+      final mockVaultRepository = MockVaultRepository();
 
       final sut = Material(
         child: Scaffold(
@@ -84,10 +80,10 @@ void main() {
         ),
       );
       await AppSetup.pumpPage(tester, sut, [
-        vaultRepositoryProvider.overrideWithValue(mockEntryRepository),
+        vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
       ]);
 
-      when(mockEntryRepository.addEntry(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
 
       expect(find.byType(ShadInputFormField), findsNWidgets(5));
 

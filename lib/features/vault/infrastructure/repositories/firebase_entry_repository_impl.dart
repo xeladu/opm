@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
-import 'package:open_password_manager/features/vault/domain/repositories/entry_repository.dart';
+import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 
 import 'package:open_password_manager/shared/domain/entities/app_config.dart';
 
-class FirebaseEntryRepositoryImpl implements EntryRepository {
+class FirebaseEntryRepositoryImpl implements VaultRepository {
   final FirebaseConfig config;
   final CryptographyRepository cryptoRepo;
 

@@ -1,10 +1,10 @@
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
-import 'package:open_password_manager/features/vault/domain/repositories/entry_repository.dart';
+import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class SupabaseEntryRepositoryImpl implements EntryRepository {
+class SupabaseEntryRepositoryImpl implements VaultRepository {
   final SupabaseClient client;
   final String tableName;
   final CryptographyRepository cryptoRepo;
