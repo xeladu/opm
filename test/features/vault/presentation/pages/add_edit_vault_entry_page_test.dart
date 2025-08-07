@@ -1,15 +1,20 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:open_password_manager/features/vault/application/providers/add_edit_mode_active_provider.dart';
+import 'package:open_password_manager/features/vault/application/providers/has_changes_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/add_edit_vault_entry_page.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_edit_form.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
+import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../../helper/app_setup.dart';
 import '../../../../helper/display_size.dart';
 import '../../../../helper/test_data_generator.dart';
+import '../../../../helper/test_error_suppression.dart';
 import '../../../../mocking/mocks.mocks.dart';
 
 void main() {
@@ -69,6 +74,37 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(saved, isTrue);
+      });
+
+      testWidgets('Test cancel with dialog ($deviceSizeName)', (tester) async {
+        await DisplaySizeHelper.setSize(tester, sizeEntry.value);
+        suppressOverflowErrors();
+
+        when(mockVaultRepository.editEntry(any)).thenAnswer((_) => Future.value());
+
+        final sut = AddEditVaultEntryPage(
+          entry: TestDataGenerator.randomVaultEntry(),
+          onSave: () {},
+        );
+        await AppSetup.pumpPage(tester, sut, [
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        ]);
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(AddEditVaultEntryPage)),
+        );
+        container.read(hasChangesProvider.notifier).setHasChanges(true);
+        container.read(addEditModeActiveProvider.notifier).setMode(true);
+
+        await tester.tap(find.byType(SecondaryButton));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ShadDialog), findsOneWidget);
+
+        await tester.tap(find.byWidgetPredicate((w) => w is SecondaryButton && w.caption == "Stay"));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AddEditVaultEntryPage), findsOneWidget);
       });
     });
   }
