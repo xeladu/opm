@@ -2,7 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/auth_repository_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/device_auth_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/password_generator_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
@@ -14,7 +15,8 @@ import 'package:open_password_manager/shared/presentation/generic_error.dart';
 import 'package:open_password_manager/shared/utils/bootstrapper.dart';
 import 'package:open_password_manager/shared/domain/entities/provider_config.dart';
 import 'package:open_password_manager/shared/utils/log_service.dart';
-import 'package:open_password_manager/shared/utils/provider_factory.dart';
+import 'package:open_password_manager/shared/utils/repository_factory.dart';
+import 'package:open_password_manager/shared/utils/service_factory.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'features/auth/presentation/pages/sign_in_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,14 +26,11 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     FlutterError.onError = LogService.recordFlutterFatalError;
-    PlatformDispatcher.instance.onError =
-        (dynamic error, StackTrace? stackTrace) {
-          LogService.recordFlutterFatalError(
-            FlutterErrorDetails(exception: error, stack: stackTrace),
-          );
+    PlatformDispatcher.instance.onError = (dynamic error, StackTrace? stackTrace) {
+      LogService.recordFlutterFatalError(FlutterErrorDetails(exception: error, stack: stackTrace));
 
-          return true;
-        };
+      return true;
+    };
 
     final bootstrapper = Bootstrapper();
     await bootstrapper.initBackendFromConfig();
@@ -43,37 +42,35 @@ void main() async {
       appwriteClient: bootstrapper.appwriteClient,
     );
 
-    final authProvider = ProviderFactory.getAuthProvider(providerConfig);
-    final passwordProvider = ProviderFactory.getPasswordProvider(
-      providerConfig,
-    );
-    final cryptoProvider = ProviderFactory.getCryptoProvider();
-    final exportProvider = ProviderFactory.getExportProvider();
-    final clipboardProvider = ProviderFactory.getClipboardProvider();
-    final saltProvider = ProviderFactory.getSaltProvider(providerConfig);
-    final passwordGeneratorProvider =
-        ProviderFactory.getPasswordGeneratorProvider();
+    final serviceFactory = ServiceFactory();
+    final repoFactory = RepositoryFactory(serviceFactory);
+
+    final authProvider = repoFactory.getAuthProvider(providerConfig);
+    final clipboardProvider = repoFactory.getClipboardProvider();
+    final cryptoProvider = repoFactory.getCryptoProvider();
+    final deviceAuthProvider = repoFactory.getDeviceAuthProvider();
+    final exportProvider = repoFactory.getExportProvider();
+    final passwordGeneratorProvider = repoFactory.getPasswordGeneratorProvider();
+    final saltProvider = repoFactory.getSaltProvider(providerConfig);
+    final vaultProvider = repoFactory.getPasswordProvider(providerConfig);
 
     runApp(
       ProviderScope(
         overrides: [
           authRepositoryProvider.overrideWithValue(authProvider),
-          vaultRepositoryProvider.overrideWithValue(passwordProvider),
-          exportRepositoryProvider.overrideWithValue(exportProvider),
-          cryptographyRepositoryProvider.overrideWithValue(cryptoProvider),
           clipboardRepositoryProvider.overrideWithValue(clipboardProvider),
+          cryptographyRepositoryProvider.overrideWithValue(cryptoProvider),
+          deviceAuthRepositoryProvider.overrideWithValue(deviceAuthProvider),
+          exportRepositoryProvider.overrideWithValue(exportProvider),
+          passwordGeneratorRepositoryProvider.overrideWithValue(passwordGeneratorProvider),
           saltRepositoryProvider.overrideWithValue(saltProvider),
-          passwordGeneratorRepositoryProvider.overrideWithValue(
-            passwordGeneratorProvider,
-          ),
+          vaultRepositoryProvider.overrideWithValue(vaultProvider),
         ],
         child: const OpmApp(),
       ),
     );
   } catch (ex, st) {
-    LogService.recordFlutterFatalError(
-      FlutterErrorDetails(exception: ex, stack: st),
-    );
+    LogService.recordFlutterFatalError(FlutterErrorDetails(exception: ex, stack: st));
 
     runApp(const OpmApp.error());
   }
@@ -99,20 +96,14 @@ class OpmApp extends ConsumerWidget {
         : ShadApp(
             title: 'OPM - Open Password Manager',
             debugShowCheckedModeBanner: false,
-            themeMode: ref.watch(
-              appSettingsProvider.select((s) => s.themeMode),
-            ),
+            themeMode: ref.watch(appSettingsProvider.select((s) => s.themeMode)),
             theme: ShadThemeData(
-              colorScheme: ref.watch(
-                appSettingsProvider.select((s) => s.lightColorScheme),
-              ),
+              colorScheme: ref.watch(appSettingsProvider.select((s) => s.lightColorScheme)),
               textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter),
               brightness: Brightness.light,
             ),
             darkTheme: ShadThemeData(
-              colorScheme: ref.watch(
-                appSettingsProvider.select((s) => s.darkColorScheme),
-              ),
+              colorScheme: ref.watch(appSettingsProvider.select((s) => s.darkColorScheme)),
               textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter),
               brightness: Brightness.dark,
             ),

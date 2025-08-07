@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.open_password_manager"
+    namespace = "org.quickcoder.open_password_manager"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 

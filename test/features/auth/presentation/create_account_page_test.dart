@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';

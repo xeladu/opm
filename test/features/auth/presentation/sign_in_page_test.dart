@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
-import 'package:open_password_manager/features/auth/infrastructure/auth_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/auth_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';

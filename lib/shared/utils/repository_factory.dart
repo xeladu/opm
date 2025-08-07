@@ -1,5 +1,7 @@
 import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart';
+import 'package:open_password_manager/features/auth/domain/repositories/device_auth_repository.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/appwrite_auth_repository_impl.dart';
+import 'package:open_password_manager/features/auth/infrastructure/repositories/device_auth_repository_impl.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/firebase_auth_repository_impl.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/supabase_auth_repository_impl.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
@@ -20,9 +22,13 @@ import 'package:open_password_manager/shared/infrastructure/repositories/salt/fi
 import 'package:open_password_manager/shared/infrastructure/repositories/salt/supabase_salt_repository_impl.dart';
 import 'package:open_password_manager/shared/utils/hosting_provider.dart';
 import 'package:open_password_manager/shared/domain/entities/provider_config.dart';
+import 'package:open_password_manager/shared/utils/service_factory.dart';
 
-class ProviderFactory {
-  static AuthRepository getAuthProvider(ProviderConfig config) {
+class RepositoryFactory {
+  final ServiceFactory serviceFactory;
+  RepositoryFactory(this.serviceFactory);
+
+  AuthRepository getAuthProvider(ProviderConfig config) {
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
         return FirebaseAuthRepositoryImpl();
@@ -41,19 +47,19 @@ class ProviderFactory {
     }
   }
 
-  static ExportRepository getExportProvider() {
+  ExportRepository getExportProvider() {
     return ExportRepositoryImpl.instance;
   }
 
-  static CryptographyRepository getCryptoProvider() {
+  CryptographyRepository getCryptoProvider() {
     return CryptographyRepositoryImpl.instance;
   }
 
-  static PasswordGeneratorRepository getPasswordGeneratorProvider() {
+  PasswordGeneratorRepository getPasswordGeneratorProvider() {
     return PasswordGeneratorRepositoryImpl.instance;
   }
 
-  static EntryRepository getPasswordProvider(ProviderConfig config) {
+  EntryRepository getPasswordProvider(ProviderConfig config) {
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
         return FirebaseEntryRepositoryImpl(
@@ -83,11 +89,11 @@ class ProviderFactory {
     }
   }
 
-  static ClipboardRepository getClipboardProvider() {
+  ClipboardRepository getClipboardProvider() {
     return ClipboardRepositoryImpl.instance;
   }
 
-  static SaltRepository getSaltProvider(ProviderConfig config) {
+  SaltRepository getSaltProvider(ProviderConfig config) {
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
         return FirebaseSaltRepositoryImpl(
@@ -111,5 +117,9 @@ class ProviderFactory {
           collectionId: config.appConfig.appwriteConfig!.saltCollectionId,
         );
     }
+  }
+
+  DeviceAuthRepository getDeviceAuthProvider() {
+    return DeviceAuthRepositoryImpl(serviceFactory.getStorageService());
   }
 }

@@ -16,14 +16,8 @@ class DialogService {
           'Are you sure you want to cancel your operation?\r\nUnsaved changes will be lost!',
         ),
         actions: [
-          SecondaryButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            caption: "Stay",
-          ),
-          PrimaryButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            caption: "Leave",
-          ),
+          SecondaryButton(onPressed: () => Navigator.of(context).pop(false), caption: "Stay"),
+          PrimaryButton(onPressed: () => Navigator.of(context).pop(true), caption: "Leave"),
         ],
       ),
     );
@@ -41,14 +35,27 @@ class DialogService {
           'Are you sure you want to delete this password entry?\r\nThis action cannot be undone!',
         ),
         actions: [
-          SecondaryButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            caption: "Cancel",
-          ),
-          PrimaryButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            caption: "Delete",
-          ),
+          SecondaryButton(onPressed: () => Navigator.of(context).pop(false), caption: "Cancel"),
+          PrimaryButton(onPressed: () => Navigator.of(context).pop(true), caption: "Delete"),
+        ],
+      ),
+    );
+  }
+
+  /// Shows a biometrics setup confirmation dialog.
+  ///
+  /// Returns `true` if confirmed and `false`/`null` otherwise
+  static Future<bool?> showBiometricsSetupConfirmation(BuildContext context) async {
+    return await showShadDialog<bool>(
+      context: context,
+      builder: (context) => ShadDialog.alert(
+        title: const Text('Biometrics Authentication'),
+        description: const Text(
+          'Your device supports biometric authentication. Do you want to use it instead of your email and password?\n\nEmail and password authentication will always be available.',
+        ),
+        actions: [
+          SecondaryButton(onPressed: () => Navigator.of(context).pop(false), caption: "Skip for now"),
+          PrimaryButton(onPressed: () => Navigator.of(context).pop(true), caption: "Enable"),
         ],
       ),
     );
