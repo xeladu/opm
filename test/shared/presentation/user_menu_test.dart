@@ -1,31 +1,47 @@
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/export_repository_provider.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/import_repository_provider.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
+import 'package:open_password_manager/shared/application/providers/file_picker_service_provider.dart';
+import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/sheets/export_sheet.dart';
+import 'package:open_password_manager/shared/presentation/sheets/import_sheet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/settings_sheet.dart';
 import 'package:open_password_manager/shared/presentation/user_menu.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../helper/app_setup.dart';
+import '../../helper/test_data_generator.dart';
 import '../../helper/test_error_suppression.dart';
 import '../../mocking/mocks.mocks.dart';
 
 void main() {
   group("UserMenu", () {
     late MockAuthRepository mockAuthRepository;
+    late MockExportRepository mockExportRepository;
+    late MockVaultRepository mockVaultRepository;
+    late MockImportRepository mockImportRepository;
+    late MockFilePickerService mockFilePickerService;
 
     setUp(() {
       mockAuthRepository = MockAuthRepository();
+      mockExportRepository = MockExportRepository();
+      mockVaultRepository = MockVaultRepository();
+      mockImportRepository = MockImportRepository();
+      mockFilePickerService = MockFilePickerService();
     });
 
     testWidgets("Test default elements", (tester) async {
       final sut = Scaffold(body: UserMenu());
 
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       expect(find.byType(UserMenu), findsOneWidget);
       expect(find.byType(CircleAvatar), findsOneWidget);
@@ -55,11 +71,22 @@ void main() {
       verify(mockAuthRepository.signOut()).called(1);
     });
 
-    testWidgets("Test export", (tester) async {
+    testWidgets("Test JSON export", (tester) async {
+      when(mockExportRepository.exportPasswordEntriesJson(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries()).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
       final sut = Scaffold(body: UserMenu());
 
       await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
+        () async => await AppSetup.pumpPage(tester, sut, [
+          exportRepositoryProvider.overrideWithValue(mockExportRepository),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        ]),
       );
 
       await tester.tap(find.byType(UserMenu));
@@ -69,14 +96,419 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ExportSheet), findsOneWidget);
+
+      await tester.tap(find.byType(PrimaryButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExportSheet), findsNothing);
+
+      verify(mockExportRepository.exportPasswordEntriesJson(any)).called(1);
+    });
+
+    testWidgets("Test CSV export", (tester) async {
+      when(mockExportRepository.exportPasswordEntriesCsv(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries()).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
+      final sut = Scaffold(body: UserMenu());
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          exportRepositoryProvider.overrideWithValue(mockExportRepository),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        ]),
+      );
+
+      await tester.tap(find.byType(UserMenu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Export vault"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExportSheet), findsOneWidget);
+
+      await tester.tap(find.text("JSON"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("CSV"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(PrimaryButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExportSheet), findsNothing);
+
+      verify(mockExportRepository.exportPasswordEntriesCsv(any)).called(1);
+    });
+
+    testWidgets("Test import OPM", (tester) async {
+      when(mockImportRepository.validateOpmFile(any)).thenAnswer((_) {});
+      when(mockImportRepository.importFromOpm(any)).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+      when(mockFilePickerService.pickFile()).thenAnswer(
+        (_) => Future.value(
+          FilePickerResult([
+            PlatformFile(
+              path: "folder/subfolder",
+              name: "my-file",
+              size: 64,
+              bytes: Uint8List.fromList([116, 101, 115, 116]),
+            ),
+          ]),
+        ),
+      );
+      when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+
+      final sut = Scaffold(body: UserMenu());
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          importRepositoryProvider.overrideWithValue(mockImportRepository),
+          filePickerServiceProvider.overrideWithValue(mockFilePickerService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        ]),
+      );
+
+      await tester.tap(find.byType(UserMenu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Import vault"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsOneWidget);
+
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Pick CSV file"),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Import"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsNothing);
+
+      verify(mockImportRepository.importFromOpm(any)).called(1);
+      verify(mockImportRepository.validateOpmFile(any)).called(1);
+      verify(mockFilePickerService.pickFile()).called(1);
+    });
+
+    testWidgets("Test import 1Password", (tester) async {
+      when(mockImportRepository.validate1PasswordFile(any)).thenAnswer((_) {});
+      when(mockImportRepository.importFrom1Password(any)).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+      when(mockFilePickerService.pickFile()).thenAnswer(
+        (_) => Future.value(
+          FilePickerResult([
+            PlatformFile(
+              path: "folder/subfolder",
+              name: "my-file",
+              size: 64,
+              bytes: Uint8List.fromList([116, 101, 115, 116]),
+            ),
+          ]),
+        ),
+      );
+      when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+
+      final sut = Scaffold(body: UserMenu());
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          importRepositoryProvider.overrideWithValue(mockImportRepository),
+          filePickerServiceProvider.overrideWithValue(mockFilePickerService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        ]),
+      );
+
+      await tester.tap(find.byType(UserMenu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Import vault"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsOneWidget);
+
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Pick CSV file"),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Open Password Manager"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("1Password"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Import"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsNothing);
+
+      verify(mockImportRepository.importFrom1Password(any)).called(1);
+      verify(mockImportRepository.validate1PasswordFile(any)).called(1);
+      verify(mockFilePickerService.pickFile()).called(1);
+    });
+
+    testWidgets("Test import LastPass", (tester) async {
+      when(mockImportRepository.validateLastPassFile(any)).thenAnswer((_) {});
+      when(mockImportRepository.importFromLastPass(any)).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+      when(mockFilePickerService.pickFile()).thenAnswer(
+        (_) => Future.value(
+          FilePickerResult([
+            PlatformFile(
+              path: "folder/subfolder",
+              name: "my-file",
+              size: 64,
+              bytes: Uint8List.fromList([116, 101, 115, 116]),
+            ),
+          ]),
+        ),
+      );
+      when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+
+      final sut = Scaffold(body: UserMenu());
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          importRepositoryProvider.overrideWithValue(mockImportRepository),
+          filePickerServiceProvider.overrideWithValue(mockFilePickerService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        ]),
+      );
+
+      await tester.tap(find.byType(UserMenu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Import vault"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsOneWidget);
+
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Pick CSV file"),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Open Password Manager"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("LastPass"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Import"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsNothing);
+
+      verify(mockImportRepository.importFromLastPass(any)).called(1);
+      verify(mockImportRepository.validateLastPassFile(any)).called(1);
+      verify(mockFilePickerService.pickFile()).called(1);
+    });
+
+    testWidgets("Test import Bitwarden", (tester) async {
+      when(mockImportRepository.validateBitwardenFile(any)).thenAnswer((_) {});
+      when(mockImportRepository.importFromBitwarden(any)).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+      when(mockFilePickerService.pickFile()).thenAnswer(
+        (_) => Future.value(
+          FilePickerResult([
+            PlatformFile(
+              path: "folder/subfolder",
+              name: "my-file",
+              size: 64,
+              bytes: Uint8List.fromList([116, 101, 115, 116]),
+            ),
+          ]),
+        ),
+      );
+      when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+
+      final sut = Scaffold(body: UserMenu());
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          importRepositoryProvider.overrideWithValue(mockImportRepository),
+          filePickerServiceProvider.overrideWithValue(mockFilePickerService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        ]),
+      );
+
+      await tester.tap(find.byType(UserMenu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Import vault"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsOneWidget);
+
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Pick CSV file"),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Open Password Manager"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Bitwarden"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Import"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsNothing);
+
+      verify(mockImportRepository.importFromBitwarden(any)).called(1);
+      verify(mockImportRepository.validateBitwardenFile(any)).called(1);
+      verify(mockFilePickerService.pickFile()).called(1);
+    });
+
+    testWidgets("Test import KeePass", (tester) async {
+      when(mockImportRepository.validateKeepassFile(any)).thenAnswer((_) {});
+      when(mockImportRepository.importFromKeepass(any)).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+      when(mockFilePickerService.pickFile()).thenAnswer(
+        (_) => Future.value(
+          FilePickerResult([
+            PlatformFile(
+              path: "folder/subfolder",
+              name: "my-file",
+              size: 64,
+              bytes: Uint8List.fromList([116, 101, 115, 116]),
+            ),
+          ]),
+        ),
+      );
+      when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+
+      final sut = Scaffold(body: UserMenu());
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          importRepositoryProvider.overrideWithValue(mockImportRepository),
+          filePickerServiceProvider.overrideWithValue(mockFilePickerService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        ]),
+      );
+
+      await tester.tap(find.byType(UserMenu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Import vault"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsOneWidget);
+
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Pick CSV file"),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Open Password Manager"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("KeePass", skipOffstage: false));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Import"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsNothing);
+
+      verify(mockImportRepository.importFromKeepass(any)).called(1);
+      verify(mockImportRepository.validateKeepassFile(any)).called(1);
+      verify(mockFilePickerService.pickFile()).called(1);
+    });
+
+    testWidgets("Test import Keeper", (tester) async {
+      when(mockImportRepository.validateKeeperFile(any)).thenAnswer((_) {});
+      when(mockImportRepository.importFromKeeper(any)).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+      when(mockFilePickerService.pickFile()).thenAnswer(
+        (_) => Future.value(
+          FilePickerResult([
+            PlatformFile(
+              path: "folder/subfolder",
+              name: "my-file",
+              size: 64,
+              bytes: Uint8List.fromList([116, 101, 115, 116]),
+            ),
+          ]),
+        ),
+      );
+      when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+
+      final sut = Scaffold(body: UserMenu());
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          importRepositoryProvider.overrideWithValue(mockImportRepository),
+          filePickerServiceProvider.overrideWithValue(mockFilePickerService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        ]),
+      );
+
+      await tester.tap(find.byType(UserMenu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Import vault"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsOneWidget);
+
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Pick CSV file"),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Open Password Manager"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Keeper"));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Import"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsNothing);
+
+      verify(mockImportRepository.importFromKeeper(any)).called(1);
+      verify(mockImportRepository.validateKeeperFile(any)).called(1);
+      verify(mockFilePickerService.pickFile()).called(1);
     });
 
     testWidgets("Test settings", (tester) async {
       final sut = Scaffold(body: UserMenu());
 
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       await tester.tap(find.byType(UserMenu));
       await tester.pumpAndSettle();

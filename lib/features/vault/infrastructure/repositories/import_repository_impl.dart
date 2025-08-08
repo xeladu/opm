@@ -1,9 +1,19 @@
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/exceptions/import_exception.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/import_repository.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../shared/utils/csv_helper.dart';
 
 class ImportRepositoryImpl extends ImportRepository {
+  static ImportRepositoryImpl? _instance;
+  static ImportRepositoryImpl get instance {
+    _instance ??= ImportRepositoryImpl._();
+
+    return _instance!;
+  }
+
+  ImportRepositoryImpl._();
+
   /// Imports a 1Password CSV export file.
   ///
   /// Maps 1Password CSV fields to VaultEntry fields:
@@ -240,5 +250,271 @@ class ImportRepositoryImpl extends ImportRepository {
     }
 
     return entries;
+  }
+
+  /// Imports a OPM CSV export file.
+  ///
+  /// Maps OPM CSV fields to VaultEntry fields:
+  ///
+  /// | CSV Field      | VaultEntry Field |
+  /// |----------------|------------------|
+  /// | id             | (ignored)         |
+  /// | name           | name             |
+  /// | username       | username         |
+  /// | password       | password         |
+  /// | urls (as list) | urls (as list)   |
+  /// | comments       | comments         |
+  /// | createdAt      | createdAt        |
+  /// | updatedAt      | updatedAt        |
+  @override
+  Future<List<VaultEntry>> importFromOpm(String csvContent) async {
+    final rows = CsvHelper.parseCsv(csvContent);
+
+    if (rows.length < 2) return [];
+
+    final header = rows.first;
+    final entries = <VaultEntry>[];
+
+    for (final row in rows.skip(1)) {
+      if (row.length != header.length) continue;
+
+      final map = CsvHelper.mapCsvRowToHeader(header, row);
+      entries.add(
+        VaultEntry(
+          id: Uuid().v4(),
+          name: map['name'] ?? '',
+          username: map['user'] ?? '',
+          password: map['password'] ?? '',
+          urls: map['urls'] != null && map['urls']!.isNotEmpty
+              ? map['urls']!.split(";").map((e) => e.toString()).toList()
+              : [],
+          comments: map['comments'] ?? '',
+          createdAt: map['createdAt'] != null
+              ? DateTime.parse(map['createdAt']!).toIso8601String()
+              : DateTime.now().toIso8601String(),
+          updatedAt: map['updatedAt'] != null
+              ? DateTime.parse(map['updatedAt']!).toIso8601String()
+              : DateTime.now().toIso8601String(),
+        ),
+      );
+    }
+
+    return entries;
+  }
+
+  @override
+  void validate1PasswordFile(String csvContent) {
+    if (csvContent.isEmpty) {
+      throw ImportException(message: "No content");
+    }
+    final rows = CsvHelper.parseCsv(csvContent);
+
+    if (rows.length < 2) {
+      throw ImportException(message: "No data");
+    }
+
+    final header = rows.first;
+    final hasNameHeader = header.contains("Title");
+    final hasEmailHeader = header.contains("Username");
+    final hasPasswordHeader = header.contains("Password");
+    final hasUrlHeader = header.contains("Website");
+    final hasCommentsHeader = header.contains("Notes");
+
+    if (!hasNameHeader ||
+        !hasEmailHeader ||
+        !hasPasswordHeader ||
+        !hasUrlHeader ||
+        !hasCommentsHeader) {
+      var errorString = "The following expected header fields are missing:\n";
+      errorString += hasNameHeader ? "" : "Title, ";
+      errorString += hasEmailHeader ? "" : "Username, ";
+      errorString += hasPasswordHeader ? "" : "Password, ";
+      errorString += hasUrlHeader ? "" : "Website, ";
+      errorString += hasCommentsHeader ? "" : "Notes, ";
+      errorString = errorString.substring(0, errorString.length - 2);
+
+      throw ImportException(message: errorString);
+    }
+  }
+
+  @override
+  void validateBitwardenFile(String csvContent) {
+    if (csvContent.isEmpty) {
+      throw ImportException(message: "No content");
+    }
+    final rows = CsvHelper.parseCsv(csvContent);
+
+    if (rows.length < 2) {
+      throw ImportException(message: "No data");
+    }
+
+    final header = rows.first;
+    final hasNameHeader = header.contains("name");
+    final hasEmailHeader = header.contains("login_username");
+    final hasPasswordHeader = header.contains("login_password");
+    final hasUrlHeader = header.contains("login_uri");
+    final hasCommentsHeader = header.contains("notes");
+
+    if (!hasNameHeader ||
+        !hasEmailHeader ||
+        !hasPasswordHeader ||
+        !hasUrlHeader ||
+        !hasCommentsHeader) {
+      var errorString = "The following expected header fields are missing:\n";
+      errorString += hasNameHeader ? "" : "name, ";
+      errorString += hasEmailHeader ? "" : "login_username, ";
+      errorString += hasPasswordHeader ? "" : "login_password, ";
+      errorString += hasUrlHeader ? "" : "login_uri ,";
+      errorString += hasCommentsHeader ? "" : "notes, ";
+      errorString = errorString.substring(0, errorString.length - 2);
+
+      throw ImportException(message: errorString);
+    }
+  }
+
+  @override
+  void validateKeepassFile(String csvContent) {
+    if (csvContent.isEmpty) {
+      throw ImportException(message: "No content");
+    }
+    final rows = CsvHelper.parseCsv(csvContent);
+
+    if (rows.length < 2) {
+      throw ImportException(message: "No data");
+    }
+
+    final header = rows.first;
+    final hasNameHeader = header.contains("Account");
+    final hasEmailHeader = header.contains("Login Name");
+    final hasPasswordHeader = header.contains("Password");
+    final hasUrlHeader = header.contains("Web Site");
+    final hasCommentsHeader = header.contains("Comments");
+
+    if (!hasNameHeader ||
+        !hasEmailHeader ||
+        !hasPasswordHeader ||
+        !hasUrlHeader ||
+        !hasCommentsHeader) {
+      var errorString = "The following expected header fields are missing:";
+      errorString += hasNameHeader ? "" : "Account, ";
+      errorString += hasEmailHeader ? "" : "Login Name, ";
+      errorString += hasPasswordHeader ? "" : "Password, ";
+      errorString += hasUrlHeader ? "" : "Web Site, ";
+      errorString += hasCommentsHeader ? "" : "Comments, ";
+      errorString = errorString.substring(0, errorString.length - 2);
+
+      throw ImportException(message: errorString);
+    }
+  }
+
+  @override
+  void validateKeeperFile(String csvContent) {
+    if (csvContent.isEmpty) {
+      throw ImportException(message: "No content");
+    }
+    final rows = CsvHelper.parseCsv(csvContent);
+
+    if (rows.length < 2) {
+      throw ImportException(message: "No data");
+    }
+
+    final header = rows.first;
+    final hasNameHeader = header.contains("Title");
+    final hasEmailHeader = header.contains("Login");
+    final hasPasswordHeader = header.contains("Password");
+    final hasUrlHeader = header.contains("Website Address");
+    final hasCommentsHeader = header.contains("Notes");
+
+    if (!hasNameHeader ||
+        !hasEmailHeader ||
+        !hasPasswordHeader ||
+        !hasUrlHeader ||
+        !hasCommentsHeader) {
+      var errorString = "The following expected header fields are missing:\n";
+      errorString += hasNameHeader ? "" : "Title, ";
+      errorString += hasEmailHeader ? "" : "Login, ";
+      errorString += hasPasswordHeader ? "" : "Password, ";
+      errorString += hasUrlHeader ? "" : "Website Address, ";
+      errorString += hasCommentsHeader ? "" : "Notes, ";
+      errorString = errorString.substring(0, errorString.length - 2);
+
+      throw ImportException(message: errorString);
+    }
+  }
+
+  @override
+  void validateLastPassFile(String csvContent) {
+    if (csvContent.isEmpty) {
+      throw ImportException(message: "No content");
+    }
+    final rows = CsvHelper.parseCsv(csvContent);
+
+    if (rows.length < 2) {
+      throw ImportException(message: "No data");
+    }
+
+    final header = rows.first;
+    final hasNameHeader = header.contains("name");
+    final hasEmailHeader = header.contains("username");
+    final hasPasswordHeader = header.contains("password");
+    final hasUrlHeader = header.contains("url");
+    final hasCommentsHeader = header.contains("extra");
+
+    if (!hasNameHeader ||
+        !hasEmailHeader ||
+        !hasPasswordHeader ||
+        !hasUrlHeader ||
+        !hasCommentsHeader) {
+      var errorString = "The following expected header fields are missing:\n";
+      errorString += hasNameHeader ? "" : "name, ";
+      errorString += hasEmailHeader ? "" : "username, ";
+      errorString += hasPasswordHeader ? "" : "password, ";
+      errorString += hasUrlHeader ? "" : "url, ";
+      errorString += hasCommentsHeader ? "" : "extra, ";
+      errorString = errorString.substring(0, errorString.length - 2);
+
+      throw ImportException(message: errorString);
+    }
+  }
+
+  @override
+  void validateOpmFile(String csvContent) {
+    if (csvContent.isEmpty) {
+      throw ImportException(message: "No content");
+    }
+    final rows = CsvHelper.parseCsv(csvContent);
+
+    if (rows.length < 2) {
+      throw ImportException(message: "No data");
+    }
+
+    final header = rows.first;
+    final hasNameHeader = header.contains("name");
+    final hasEmailHeader = header.contains("user");
+    final hasPasswordHeader = header.contains("password");
+    final hasUrlHeader = header.contains("urls");
+    final hasCommentsHeader = header.contains("comments");
+    final hasCreatedAtHeader = header.contains("createdAt");
+    final hasUpdatedAtHeader = header.contains("updatedAt");
+
+    if (!hasNameHeader ||
+        !hasEmailHeader ||
+        !hasPasswordHeader ||
+        !hasUrlHeader ||
+        !hasCommentsHeader ||
+        !hasCreatedAtHeader ||
+        !hasUpdatedAtHeader) {
+      var errorString = "The following expected header fields are missing:\n";
+      errorString += hasNameHeader ? "" : "name, ";
+      errorString += hasEmailHeader ? "" : "user, ";
+      errorString += hasPasswordHeader ? "" : "password, ";
+      errorString += hasUrlHeader ? "" : "urls, ";
+      errorString += hasCommentsHeader ? "" : "comments, ";
+      errorString += hasCreatedAtHeader ? "" : "createdAt, ";
+      errorString += hasUpdatedAtHeader ? "" : "updatedAt, ";
+      errorString = errorString.substring(0, errorString.length - 2);
+
+      throw ImportException(message: errorString);
+    }
   }
 }

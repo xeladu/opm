@@ -4,11 +4,16 @@ import 'package:open_password_manager/features/auth/application/providers/biomet
 import 'package:open_password_manager/features/auth/application/use_cases/sign_out.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/export_vault.dart';
-import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';
+import 'package:open_password_manager/features/vault/application/use_cases/import_vault.dart';
+import 'package:open_password_manager/features/vault/domain/exceptions/import_exception.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/export_repository_provider.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/import_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
 import 'package:open_password_manager/shared/presentation/sheets/export_sheet.dart';
+import 'package:open_password_manager/shared/presentation/sheets/import_sheet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/settings_sheet.dart';
 import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/popup_service.dart';
@@ -40,7 +45,7 @@ class UserMenu extends ConsumerWidget {
             final useCase = SignOut(authRepo);
             await useCase();
 
-            // triggers biometric auth again if supported            
+            // triggers biometric auth again if supported
             ref.invalidate(biometricAuthAvailableProvider);
 
             if (context.mounted) {
@@ -61,8 +66,18 @@ class UserMenu extends ConsumerWidget {
                 side: ShadSheetSide.right,
                 context: context,
                 builder: (context) => ExportSheet(
-                  onSelected: (option) =>
-                      _onExportOptionSelected(context, ref, option),
+                  onSelected: (option) => _onExportOptionSelected(context, ref, option),
+                ),
+              );
+            }
+          case UserMenuSelection.import:
+            if (context.mounted) {
+              await showShadSheet(
+                side: ShadSheetSide.right,
+                context: context,
+                builder: (context) => ImportSheet(
+                  onSelected: (provider, content) =>
+                      _onImportOptionSelected(context, ref, provider, content),
                 ),
               );
             }
@@ -70,9 +85,7 @@ class UserMenu extends ConsumerWidget {
             return;
         }
       },
-      child: CircleAvatar(
-        child: Text(ref.watch(opmUserProvider).user.substring(0, 2)),
-      ),
+      child: CircleAvatar(child: Text(ref.watch(opmUserProvider).user.substring(0, 2))),
     );
   }
 
@@ -92,6 +105,35 @@ class UserMenu extends ConsumerWidget {
     }
   }
 
+  Future<void> _onImportOptionSelected(
+    BuildContext context,
+    WidgetRef ref,
+    ImportProvider provider,
+    String fileContent,
+  ) async {
+    try {
+      final importRepo = ref.read(importRepositoryProvider);
+      final vaultRepo = ref.read(vaultRepositoryProvider);
+
+      final useCase = ImportVault(vaultRepo, importRepo);
+      await useCase(provider, fileContent);
+
+      ref.invalidate(allEntriesProvider);
+
+      if (context.mounted) {
+        ToastService.show(context, "Vault import completed!");
+      }
+    } on ImportException catch (ex) {
+      if (context.mounted) {
+        ToastService.showError(context, ex.message);
+      }
+    } on Exception catch (ex) {
+      if (context.mounted) {
+        ToastService.showError(context, ex.toString());
+      }
+    }
+  }
+
   List<PopupMenuEntry<UserMenuSelection>> get menuItems => [
     const PopupMenuItem(
       height: sizeL,
@@ -102,6 +144,18 @@ class UserMenu extends ConsumerWidget {
         children: [
           Icon(LucideIcons.settings, size: sizeS),
           Text('Settings'),
+        ],
+      ),
+    ),
+    const PopupMenuItem(
+      height: sizeL,
+      value: UserMenuSelection.import,
+      child: Row(
+        spacing: sizeXS,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(LucideIcons.import, size: sizeS),
+          Text('Import vault'),
         ],
       ),
     ),
@@ -133,4 +187,4 @@ class UserMenu extends ConsumerWidget {
   ];
 }
 
-enum UserMenuSelection { logout, settings, export }
+enum UserMenuSelection { logout, settings, import, export }

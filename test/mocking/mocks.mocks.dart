@@ -5,6 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i5;
 
+import 'package:file_picker/file_picker.dart' as _i13;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i8;
 import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart'
@@ -14,13 +15,17 @@ import 'package:open_password_manager/features/auth/domain/repositories/auth_rep
 import 'package:open_password_manager/features/auth/domain/repositories/device_auth_repository.dart'
     as _i6;
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart'
+    as _i11;
+import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart'
+    as _i10;
+import 'package:open_password_manager/features/vault/domain/repositories/import_repository.dart'
     as _i14;
 import 'package:open_password_manager/features/vault/domain/repositories/password_generator_repository.dart'
-    as _i12;
+    as _i17;
 import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart'
-    as _i13;
+    as _i18;
 import 'package:open_password_manager/shared/application/services/storage_service.dart'
-    as _i11;
+    as _i16;
 import 'package:open_password_manager/shared/domain/entities/credentials.dart'
     as _i3;
 import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart'
@@ -28,7 +33,9 @@ import 'package:open_password_manager/shared/domain/repositories/clipboard_repos
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart'
     as _i7;
 import 'package:open_password_manager/shared/domain/repositories/salt_repository.dart'
-    as _i10;
+    as _i15;
+import 'package:open_password_manager/shared/utils/file_picker_service.dart'
+    as _i12;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -227,10 +234,159 @@ class MockClipboardRepository extends _i1.Mock
           as _i5.Future<void>);
 }
 
+/// A class which mocks [ExportRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockExportRepository extends _i1.Mock implements _i10.ExportRepository {
+  MockExportRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<void> exportPasswordEntriesCsv(List<_i11.VaultEntry>? entries) =>
+      (super.noSuchMethod(
+            Invocation.method(#exportPasswordEntriesCsv, [entries]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> exportPasswordEntriesJson(List<_i11.VaultEntry>? entries) =>
+      (super.noSuchMethod(
+            Invocation.method(#exportPasswordEntriesJson, [entries]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+}
+
+/// A class which mocks [FilePickerService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockFilePickerService extends _i1.Mock implements _i12.FilePickerService {
+  MockFilePickerService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<_i13.FilePickerResult?> pickFile() =>
+      (super.noSuchMethod(
+            Invocation.method(#pickFile, []),
+            returnValue: _i5.Future<_i13.FilePickerResult?>.value(),
+          )
+          as _i5.Future<_i13.FilePickerResult?>);
+}
+
+/// A class which mocks [ImportRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockImportRepository extends _i1.Mock implements _i14.ImportRepository {
+  MockImportRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  void validateOpmFile(String? csvContent) => super.noSuchMethod(
+    Invocation.method(#validateOpmFile, [csvContent]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i5.Future<List<_i11.VaultEntry>> importFromOpm(String? csvContent) =>
+      (super.noSuchMethod(
+            Invocation.method(#importFromOpm, [csvContent]),
+            returnValue: _i5.Future<List<_i11.VaultEntry>>.value(
+              <_i11.VaultEntry>[],
+            ),
+          )
+          as _i5.Future<List<_i11.VaultEntry>>);
+
+  @override
+  void validateBitwardenFile(String? csvContent) => super.noSuchMethod(
+    Invocation.method(#validateBitwardenFile, [csvContent]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i5.Future<List<_i11.VaultEntry>> importFromBitwarden(String? csvContent) =>
+      (super.noSuchMethod(
+            Invocation.method(#importFromBitwarden, [csvContent]),
+            returnValue: _i5.Future<List<_i11.VaultEntry>>.value(
+              <_i11.VaultEntry>[],
+            ),
+          )
+          as _i5.Future<List<_i11.VaultEntry>>);
+
+  @override
+  void validate1PasswordFile(String? csvContent) => super.noSuchMethod(
+    Invocation.method(#validate1PasswordFile, [csvContent]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i5.Future<List<_i11.VaultEntry>> importFrom1Password(String? csvContent) =>
+      (super.noSuchMethod(
+            Invocation.method(#importFrom1Password, [csvContent]),
+            returnValue: _i5.Future<List<_i11.VaultEntry>>.value(
+              <_i11.VaultEntry>[],
+            ),
+          )
+          as _i5.Future<List<_i11.VaultEntry>>);
+
+  @override
+  void validateLastPassFile(String? csvContent) => super.noSuchMethod(
+    Invocation.method(#validateLastPassFile, [csvContent]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i5.Future<List<_i11.VaultEntry>> importFromLastPass(String? csvContent) =>
+      (super.noSuchMethod(
+            Invocation.method(#importFromLastPass, [csvContent]),
+            returnValue: _i5.Future<List<_i11.VaultEntry>>.value(
+              <_i11.VaultEntry>[],
+            ),
+          )
+          as _i5.Future<List<_i11.VaultEntry>>);
+
+  @override
+  void validateKeeperFile(String? csvContent) => super.noSuchMethod(
+    Invocation.method(#validateKeeperFile, [csvContent]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i5.Future<List<_i11.VaultEntry>> importFromKeeper(String? csvContent) =>
+      (super.noSuchMethod(
+            Invocation.method(#importFromKeeper, [csvContent]),
+            returnValue: _i5.Future<List<_i11.VaultEntry>>.value(
+              <_i11.VaultEntry>[],
+            ),
+          )
+          as _i5.Future<List<_i11.VaultEntry>>);
+
+  @override
+  void validateKeepassFile(String? csvContent) => super.noSuchMethod(
+    Invocation.method(#validateKeepassFile, [csvContent]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i5.Future<List<_i11.VaultEntry>> importFromKeepass(String? csvContent) =>
+      (super.noSuchMethod(
+            Invocation.method(#importFromKeepass, [csvContent]),
+            returnValue: _i5.Future<List<_i11.VaultEntry>>.value(
+              <_i11.VaultEntry>[],
+            ),
+          )
+          as _i5.Future<List<_i11.VaultEntry>>);
+}
+
 /// A class which mocks [SaltRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSaltRepository extends _i1.Mock implements _i10.SaltRepository {
+class MockSaltRepository extends _i1.Mock implements _i15.SaltRepository {
   MockSaltRepository() {
     _i1.throwOnMissingStub(this);
   }
@@ -256,7 +412,7 @@ class MockSaltRepository extends _i1.Mock implements _i10.SaltRepository {
 /// A class which mocks [StorageService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockStorageService extends _i1.Mock implements _i11.StorageService {
+class MockStorageService extends _i1.Mock implements _i16.StorageService {
   MockStorageService() {
     _i1.throwOnMissingStub(this);
   }
@@ -288,7 +444,7 @@ class MockStorageService extends _i1.Mock implements _i11.StorageService {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPasswordGeneratorRepository extends _i1.Mock
-    implements _i12.PasswordGeneratorRepository {
+    implements _i17.PasswordGeneratorRepository {
   MockPasswordGeneratorRepository() {
     _i1.throwOnMissingStub(this);
   }
@@ -326,13 +482,13 @@ class MockPasswordGeneratorRepository extends _i1.Mock
 /// A class which mocks [VaultRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockVaultRepository extends _i1.Mock implements _i13.VaultRepository {
+class MockVaultRepository extends _i1.Mock implements _i18.VaultRepository {
   MockVaultRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i5.Future<void> addEntry(_i14.VaultEntry? entry) =>
+  _i5.Future<void> addEntry(_i11.VaultEntry? entry) =>
       (super.noSuchMethod(
             Invocation.method(#addEntry, [entry]),
             returnValue: _i5.Future<void>.value(),
@@ -341,7 +497,7 @@ class MockVaultRepository extends _i1.Mock implements _i13.VaultRepository {
           as _i5.Future<void>);
 
   @override
-  _i5.Future<void> editEntry(_i14.VaultEntry? entry) =>
+  _i5.Future<void> editEntry(_i11.VaultEntry? entry) =>
       (super.noSuchMethod(
             Invocation.method(#editEntry, [entry]),
             returnValue: _i5.Future<void>.value(),
@@ -359,12 +515,12 @@ class MockVaultRepository extends _i1.Mock implements _i13.VaultRepository {
           as _i5.Future<void>);
 
   @override
-  _i5.Future<List<_i14.VaultEntry>> getAllEntries() =>
+  _i5.Future<List<_i11.VaultEntry>> getAllEntries() =>
       (super.noSuchMethod(
             Invocation.method(#getAllEntries, []),
-            returnValue: _i5.Future<List<_i14.VaultEntry>>.value(
-              <_i14.VaultEntry>[],
+            returnValue: _i5.Future<List<_i11.VaultEntry>>.value(
+              <_i11.VaultEntry>[],
             ),
           )
-          as _i5.Future<List<_i14.VaultEntry>>);
+          as _i5.Future<List<_i11.VaultEntry>>);
 }

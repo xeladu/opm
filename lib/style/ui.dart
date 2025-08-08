@@ -10,5 +10,5 @@ const double sizeXXL = 64;
 
 // other widget sizes
 const double dialogMaxWidth = 480;
-const double selectLargeWidth = 200;
+const double selectLargeWidth = 240;
 const double selectSmallWidth = 120;

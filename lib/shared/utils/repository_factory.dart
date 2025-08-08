@@ -5,11 +5,13 @@ import 'package:open_password_manager/features/auth/infrastructure/repositories/
 import 'package:open_password_manager/features/auth/infrastructure/repositories/firebase_auth_repository_impl.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/supabase_auth_repository_impl.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
+import 'package:open_password_manager/features/vault/domain/repositories/import_repository.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/password_generator_repository.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/appwrite_entry_repository_impl.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/export/export_repository_impl.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/firebase_entry_repository_impl.dart';
+import 'package:open_password_manager/features/vault/infrastructure/repositories/import_repository_impl.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/password_generator_repository_impl.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/supabase_entry_repository_impl.dart';
 import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart';
@@ -49,6 +51,10 @@ class RepositoryFactory {
 
   ExportRepository getExportProvider() {
     return ExportRepositoryImpl.instance;
+  }
+
+  ImportRepository getImportProvider() {
+    return ImportRepositoryImpl.instance;
   }
 
   CryptographyRepository getCryptoProvider() {

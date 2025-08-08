@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/device_auth_repository_provider.dart';
-import 'package:open_password_manager/features/vault/infrastructure/providers/export_provider.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/export_repository_provider.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/import_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/password_generator_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
+import 'package:open_password_manager/shared/application/providers/file_picker_service_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
@@ -45,11 +48,15 @@ void main() async {
     final serviceFactory = ServiceFactory();
     final repoFactory = RepositoryFactory(serviceFactory);
 
+    final storageProvider = serviceFactory.getStorageService();
+    final filePickerProvider = serviceFactory.getFilePickerService();
+
     final authProvider = repoFactory.getAuthProvider(providerConfig);
     final clipboardProvider = repoFactory.getClipboardProvider();
     final cryptoProvider = repoFactory.getCryptoProvider();
     final deviceAuthProvider = repoFactory.getDeviceAuthProvider();
     final exportProvider = repoFactory.getExportProvider();
+    final importProvider = repoFactory.getImportProvider();
     final passwordGeneratorProvider = repoFactory.getPasswordGeneratorProvider();
     final saltProvider = repoFactory.getSaltProvider(providerConfig);
     final vaultProvider = repoFactory.getPasswordProvider(providerConfig);
@@ -62,8 +69,11 @@ void main() async {
           cryptographyRepositoryProvider.overrideWithValue(cryptoProvider),
           deviceAuthRepositoryProvider.overrideWithValue(deviceAuthProvider),
           exportRepositoryProvider.overrideWithValue(exportProvider),
+          filePickerServiceProvider.overrideWithValue(filePickerProvider),
+          importRepositoryProvider.overrideWithValue(importProvider),
           passwordGeneratorRepositoryProvider.overrideWithValue(passwordGeneratorProvider),
           saltRepositoryProvider.overrideWithValue(saltProvider),
+          storageServiceProvider.overrideWithValue(storageProvider),
           vaultRepositoryProvider.overrideWithValue(vaultProvider),
         ],
         child: const OpmApp(),

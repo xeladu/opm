@@ -377,6 +377,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  file_picker:
+    dependency: "direct main"
+    description:
+      name: file_picker
+      sha256: "97a943524074a1e8e858aa154d09e38a4168a9ad765d6cac66606fd906b86875"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.2.2"
   firebase_auth:
     dependency: "direct main"
     description:

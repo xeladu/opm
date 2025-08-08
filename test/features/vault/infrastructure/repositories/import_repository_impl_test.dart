@@ -3,7 +3,7 @@ import 'package:open_password_manager/features/vault/infrastructure/repositories
 
 void main() {
   group('ImportRepositoryImpl', () {
-    final repo = ImportRepositoryImpl();
+    final repo = ImportRepositoryImpl.instance;
 
     group("1Password", () {
       test('1Password valid CSV', () async {
