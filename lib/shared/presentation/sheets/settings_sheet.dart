@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_password_manager/shared/presentation/settings/biometric_auth_setting.dart';
 import 'package:open_password_manager/shared/presentation/sheet.dart';
 import 'package:open_password_manager/shared/presentation/settings/color_scheme_setting.dart';
 import 'package:open_password_manager/shared/presentation/settings/theme_mode_setting.dart';
@@ -21,7 +22,7 @@ class SettingsSheet extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: sizeS,
-            children: [ColorSchemeSetting(), ThemeModeSetting()],
+            children: [ColorSchemeSetting(), ThemeModeSetting(), BiometricAuthSetting()],
           ),
         ),
       ),
