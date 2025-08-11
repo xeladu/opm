@@ -3,17 +3,18 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
-import 'package:open_password_manager/features/auth/infrastructure/providers/device_auth_repository_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/import_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/password_generator_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
+import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/file_picker_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
-import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/crypto_utils_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/generic_error.dart';
 import 'package:open_password_manager/shared/utils/bootstrapper.dart';
 import 'package:open_password_manager/shared/domain/entities/provider_config.dart';
@@ -48,31 +49,34 @@ void main() async {
     final serviceFactory = ServiceFactory();
     final repoFactory = RepositoryFactory(serviceFactory);
 
+    final cryptoUtilsProvider = repoFactory.getCryptoUtilsProvider(providerConfig);
+
     final storageProvider = serviceFactory.getStorageService();
     final filePickerProvider = serviceFactory.getFilePickerService();
+    final cryptoProvider = serviceFactory.getCryptoService(cryptoUtilsProvider, storageProvider);
 
     final authProvider = repoFactory.getAuthProvider(providerConfig);
     final clipboardProvider = repoFactory.getClipboardProvider();
-    final cryptoProvider = repoFactory.getCryptoProvider();
-    final deviceAuthProvider = repoFactory.getDeviceAuthProvider();
+    final cryptoRepoProvider = repoFactory.getCryptoProvider(cryptoProvider);
+    final biometricAuthProvider = repoFactory.getBiometricAuthProvider();
     final exportProvider = repoFactory.getExportProvider();
     final importProvider = repoFactory.getImportProvider();
     final passwordGeneratorProvider = repoFactory.getPasswordGeneratorProvider();
-    final saltProvider = repoFactory.getSaltProvider(providerConfig);
-    final vaultProvider = repoFactory.getPasswordProvider(providerConfig);
+    final vaultProvider = repoFactory.getVaultProvider(providerConfig, cryptoProvider);
 
     runApp(
       ProviderScope(
         overrides: [
           authRepositoryProvider.overrideWithValue(authProvider),
           clipboardRepositoryProvider.overrideWithValue(clipboardProvider),
-          cryptographyRepositoryProvider.overrideWithValue(cryptoProvider),
-          deviceAuthRepositoryProvider.overrideWithValue(deviceAuthProvider),
+          cryptographyRepositoryProvider.overrideWithValue(cryptoRepoProvider),
+          cryptoServiceProvider.overrideWithValue(cryptoProvider),
+          biometricAuthRepositoryProvider.overrideWithValue(biometricAuthProvider),
           exportRepositoryProvider.overrideWithValue(exportProvider),
           filePickerServiceProvider.overrideWithValue(filePickerProvider),
           importRepositoryProvider.overrideWithValue(importProvider),
           passwordGeneratorRepositoryProvider.overrideWithValue(passwordGeneratorProvider),
-          saltRepositoryProvider.overrideWithValue(saltProvider),
+          cryptoUtilsRepositoryProvider.overrideWithValue(cryptoUtilsProvider),
           storageServiceProvider.overrideWithValue(storageProvider),
           vaultRepositoryProvider.overrideWithValue(vaultProvider),
         ],

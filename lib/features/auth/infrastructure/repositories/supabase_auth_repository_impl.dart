@@ -8,14 +8,8 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
   const SupabaseAuthRepositoryImpl(this.client);
 
   @override
-  Future<void> createAccount({
-    required String email,
-    required String password,
-  }) async {
-    final response = await client.auth.signUp(
-      email: email,
-      password: password,
-    );
+  Future<void> createAccount({required String email, required String password}) async {
+    final response = await client.auth.signUp(email: email, password: password);
     if (response.user == null) {
       throw Exception('Failed to create account');
     }
@@ -24,10 +18,7 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> signIn({required String email, required String password}) async {
     try {
-      final response = await client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+      final response = await client.auth.signInWithPassword(email: email, password: password);
       if (response.user == null) {
         throw Exception('Failed to sign in');
       }
@@ -42,20 +33,6 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> deleteAccount() async {
-    final user = client.auth.currentUser;
-    if (user == null) {
-      throw Exception('No user signed in');
-    }
-    // Supabase does not allow users to delete themselves directly from client SDK
-    // You may want to sign out the user instead, or call a custom function on your backend
-    await client.auth.signOut();
-    throw UnimplementedError(
-      'Delete account is not supported from client SDK.',
-    );
-  }
-
-  @override
   Future<OpmUser> getCurrentUser() async {
     try {
       final user = client.auth.currentUser;
@@ -63,5 +40,15 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
     } on AuthException catch (e) {
       throw Exception(e.message);
     }
+  }
+
+  @override
+  Future<bool> isSessionExpired() async {
+    return client.auth.currentSession == null || client.auth.currentSession!.isExpired;
+  }
+
+  @override
+  Future<void> refreshSession() async {
+    await client.auth.refreshSession();
   }
 }

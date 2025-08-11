@@ -1,14 +1,18 @@
 import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart';
-import 'package:open_password_manager/features/auth/domain/repositories/device_auth_repository.dart';
+import 'package:open_password_manager/features/auth/domain/repositories/biometric_auth_repository.dart';
 
 class BiometricSignIn {
   final AuthRepository authRepo;
-  final DeviceAuthRepository deviceAuthRepo;
+  final BiometricAuthRepository biometricAuthRepo;
 
-  BiometricSignIn(this.authRepo, this.deviceAuthRepo);
+  BiometricSignIn(this.authRepo, this.biometricAuthRepo);
 
-  Future<void> call() async {
-    final creds = await deviceAuthRepo.authenticate();
-    await authRepo.signIn(email: creds.email, password: creds.password);
+  Future<bool> call() async {
+    final result = await biometricAuthRepo.authenticate();
+    if (!result) return false;
+
+    await authRepo.refreshSession();
+
+    return true;
   }
 }

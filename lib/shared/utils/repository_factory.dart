@@ -1,7 +1,7 @@
 import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart';
-import 'package:open_password_manager/features/auth/domain/repositories/device_auth_repository.dart';
+import 'package:open_password_manager/features/auth/domain/repositories/biometric_auth_repository.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/appwrite_auth_repository_impl.dart';
-import 'package:open_password_manager/features/auth/infrastructure/repositories/device_auth_repository_impl.dart';
+import 'package:open_password_manager/features/auth/infrastructure/repositories/biometric_auth_repository_impl.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/firebase_auth_repository_impl.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/supabase_auth_repository_impl.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
@@ -14,14 +14,15 @@ import 'package:open_password_manager/features/vault/infrastructure/repositories
 import 'package:open_password_manager/features/vault/infrastructure/repositories/import_repository_impl.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/password_generator_repository_impl.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/supabase_entry_repository_impl.dart';
+import 'package:open_password_manager/shared/application/services/crypto_service.dart';
 import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
-import 'package:open_password_manager/shared/domain/repositories/salt_repository.dart';
-import 'package:open_password_manager/shared/infrastructure/repositories/salt/appwrite_salt_repository_impl.dart';
+import 'package:open_password_manager/shared/domain/repositories/crypto_utils_repository.dart';
+import 'package:open_password_manager/shared/infrastructure/repositories/crypto_utils/appwrite_crypto_utils_repository_impl.dart';
 import 'package:open_password_manager/shared/infrastructure/repositories/clipboard_repository_impl.dart';
 import 'package:open_password_manager/shared/infrastructure/repositories/cryptography_repository_impl.dart';
-import 'package:open_password_manager/shared/infrastructure/repositories/salt/firebase_salt_repository_impl.dart';
-import 'package:open_password_manager/shared/infrastructure/repositories/salt/supabase_salt_repository_impl.dart';
+import 'package:open_password_manager/shared/infrastructure/repositories/crypto_utils/firebase_crypto_utils_repository_impl.dart';
+import 'package:open_password_manager/shared/infrastructure/repositories/crypto_utils/supabase_crypto_utils_repository_impl.dart';
 import 'package:open_password_manager/shared/utils/hosting_provider.dart';
 import 'package:open_password_manager/shared/domain/entities/provider_config.dart';
 import 'package:open_password_manager/shared/utils/service_factory.dart';
@@ -57,20 +58,22 @@ class RepositoryFactory {
     return ImportRepositoryImpl.instance;
   }
 
-  CryptographyRepository getCryptoProvider() {
-    return CryptographyRepositoryImpl.instance;
+  CryptographyRepository getCryptoProvider(CryptoService cryptoService) {
+    return CryptographyRepositoryImpl(cryptoService);
   }
 
   PasswordGeneratorRepository getPasswordGeneratorProvider() {
     return PasswordGeneratorRepositoryImpl.instance;
   }
 
-  VaultRepository getPasswordProvider(ProviderConfig config) {
+  VaultRepository getVaultProvider(ProviderConfig config, CryptoService cryptoService) {
+    final cryptoProvider = getCryptoProvider(cryptoService);
+
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
         return FirebaseEntryRepositoryImpl(
           config: config.appConfig.firebaseConfig!,
-          cryptoRepo: getCryptoProvider(),
+          cryptoRepo: cryptoProvider,
         );
       case HostingProvider.supabase:
         if (config.supabaseClient == null) {
@@ -80,7 +83,7 @@ class RepositoryFactory {
         return SupabaseEntryRepositoryImpl(
           client: config.supabaseClient!,
           tableName: config.appConfig.supabaseConfig!.passwordDbName,
-          cryptoRepo: getCryptoProvider(),
+          cryptoRepo: cryptoProvider,
         );
       case HostingProvider.appwrite:
         if (config.appwriteClient == null) {
@@ -90,7 +93,7 @@ class RepositoryFactory {
         return AppwriteEntryRepositoryImpl(
           client: config.appwriteClient!,
           config: config.appConfig.appwriteConfig!,
-          cryptoRepo: getCryptoProvider(),
+          cryptoRepo: cryptoProvider,
         );
     }
   }
@@ -99,17 +102,17 @@ class RepositoryFactory {
     return ClipboardRepositoryImpl.instance;
   }
 
-  SaltRepository getSaltProvider(ProviderConfig config) {
+  CryptoUtilsRepository getCryptoUtilsProvider(ProviderConfig config) {
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
-        return FirebaseSaltRepositoryImpl(
+        return FirebaseCryptoUtilsRepositoryImpl(
           collectionId: config.appConfig.firebaseConfig!.saltCollectionName,
         );
       case HostingProvider.supabase:
         if (config.supabaseClient == null) {
           throw Exception("Invalid supabase client configuration");
         }
-        return SupabaseSaltRepositoryImpl(
+        return SupabaseCryptoUtilsRepositoryImpl(
           client: config.supabaseClient!,
           tableName: config.appConfig.supabaseConfig!.saltDbName,
         );
@@ -117,7 +120,7 @@ class RepositoryFactory {
         if (config.appwriteClient == null) {
           throw Exception("Invalid appwrite client configuration");
         }
-        return AppwriteSaltRepositoryImpl(
+        return AppwriteCryptoUtilsRepositoryImpl(
           client: config.appwriteClient!,
           databaseId: config.appConfig.appwriteConfig!.databaseId,
           collectionId: config.appConfig.appwriteConfig!.saltCollectionId,
@@ -125,7 +128,7 @@ class RepositoryFactory {
     }
   }
 
-  DeviceAuthRepository getDeviceAuthProvider() {
-    return DeviceAuthRepositoryImpl(serviceFactory.getStorageService());
+  BiometricAuthRepository getBiometricAuthProvider() {
+    return BiometricAuthRepositoryImpl();
   }
 }

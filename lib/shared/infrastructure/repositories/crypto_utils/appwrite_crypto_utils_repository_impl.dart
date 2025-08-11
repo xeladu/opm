@@ -1,13 +1,14 @@
 import 'package:appwrite/appwrite.dart';
-import 'package:open_password_manager/shared/domain/repositories/salt_repository.dart';
+import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
+import 'package:open_password_manager/shared/domain/repositories/crypto_utils_repository.dart';
 
-class AppwriteSaltRepositoryImpl implements SaltRepository {
+class AppwriteCryptoUtilsRepositoryImpl implements CryptoUtilsRepository {
   final Client client;
   final String databaseId;
   final String collectionId;
   late Databases _db;
 
-  AppwriteSaltRepositoryImpl({
+  AppwriteCryptoUtilsRepositoryImpl({
     required this.client,
     required this.databaseId,
     required this.collectionId,
@@ -16,33 +17,28 @@ class AppwriteSaltRepositoryImpl implements SaltRepository {
   }
 
   @override
-  Future<String?> getUserSalt(String userId) async {
+  Future<CryptoUtils> getCryptoUtils(String userId) async {
     try {
-      // Use the userId directly as the document ID
       final document = await _db.getDocument(
         databaseId: databaseId,
         collectionId: collectionId,
         documentId: userId,
       );
 
-      return document.data['salt'] as String?;
+      return CryptoUtils.fromJson(document.data);
     } catch (e) {
-      return null;
+      return CryptoUtils.empty();
     }
   }
 
   @override
-  Future<void> saveUserSalt(String userId, String salt) async {
+  Future<void> saveCryptoUtils(String userId, CryptoUtils utils) async {
     try {
       await _db.createDocument(
         databaseId: databaseId,
         collectionId: collectionId,
         documentId: userId,
-        data: {
-          'salt': salt,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        },
+        data: {'salt': utils.salt, 'encMek': utils.encryptedMasterKey},
         permissions: [
           Permission.read(Role.user(userId)),
           Permission.update(Role.user(userId)),

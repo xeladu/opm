@@ -8,16 +8,9 @@ class AppwriteAuthRepositoryImpl implements AuthRepository {
   AppwriteAuthRepositoryImpl(Client client) : _account = Account(client);
 
   @override
-  Future<void> createAccount({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> createAccount({required String email, required String password}) async {
     try {
-      await _account.create(
-        userId: ID.unique(),
-        email: email,
-        password: password,
-      );
+      await _account.create(userId: ID.unique(), email: email, password: password);
     } on AppwriteException catch (e) {
       throw Exception(e.message ?? 'Failed to create account');
     }
@@ -42,15 +35,6 @@ class AppwriteAuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> deleteAccount() async {
-    try {
-      await _account.deleteSession(sessionId: 'current');
-    } on AppwriteException catch (e) {
-      throw Exception(e.message ?? 'Failed to delete account');
-    }
-  }
-
-  @override
   Future<OpmUser> getCurrentUser() async {
     try {
       final user = await _account.get();
@@ -58,5 +42,22 @@ class AppwriteAuthRepositoryImpl implements AuthRepository {
     } on AppwriteException catch (e) {
       throw Exception(e.message ?? 'Failed to retrieve account');
     }
+  }
+
+  @override
+  Future<void> refreshSession() async {
+    try {
+      await _account.updateSession(sessionId: 'current');
+    } on AppwriteException catch (e) {
+      throw Exception(e.message ?? 'Failed to refresh session');
+    }
+  }
+
+  @override
+  Future<bool> isSessionExpired() async {
+    final session = await _account.getSession(sessionId: 'current');
+    final exprDate = DateTime.parse(session.expire);
+
+    return exprDate.isAfter(DateTime.now());
   }
 }

@@ -1,27 +1,28 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:open_password_manager/shared/domain/entities/credentials.dart';
 
 class StorageService {
   static AndroidOptions _getAndroidOptions() =>
-      AndroidOptions(encryptedSharedPreferences: true);
-  final _storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
+      const AndroidOptions(encryptedSharedPreferences: true);
+  static IOSOptions _getIosOptions() =>
+      const IOSOptions(accessibility: KeychainAccessibility.first_unlock);
 
-  final _credentialsStorageKey = "credentials";
+  final _storage = FlutterSecureStorage(aOptions: _getAndroidOptions(), iOptions: _getIosOptions());
 
-  Future<void> storeAuthCredentials(Credentials credentials) async {
-    await _storage.write(
-      key: _credentialsStorageKey,
-      value: jsonEncode(credentials.toJson()),
-    );
+  final _masterEncryptionKey = "masterKey";
+
+  Future<bool> hasMasterKey() async {
+    return await _storage.containsKey(key: _masterEncryptionKey);
   }
 
-  Future<Credentials> loadAuthCredentials() async {
-    final storageValue = await _storage.read(key: _credentialsStorageKey);
+  Future<void> storeBiometricMasterEncryptionKey(Uint8List key) async {
+    await _storage.write(key: _masterEncryptionKey, value: base64Encode(key));
+  }
 
-    return storageValue == null
-        ? Credentials.empty()
-        : Credentials.fromJson(jsonDecode(storageValue));
+  Future<Uint8List> loadBiometricMasterEncryptionKey() async {
+    final storageValue = await _storage.read(key: _masterEncryptionKey);
+    return storageValue == null ? Uint8List(0) : base64Decode(storageValue);
   }
 }

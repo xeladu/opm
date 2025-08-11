@@ -17,12 +17,12 @@ void main() {
   for (var sizeEntry in DisplaySizes.sizes.entries) {
     group('CreateAccountPage', () {
       late MockAuthRepository mockAuthRepository;
-      late MockSaltRepository mockSaltRepository;
+      late MockCryptoUtilsRepository mockCryptoUtilsRepository;
       final deviceSizeName = sizeEntry.key;
 
       setUp(() {
         mockAuthRepository = MockAuthRepository();
-        mockSaltRepository = MockSaltRepository();
+        mockCryptoUtilsRepository = MockCryptoUtilsRepository();
       });
 
       testWidgets('Test default elements ($deviceSizeName)', (tester) async {
@@ -36,21 +36,15 @@ void main() {
 
         expect(
           find.byType(CreateAccoutPageMobile),
-          DisplaySizeHelper.isMobile(sizeEntry.value)
-              ? findsOneWidget
-              : findsNothing,
+          DisplaySizeHelper.isMobile(sizeEntry.value) ? findsOneWidget : findsNothing,
         );
         expect(
           find.byType(CreateAccoutPageDesktop),
-          DisplaySizeHelper.isMobile(sizeEntry.value)
-              ? findsNothing
-              : findsOneWidget,
+          DisplaySizeHelper.isMobile(sizeEntry.value) ? findsNothing : findsOneWidget,
         );
       });
 
-      testWidgets('Test non matching passwords ($deviceSizeName)', (
-        tester,
-      ) async {
+      testWidgets('Test non matching passwords ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
         suppressOverflowErrors();
 
@@ -60,23 +54,15 @@ void main() {
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
-        await tester.enterText(
-          find.byType(PasswordFormField).first,
-          'password123',
-        );
-        await tester.enterText(
-          find.byType(PasswordFormField).last,
-          'password456',
-        );
+        await tester.enterText(find.byType(PasswordFormField).first, 'password123');
+        await tester.enterText(find.byType(PasswordFormField).last, 'password456');
         await tester.tap(find.byType(PrimaryButton));
         await tester.pump();
 
         expect(find.text('Passwords do not match'), findsNWidgets(2));
       });
 
-      testWidgets('Test navigation to sign in page ($deviceSizeName)', (
-        tester,
-      ) async {
+      testWidgets('Test navigation to sign in page ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
         suppressOverflowErrors();
 
@@ -96,9 +82,7 @@ void main() {
         expect(find.byType(SignInPage), findsOneWidget);
       });
 
-      testWidgets('Test missing password confirmation ($deviceSizeName)', (
-        tester,
-      ) async {
+      testWidgets('Test missing password confirmation ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
         suppressOverflowErrors();
 
@@ -108,10 +92,7 @@ void main() {
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
-        await tester.enterText(
-          find.byType(PasswordFormField).first,
-          'password123',
-        );
+        await tester.enterText(find.byType(PasswordFormField).first, 'password123');
         await tester.enterText(find.byType(PasswordFormField).last, '');
         await tester.tap(find.byType(PrimaryButton));
         await tester.pump();
@@ -129,23 +110,15 @@ void main() {
         ]);
 
         await tester.enterText(find.byType(EmailFormField), '');
-        await tester.enterText(
-          find.byType(PasswordFormField).first,
-          'password123',
-        );
-        await tester.enterText(
-          find.byType(PasswordFormField).last,
-          'password123',
-        );
+        await tester.enterText(find.byType(PasswordFormField).first, 'password123');
+        await tester.enterText(find.byType(PasswordFormField).last, 'password123');
         await tester.tap(find.byType(PrimaryButton));
         await tester.pump();
 
         expect(find.text('Please enter a value'), findsOneWidget);
       });
 
-      testWidgets('Test missing passwords error ($deviceSizeName)', (
-        tester,
-      ) async {
+      testWidgets('Test missing passwords error ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
         suppressOverflowErrors();
 
@@ -175,7 +148,7 @@ void main() {
         ).thenAnswer((_) async {});
 
         when(
-          mockSaltRepository.saveUserSalt(any, any),
+          mockCryptoUtilsRepository.saveCryptoUtils(any, any),
         ).thenAnswer((_) => Future.value(null));
 
         final sut = CreateAccountPage();
@@ -184,22 +157,13 @@ void main() {
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
-        await tester.enterText(
-          find.byType(PasswordFormField).first,
-          'password123',
-        );
-        await tester.enterText(
-          find.byType(PasswordFormField).last,
-          'password123',
-        );
+        await tester.enterText(find.byType(PasswordFormField).first, 'password123');
+        await tester.enterText(find.byType(PasswordFormField).last, 'password123');
         await tester.tap(find.byType(PrimaryButton));
         await tester.pump();
 
         verify(
-          mockAuthRepository.createAccount(
-            email: 'test@example.com',
-            password: 'password123',
-          ),
+          mockAuthRepository.createAccount(email: 'test@example.com', password: 'password123'),
         ).called(1);
       });
     });

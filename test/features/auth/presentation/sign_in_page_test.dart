@@ -1,13 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart';
-import 'package:open_password_manager/features/auth/infrastructure/providers/device_auth_repository_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
+import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
+import 'package:open_password_manager/features/vault/presentation/pages/vault_list_page.dart';
+import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
-import 'package:open_password_manager/shared/domain/entities/credentials.dart';
+import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
-import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/crypto_utils_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
@@ -25,18 +28,23 @@ void main() {
   for (var sizeEntry in DisplaySizes.sizes.entries) {
     group('SignInPage', () {
       late MockAuthRepository mockAuthRepository;
-      late MockDeviceAuthRepository mockDeviceAuthRepository;
+      late MockBiometricAuthRepository mockBiometricAuthRepository;
       late MockCryptographyRepository mockCryptographyRepository;
-      late MockSaltRepository mockSaltRepository;
       late MockStorageService mockStorageService;
+      late MockCryptoUtilsRepository mockCryptoUtilsRepository;
+      late MockCryptoService mockCryptoService;
+      late MockVaultRepository mockVaultRepository;
+
       final deviceSizeName = sizeEntry.key;
 
       setUp(() {
         mockAuthRepository = MockAuthRepository();
-        mockDeviceAuthRepository = MockDeviceAuthRepository();
+        mockBiometricAuthRepository = MockBiometricAuthRepository();
         mockCryptographyRepository = MockCryptographyRepository();
-        mockSaltRepository = MockSaltRepository();
         mockStorageService = MockStorageService();
+        mockCryptoUtilsRepository = MockCryptoUtilsRepository();
+        mockCryptoService = MockCryptoService();
+        mockVaultRepository = MockVaultRepository();
       });
 
       testWidgets('Test default elements ($deviceSizeName)', (tester) async {
@@ -132,56 +140,68 @@ void main() {
           mockAuthRepository.signIn(email: anyNamed('email'), password: anyNamed('password')),
         ).thenAnswer((_) async {});
         when(mockAuthRepository.getCurrentUser()).thenAnswer((_) => Future.value(OpmUser.empty()));
+        when(mockAuthRepository.isSessionExpired()).thenAnswer((_) => Future.value(true));
 
-        when(mockSaltRepository.getUserSalt(any)).thenAnswer((_) => Future.value(""));
-
-        when(mockDeviceAuthRepository.isSupported()).thenAnswer((_) => Future.value(false));
         when(
-          mockDeviceAuthRepository.hasStoredCredentials(),
-        ).thenAnswer((_) => Future.value(false));
+          mockCryptoUtilsRepository.getCryptoUtils(any),
+        ).thenAnswer((_) => Future.value(CryptoUtils.empty()));
+
+        when(mockBiometricAuthRepository.isSupported()).thenAnswer((_) => Future.value(false));
+
+        when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(false));
+
+        when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
+
+        when(mockVaultRepository.getAllEntries()).thenAnswer((_) => Future.value([]));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          deviceAuthRepositoryProvider.overrideWithValue(mockDeviceAuthRepository),
+          biometricAuthRepositoryProvider.overrideWithValue(mockBiometricAuthRepository),
           cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
-          saltRepositoryProvider.overrideWithValue(mockSaltRepository),
+          cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptoServiceProvider.overrideWithValue(mockCryptoService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
         await tester.enterText(find.byType(PasswordFormField), 'password123');
         await tester.tap(find.byType(PrimaryButton));
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         verify(
           mockAuthRepository.signIn(email: 'test@example.com', password: 'password123'),
         ).called(1);
         verify(mockAuthRepository.getCurrentUser()).called(1);
+        verify(mockCryptoService.init(any, any, false)).called(1);
         expect(find.byType(ShadToast), findsOneWidget);
         expect(find.textContaining("Sign in successful"), findsOneWidget);
+        expect(find.byType(VaultListPage), findsOneWidget);
       });
 
       testWidgets('Test failed biometric sign in ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
         suppressOverflowErrors();
 
-        when(
-          mockAuthRepository.signIn(email: anyNamed('email'), password: anyNamed('password')),
-        ).thenAnswer((_) async {});
+        when(mockAuthRepository.isSessionExpired()).thenAnswer((_) => Future.value(false));
         when(mockAuthRepository.getCurrentUser()).thenAnswer((_) => Future.value(OpmUser.empty()));
 
-        when(mockSaltRepository.getUserSalt(any)).thenAnswer((_) => Future.value(""));
+        when(
+          mockCryptoUtilsRepository.getCryptoUtils(any),
+        ).thenAnswer((_) => Future.value(CryptoUtils.empty()));
 
-        when(mockDeviceAuthRepository.isSupported()).thenAnswer((_) => Future.value(true));
-        when(mockDeviceAuthRepository.hasStoredCredentials()).thenAnswer((_) => Future.value(true));
-        when(mockDeviceAuthRepository.authenticate()).thenThrow(Exception("error"));
+        when(mockBiometricAuthRepository.isSupported()).thenAnswer((_) => Future.value(true));
+        when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(true));
+        when(mockBiometricAuthRepository.authenticate()).thenThrow(Exception("error"));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          deviceAuthRepositoryProvider.overrideWithValue(mockDeviceAuthRepository),
+          biometricAuthRepositoryProvider.overrideWithValue(mockBiometricAuthRepository),
           cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
-          saltRepositoryProvider.overrideWithValue(mockSaltRepository),
+          cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
         ]);
 
         // wait for biometric auth
@@ -189,48 +209,59 @@ void main() {
 
         verifyNever(mockAuthRepository.signIn(email: 'a', password: 'b'));
         verifyNever(mockAuthRepository.getCurrentUser());
-        verify(mockDeviceAuthRepository.isSupported()).called(1);
-        verify(mockDeviceAuthRepository.hasStoredCredentials()).called(1);
-        verify(mockDeviceAuthRepository.authenticate()).called(1);
+        verify(mockBiometricAuthRepository.isSupported()).called(1);
+        verify(mockStorageService.hasMasterKey()).called(1);
+        verify(mockBiometricAuthRepository.authenticate()).called(1);
+        verifyNever(mockCryptoService.init(any, any, any));
         expect(find.byType(ShadToast), findsOneWidget);
         expect(find.textContaining("Biometric authentication failed"), findsOneWidget);
+        expect(find.byType(SignInPage), findsOneWidget);
       });
 
       testWidgets('Test valid biometric sign in ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
         suppressOverflowErrors();
 
-        when(
-          mockAuthRepository.signIn(email: anyNamed('email'), password: anyNamed('password')),
-        ).thenAnswer((_) async {});
+        when(mockAuthRepository.isSessionExpired()).thenAnswer((_) => Future.value(false));
         when(mockAuthRepository.getCurrentUser()).thenAnswer((_) => Future.value(OpmUser.empty()));
 
-        when(mockSaltRepository.getUserSalt(any)).thenAnswer((_) => Future.value(""));
-
-        when(mockDeviceAuthRepository.isSupported()).thenAnswer((_) => Future.value(true));
-        when(mockDeviceAuthRepository.hasStoredCredentials()).thenAnswer((_) => Future.value(true));
         when(
-          mockDeviceAuthRepository.authenticate(),
-        ).thenAnswer((_) => Future.value(Credentials(email: "a", password: "b")));
+          mockCryptoUtilsRepository.getCryptoUtils(any),
+        ).thenAnswer((_) => Future.value(CryptoUtils.empty()));
+
+        when(mockBiometricAuthRepository.isSupported()).thenAnswer((_) => Future.value(true));
+        when(mockBiometricAuthRepository.authenticate()).thenAnswer((_) => Future.value(true));
+
+        when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(true));
+
+        when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
+
+        when(mockVaultRepository.getAllEntries()).thenAnswer((_) => Future.value([]));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          deviceAuthRepositoryProvider.overrideWithValue(mockDeviceAuthRepository),
+          biometricAuthRepositoryProvider.overrideWithValue(mockBiometricAuthRepository),
           cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
-          saltRepositoryProvider.overrideWithValue(mockSaltRepository),
+          cryptoServiceProvider.overrideWithValue(mockCryptoService),
+          cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
         ]);
 
         // wait for biometric auth
         await tester.pump(Duration(milliseconds: 300));
 
-        verify(mockAuthRepository.signIn(email: 'a', password: 'b')).called(1);
+        verify(mockAuthRepository.isSessionExpired()).called(1);
         verify(mockAuthRepository.getCurrentUser()).called(1);
-        verify(mockDeviceAuthRepository.isSupported()).called(2);
-        verify(mockDeviceAuthRepository.hasStoredCredentials()).called(2);
-        verify(mockDeviceAuthRepository.authenticate()).called(1);
+        verify(mockBiometricAuthRepository.isSupported()).called(1);
+        verify(mockStorageService.hasMasterKey()).called(1);
+        verify(mockBiometricAuthRepository.authenticate()).called(1);
+        verify(mockCryptoService.init(any, any, any)).called(1);
+        verify(mockVaultRepository.getAllEntries()).called(1);
         expect(find.byType(ShadToast), findsOneWidget);
         expect(find.textContaining("Sign in successful"), findsOneWidget);
+        expect(find.byType(VaultListPage), findsOneWidget);
       });
 
       testWidgets('Test biometric setup prompt with confirm ($deviceSizeName)', (tester) async {
@@ -240,22 +271,29 @@ void main() {
         when(
           mockAuthRepository.signIn(email: anyNamed('email'), password: anyNamed('password')),
         ).thenAnswer((_) async {});
+        when(mockAuthRepository.isSessionExpired()).thenAnswer((_) => Future.value(false));
         when(mockAuthRepository.getCurrentUser()).thenAnswer((_) => Future.value(OpmUser.empty()));
 
-        when(mockSaltRepository.getUserSalt(any)).thenAnswer((_) => Future.value(""));
-
-        when(mockDeviceAuthRepository.isSupported()).thenAnswer((_) => Future.value(true));
         when(
-          mockDeviceAuthRepository.hasStoredCredentials(),
-        ).thenAnswer((_) => Future.value(false));
+          mockCryptoUtilsRepository.getCryptoUtils(any),
+        ).thenAnswer((_) => Future.value(CryptoUtils.empty()));
+
+        when(mockBiometricAuthRepository.isSupported()).thenAnswer((_) => Future.value(true));
+        when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(false));
+
+        when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
+
+        when(mockVaultRepository.getAllEntries()).thenAnswer((_) => Future.value([]));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          deviceAuthRepositoryProvider.overrideWithValue(mockDeviceAuthRepository),
+          biometricAuthRepositoryProvider.overrideWithValue(mockBiometricAuthRepository),
           cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
-          saltRepositoryProvider.overrideWithValue(mockSaltRepository),
+          cryptoServiceProvider.overrideWithValue(mockCryptoService),
+          cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
           storageServiceProvider.overrideWithValue(mockStorageService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
@@ -267,8 +305,8 @@ void main() {
           mockAuthRepository.signIn(email: 'test@example.com', password: 'password123'),
         ).called(1);
         verify(mockAuthRepository.getCurrentUser()).called(1);
-        verify(mockDeviceAuthRepository.isSupported()).called(2);
-        verify(mockDeviceAuthRepository.hasStoredCredentials()).called(2);
+        verify(mockBiometricAuthRepository.isSupported()).called(2);
+        verify(mockStorageService.hasMasterKey()).called(1);
 
         expect(find.text("Biometrics Authentication"), findsOneWidget);
         expect(find.text("Enable"), findsOneWidget);
@@ -278,9 +316,10 @@ void main() {
         await tester.tap(
           find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Enable"),
         );
-        await tester.pump(Duration(milliseconds: 200));
+        await tester.pumpAndSettle();
 
-        verify(mockStorageService.storeAuthCredentials(any)).called(1);
+        verify(mockCryptoService.init(any, any, true)).called(1);
+        expect(find.byType(VaultListPage), findsOneWidget);
       });
 
       testWidgets('Test biometric setup prompt with cancel ($deviceSizeName)', (tester) async {
@@ -290,22 +329,29 @@ void main() {
         when(
           mockAuthRepository.signIn(email: anyNamed('email'), password: anyNamed('password')),
         ).thenAnswer((_) async {});
+        when(mockAuthRepository.isSessionExpired()).thenAnswer((_) => Future.value(false));
         when(mockAuthRepository.getCurrentUser()).thenAnswer((_) => Future.value(OpmUser.empty()));
 
-        when(mockSaltRepository.getUserSalt(any)).thenAnswer((_) => Future.value(""));
-
-        when(mockDeviceAuthRepository.isSupported()).thenAnswer((_) => Future.value(true));
         when(
-          mockDeviceAuthRepository.hasStoredCredentials(),
-        ).thenAnswer((_) => Future.value(false));
+          mockCryptoUtilsRepository.getCryptoUtils(any),
+        ).thenAnswer((_) => Future.value(CryptoUtils.empty()));
+
+        when(mockBiometricAuthRepository.isSupported()).thenAnswer((_) => Future.value(true));
+        when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(false));
+
+        when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
+
+        when(mockVaultRepository.getAllEntries()).thenAnswer((_) => Future.value([]));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          deviceAuthRepositoryProvider.overrideWithValue(mockDeviceAuthRepository),
+          biometricAuthRepositoryProvider.overrideWithValue(mockBiometricAuthRepository),
           cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
-          saltRepositoryProvider.overrideWithValue(mockSaltRepository),
+          cryptoServiceProvider.overrideWithValue(mockCryptoService),
+          cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
           storageServiceProvider.overrideWithValue(mockStorageService),
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
@@ -317,8 +363,8 @@ void main() {
           mockAuthRepository.signIn(email: 'test@example.com', password: 'password123'),
         ).called(1);
         verify(mockAuthRepository.getCurrentUser()).called(1);
-        verify(mockDeviceAuthRepository.isSupported()).called(2);
-        verify(mockDeviceAuthRepository.hasStoredCredentials()).called(2);
+        verify(mockBiometricAuthRepository.isSupported()).called(2);
+        verify(mockStorageService.hasMasterKey()).called(1);
 
         expect(find.text("Biometrics Authentication"), findsOneWidget);
         expect(find.text("Enable"), findsOneWidget);
@@ -328,9 +374,10 @@ void main() {
         await tester.tap(
           find.byWidgetPredicate((w) => w is SecondaryButton && w.caption == "Skip for now"),
         );
-        await tester.pump(Duration(milliseconds: 200));
+        await tester.pumpAndSettle();
 
-        verifyNever(mockStorageService.storeAuthCredentials(any));
+        verify(mockCryptoService.init(any, any, false)).called(1);
+        expect(find.byType(VaultListPage), findsOneWidget);
       });
 
       testWidgets('Test repository throws error ($deviceSizeName)', (tester) async {

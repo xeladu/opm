@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/application/providers/biometric_auth_available_provider.dart';
+import 'package:open_password_manager/features/auth/application/use_cases/biometric_sign_in.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/sign_in.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
-import 'package:open_password_manager/features/auth/infrastructure/providers/device_auth_repository_provider.dart';
+import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_list_page.dart';
+import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
+import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
-import 'package:open_password_manager/features/auth/application/services/crypto_service.dart';
-import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
-import 'package:open_password_manager/shared/domain/entities/credentials.dart';
-import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
-import 'package:open_password_manager/shared/infrastructure/providers/salt_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/loading_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
@@ -84,11 +82,8 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     );
   }
 
-  Future<void> _handleSignIn({String? email, String? password}) async {
-    // form validation only if data comes from the form and is not passed in
-    if (email == null && password == null) {
-      if (!(_formKey.currentState?.saveAndValidate() ?? false)) return;
-    }
+  Future<void> _handleSignIn() async {
+    if (!(_formKey.currentState?.saveAndValidate() ?? false)) return;
 
     setState(() {
       _isLoading = true;
@@ -99,23 +94,18 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     final useCase = SignIn(authRepo);
 
     try {
-      final String emailCredential = email ?? data['email'];
-      final String passwordCredential = password ?? data['password'];
+      final String emailCredential = data['email'];
+      final String passwordCredential = data['password'];
       await useCase(email: emailCredential, password: passwordCredential);
 
       // Get user info first
       final activeUser = await authRepo.getCurrentUser();
-
-      // Initialize crypto with shared salt management
-      final cryptoRepo = ref.read(cryptographyRepositoryProvider);
-      final saltRepo = ref.read(saltRepositoryProvider);
-      final cryptoService = CryptoService(cryptoRepo: cryptoRepo, saltRepo: saltRepo);
-
-      await cryptoService.initWithSharedSalt(passwordCredential, activeUser.id);
-
       ref.read(opmUserProvider.notifier).setUser(activeUser);
 
-      await _askForBiometricLoginSetup();
+      final enableBiometricSignIn = await _askForBiometricLoginSetup();
+
+      final cryptoService = ref.read(cryptoServiceProvider);
+      await cryptoService.init(activeUser.id, data['password'], enableBiometricSignIn);
 
       if (mounted) {
         ToastService.show(context, 'Sign in successful!');
@@ -141,10 +131,27 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     ref.listen<AsyncValue<bool>>(biometricAuthAvailableProvider, (prev, next) async {
       if (next.hasValue && next.value!) {
         try {
-          final credentials = await ref.read(deviceAuthRepositoryProvider).authenticate();
-          if (credentials == Credentials.empty()) return;
+          final authRepo = ref.read(authRepositoryProvider);
+          final biometricAuthRepo = ref.read(biometricAuthRepositoryProvider);
 
-          await _handleSignIn(email: credentials.email, password: credentials.password);
+          final useCase = BiometricSignIn(authRepo, biometricAuthRepo);
+          final didAuthenticate = await useCase();
+
+          if (!didAuthenticate) return;
+
+          final activeUser = await authRepo.getCurrentUser();
+          ref.read(opmUserProvider.notifier).setUser(activeUser);
+
+          final cryptoService = ref.read(cryptoServiceProvider);
+          await cryptoService.init(activeUser.id, null, true);
+
+          if (mounted) {
+            ToastService.show(context, 'Sign in successful!');
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const VaultListPage()),
+            );
+          }
         } on Exception catch (ex, st) {
           LogService.recordFlutterFatalError(FlutterErrorDetails(exception: ex, stack: st));
           if (mounted) {
@@ -155,29 +162,35 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     });
   }
 
-  Future<void> _askForBiometricLoginSetup() async {
-    try {
-      final canUseBiometrics = await ref.read(deviceAuthRepositoryProvider).isSupported();
-      final isAlreadySetUp = await ref.read(deviceAuthRepositoryProvider).hasStoredCredentials();
+  Future<bool> _askForBiometricLoginSetup() async {
+    final biometricAuthRepo = ref.read(biometricAuthRepositoryProvider);
+    final appSettings = ref.read(appSettingsProvider);
 
-      if (!canUseBiometrics || isAlreadySetUp) return;
+    try {
+      final canUseBiometrics = await biometricAuthRepo.isSupported();
+      if (!canUseBiometrics) return false;
+
+      final isAlreadySetUp = appSettings.biometricAuthEnabled;
+      if (isAlreadySetUp) return true;
 
       if (mounted) {
         final result = await DialogService.showBiometricsSetupConfirmation(context);
-        if (result != true) return;
+        if (result != true) return false;
 
-        final email = _formKey.currentState!.value["email"];
-        final password = _formKey.currentState!.value["password"];
-
-        await ref
-            .read(storageServiceProvider)
-            .storeAuthCredentials(Credentials(email: email, password: password));
+        final currentSettings = appSettings;
+        ref
+            .read(appSettingsProvider.notifier)
+            .setSettings(currentSettings.copyWith(newBiometricAuthEnabled: true));
       }
+
+      return true;
     } on Exception catch (ex, st) {
       LogService.recordFlutterFatalError(FlutterErrorDetails(exception: ex, stack: st));
       if (mounted) {
         ToastService.showError(context, "Could not enable biometric authentication!");
       }
+
+      return false;
     }
   }
 }

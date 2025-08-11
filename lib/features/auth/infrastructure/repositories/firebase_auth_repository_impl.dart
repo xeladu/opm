@@ -4,15 +4,9 @@ import 'package:open_password_manager/features/auth/domain/repositories/auth_rep
 
 class FirebaseAuthRepositoryImpl implements AuthRepository {
   @override
-  Future<void> createAccount({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> createAccount({required String email, required String password}) async {
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message ?? 'Failed to create account');
     }
@@ -21,10 +15,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> signIn({required String email, required String password}) async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message ?? 'Failed to sign in');
     }
@@ -36,20 +27,6 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> deleteAccount() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.delete();
-      } else {
-        throw Exception('No user signed in');
-      }
-    } on FirebaseAuthException catch (e) {
-      throw Exception(e.message ?? 'Failed to delete account');
-    }
-  }
-
-  @override
   Future<OpmUser> getCurrentUser() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -58,5 +35,15 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message ?? 'Failed to retrieve account');
     }
+  }
+
+  @override
+  Future<bool> isSessionExpired() async {
+    return FirebaseAuth.instance.currentUser == null;
+  }
+
+  @override
+  Future<void> refreshSession() async {
+    // not supported, managed by Firebase internally
   }
 }
