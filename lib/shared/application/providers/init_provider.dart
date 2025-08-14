@@ -9,7 +9,6 @@ final initProvider = AsyncNotifierProvider.autoDispose<InitState, void>(InitStat
 class InitState extends AutoDisposeAsyncNotifier<void> {
   @override
   FutureOr<void> build() async {
-    await Future.delayed(Duration(seconds: 2));
     final settings = await ref.read(settingsRepositoryProvider).load();
 
     ref.read(settingsProvider.notifier).setSettings(settings);
