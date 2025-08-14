@@ -1,6 +1,7 @@
 import 'package:mockito/annotations.dart';
 import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart';
 import 'package:open_password_manager/features/auth/domain/repositories/biometric_auth_repository.dart';
+import 'package:open_password_manager/features/settings/domain/repositories/settings_repository.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/import_repository.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
@@ -22,6 +23,7 @@ import 'package:open_password_manager/shared/utils/file_picker_service.dart';
   FilePickerService,
   ImportRepository,
   CryptoUtilsRepository,
+  SettingsRepository,
   StorageService,
   PasswordGeneratorRepository,
   VaultRepository,

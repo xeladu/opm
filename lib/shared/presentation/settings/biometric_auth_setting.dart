@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/application/providers/biometric_auth_available_provider.dart';
-import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
+import 'package:open_password_manager/features/settings/infrastructure/providers/settings_provider.dart';
+import 'package:open_password_manager/features/settings/infrastructure/providers/settings_repository_provider.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -19,17 +20,18 @@ class BiometricAuthSetting extends ConsumerWidget {
         ShadSwitch(
           label: Text("Use biometric authentication"),
           sublabel: Text("Sign in with your fingerprint or face ID"),
-          value: ref.watch(appSettingsProvider).biometricAuthEnabled,
+          value: ref.watch(settingsProvider).biometricAuthEnabled,
           enabled: biometricAvailable.when(
             data: (value) => value,
             error: (_, _) => false,
             loading: () => false,
           ),
-          onChanged: (value) {
-            final settings = ref.read(appSettingsProvider);
-            ref
-                .read(appSettingsProvider.notifier)
-                .setSettings(settings.copyWith(newBiometricAuthEnabled: value));
+          onChanged: (value) async {
+            final settings = ref.read(settingsProvider);
+            final newSettings = settings.copyWith(newBiometricAuthEnabled: value);
+            ref.read(settingsProvider.notifier).setSettings(newSettings);
+
+            await ref.read(settingsRepositoryProvider).save(newSettings);
           },
         ),
         ShadCard(

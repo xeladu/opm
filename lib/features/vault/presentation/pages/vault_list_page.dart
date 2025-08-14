@@ -5,9 +5,9 @@ import 'package:open_password_manager/features/vault/application/providers/filte
 import 'package:open_password_manager/features/vault/presentation/widgets/add_entry_button.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/desktop/vault_list_desktop.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/mobile/vault_list_mobile.dart';
+import 'package:open_password_manager/shared/presentation/loading.dart';
 import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
 import 'package:open_password_manager/style/ui.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 
 class VaultListPage extends ConsumerStatefulWidget {
   const VaultListPage({super.key});
@@ -23,7 +23,7 @@ class _State extends ConsumerState<VaultListPage> {
     final filterQuery = ref.watch(filterQueryProvider);
 
     return allPasswords.when(
-      loading: () => const ShadProgress(),
+      loading: () => Loading(text: "Getting your vault ready"),
       error: (error, stackTrace) => Text(error.toString()),
       data: (passwords) {
         final filteredPasswords = filterQuery.isEmpty

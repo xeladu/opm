@@ -4,18 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
+import 'package:open_password_manager/features/settings/infrastructure/providers/settings_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/import_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/password_generator_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
-import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
+import 'package:open_password_manager/features/settings/infrastructure/providers/settings_provider.dart';
 import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/file_picker_service_provider.dart';
+import 'package:open_password_manager/shared/application/providers/init_provider.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/crypto_utils_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/generic_error.dart';
+import 'package:open_password_manager/shared/presentation/loading.dart';
 import 'package:open_password_manager/shared/utils/bootstrapper.dart';
 import 'package:open_password_manager/shared/domain/entities/provider_config.dart';
 import 'package:open_password_manager/shared/utils/log_service.dart';
@@ -62,6 +65,7 @@ void main() async {
     final exportProvider = repoFactory.getExportProvider();
     final importProvider = repoFactory.getImportProvider();
     final passwordGeneratorProvider = repoFactory.getPasswordGeneratorProvider();
+    final settingsProvider = repoFactory.getSettingsProvider(storageProvider);
     final vaultProvider = repoFactory.getVaultProvider(providerConfig, cryptoProvider);
 
     runApp(
@@ -77,6 +81,7 @@ void main() async {
           importRepositoryProvider.overrideWithValue(importProvider),
           passwordGeneratorRepositoryProvider.overrideWithValue(passwordGeneratorProvider),
           cryptoUtilsRepositoryProvider.overrideWithValue(cryptoUtilsProvider),
+          settingsRepositoryProvider.overrideWithValue(settingsProvider),
           storageServiceProvider.overrideWithValue(storageProvider),
           vaultRepositoryProvider.overrideWithValue(vaultProvider),
         ],
@@ -99,29 +104,43 @@ class OpmApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return hasError
-        ? ShadApp(
-            theme: ShadThemeData(
-              colorScheme: ShadNeutralColorScheme.dark(),
-              brightness: Brightness.dark,
-            ),
-            home: Center(child: GenericError()),
-          )
-        : ShadApp(
-            title: 'OPM - Open Password Manager',
-            debugShowCheckedModeBanner: false,
-            themeMode: ref.watch(appSettingsProvider.select((s) => s.themeMode)),
-            theme: ShadThemeData(
-              colorScheme: ref.watch(appSettingsProvider.select((s) => s.lightColorScheme)),
-              textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter),
-              brightness: Brightness.light,
-            ),
-            darkTheme: ShadThemeData(
-              colorScheme: ref.watch(appSettingsProvider.select((s) => s.darkColorScheme)),
-              textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter),
-              brightness: Brightness.dark,
-            ),
-            home: const SignInPage(),
-          );
+    if (hasError) {
+      return ShadApp(
+        theme: ShadThemeData(
+          colorScheme: ShadNeutralColorScheme.dark(),
+          brightness: Brightness.dark,
+        ),
+        home: Center(child: GenericError()),
+      );
+    }
+
+    final initState = ref.watch(initProvider);
+
+    return ShadApp(
+      title: 'OPM - Open Password Manager',
+      debugShowCheckedModeBanner: false,
+      themeMode: ref.watch(settingsProvider.select((s) => s.themeMode)),
+      theme: ShadThemeData(
+        colorScheme: ref.watch(settingsProvider.select((s) => s.lightColorScheme)),
+        textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter),
+        brightness: Brightness.light,
+      ),
+      darkTheme: ShadThemeData(
+        colorScheme: ref.watch(settingsProvider.select((s) => s.darkColorScheme)),
+        textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter),
+        brightness: Brightness.dark,
+      ),
+      home: initState.when(
+        data: (_) => const SignInPage(),
+        loading: () => Loading(),
+        error: (_, _) => ShadApp(
+          theme: ShadThemeData(
+            colorScheme: ShadNeutralColorScheme.dark(),
+            brightness: Brightness.dark,
+          ),
+          home: Center(child: GenericError()),
+        ),
+      ),
+    );
   }
 }

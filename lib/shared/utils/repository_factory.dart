@@ -4,6 +4,8 @@ import 'package:open_password_manager/features/auth/infrastructure/repositories/
 import 'package:open_password_manager/features/auth/infrastructure/repositories/biometric_auth_repository_impl.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/firebase_auth_repository_impl.dart';
 import 'package:open_password_manager/features/auth/infrastructure/repositories/supabase_auth_repository_impl.dart';
+import 'package:open_password_manager/features/settings/domain/repositories/settings_repository.dart';
+import 'package:open_password_manager/features/settings/infrastructure/repositories/settings_repository_impl.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/import_repository.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
@@ -15,6 +17,7 @@ import 'package:open_password_manager/features/vault/infrastructure/repositories
 import 'package:open_password_manager/features/vault/infrastructure/repositories/password_generator_repository_impl.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/supabase_entry_repository_impl.dart';
 import 'package:open_password_manager/shared/application/services/crypto_service.dart';
+import 'package:open_password_manager/shared/application/services/storage_service.dart';
 import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/crypto_utils_repository.dart';
@@ -130,5 +133,9 @@ class RepositoryFactory {
 
   BiometricAuthRepository getBiometricAuthProvider() {
     return BiometricAuthRepositoryImpl();
+  }
+
+  SettingsRepository getSettingsProvider(StorageService storage) {
+    return SettingsRepositoryImpl(storage: storage);
   }
 }

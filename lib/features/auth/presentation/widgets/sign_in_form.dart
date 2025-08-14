@@ -7,7 +7,7 @@ import 'package:open_password_manager/features/auth/infrastructure/providers/aut
 import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_list_page.dart';
-import 'package:open_password_manager/shared/application/providers/app_settings_provider.dart';
+import 'package:open_password_manager/features/settings/infrastructure/providers/settings_provider.dart';
 import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/loading_button.dart';
@@ -164,7 +164,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
   Future<bool> _askForBiometricLoginSetup() async {
     final biometricAuthRepo = ref.read(biometricAuthRepositoryProvider);
-    final appSettings = ref.read(appSettingsProvider);
+    final appSettings = ref.read(settingsProvider);
 
     try {
       final canUseBiometrics = await biometricAuthRepo.isSupported();
@@ -179,7 +179,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
         final currentSettings = appSettings;
         ref
-            .read(appSettingsProvider.notifier)
+            .read(settingsProvider.notifier)
             .setSettings(currentSettings.copyWith(newBiometricAuthEnabled: true));
       }
 
