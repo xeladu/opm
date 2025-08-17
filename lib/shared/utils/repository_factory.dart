@@ -17,7 +17,6 @@ import 'package:open_password_manager/features/vault/infrastructure/repositories
 import 'package:open_password_manager/features/vault/infrastructure/repositories/password_generator_repository_impl.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/supabase_entry_repository_impl.dart';
 import 'package:open_password_manager/shared/application/services/crypto_service.dart';
-import 'package:open_password_manager/shared/application/services/storage_service.dart';
 import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/crypto_utils_repository.dart';
@@ -28,6 +27,7 @@ import 'package:open_password_manager/shared/infrastructure/repositories/crypto_
 import 'package:open_password_manager/shared/infrastructure/repositories/crypto_utils/supabase_crypto_utils_repository_impl.dart';
 import 'package:open_password_manager/shared/utils/hosting_provider.dart';
 import 'package:open_password_manager/shared/domain/entities/provider_config.dart';
+import 'package:open_password_manager/shared/application/services/storage_service.dart';
 import 'package:open_password_manager/shared/utils/service_factory.dart';
 
 class RepositoryFactory {
