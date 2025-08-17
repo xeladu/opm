@@ -66,8 +66,8 @@ Each backend provider requires a specific configuration file. Create a `config.j
         "messagingSenderId": "123456789",
         "appId": "1:123456789:web:abcdef",
         "measurementId": "G-XXXXXXXXXX",
-        "passwordCollectionPrefix": "passwords",
-        "saltCollectionName": "salts",
+        "vaultCollectionPrefix": "vault",
+        "utilsCollectionName": "utils",
     }
 }
 ```

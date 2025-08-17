@@ -85,7 +85,7 @@ class RepositoryFactory {
 
         return SupabaseEntryRepositoryImpl(
           client: config.supabaseClient!,
-          tableName: config.appConfig.supabaseConfig!.passwordDbName,
+          tableName: config.appConfig.supabaseConfig!.vaultDbName,
           cryptoRepo: cryptoProvider,
         );
       case HostingProvider.appwrite:
@@ -109,7 +109,7 @@ class RepositoryFactory {
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
         return FirebaseCryptoUtilsRepositoryImpl(
-          collectionId: config.appConfig.firebaseConfig!.saltCollectionName,
+          collectionId: config.appConfig.firebaseConfig!.utilsCollectionName,
         );
       case HostingProvider.supabase:
         if (config.supabaseClient == null) {
@@ -117,7 +117,7 @@ class RepositoryFactory {
         }
         return SupabaseCryptoUtilsRepositoryImpl(
           client: config.supabaseClient!,
-          tableName: config.appConfig.supabaseConfig!.saltDbName,
+          tableName: config.appConfig.supabaseConfig!.utilsDbName,
         );
       case HostingProvider.appwrite:
         if (config.appwriteClient == null) {
@@ -126,7 +126,7 @@ class RepositoryFactory {
         return AppwriteCryptoUtilsRepositoryImpl(
           client: config.appwriteClient!,
           databaseId: config.appConfig.appwriteConfig!.databaseId,
-          collectionId: config.appConfig.appwriteConfig!.saltCollectionId,
+          collectionId: config.appConfig.appwriteConfig!.utilsCollectionId,
         );
     }
   }

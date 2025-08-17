@@ -29,8 +29,8 @@ Create a file `config.json` in the project root with the following content:
     "supabaseConfig": {
         "url": "https://your-project-id.supabase.co",
         "anonKey": "your-anon-key",
-        "passwordDbName": "your-password-table-name",
-        "saltDbName": "your-salt-table-name"
+        "vaultDbName": "your-password-table-name",
+        "utilsDbName": "your-salt-table-name"
     }
 }
 ```
@@ -41,28 +41,28 @@ Create a file `config.json` in the project root with the following content:
 | --- | --- |
 | url | Your Supabase project URL |
 | anonKey | Public anonymous key for client connections |
-| passwordDbName | Table name for storing password entries |
-| saltDbName | Table name for storing encryption salts |
+| vaultDbName | Table name for storing password entries |
+| utilsDbName | Table name for storing encryption utilities |
 
 ### Finding Your Configuration Values
 
 1. In your Supabase dashboard, go to **Settings** → **API**
 2. Copy the **Project URL** for the `url` field
 3. Copy the **anon/public** key for the `anonKey` field
-4. Choose a table name for `passwordDbName` (e.g., "passwords")
-5. Choose a table name for `saltDbName` (e.g., "user_salts")
+4. Choose a table name for `vaultDbName` (e.g., "vault")
+5. Choose a table name for `utilsDbName` (e.g., "utils")
 
 ## Step 3: Database Setup
 
-### Create Password Entries Table
+### Create Vault Entries Table
 
 1. Go to the **SQL Editor** in your Supabase dashboard
 2. Click "New query"
-3. Run this SQL script to create the passwords table (Remember to replace the table names if needed!):
+3. Run this SQL script to create the vault table (Remember to replace the table names if needed!):
 
 ```sql
--- Create passwords table
-CREATE TABLE passwords (
+-- Create vault table
+CREATE TABLE vault (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   name text NOT NULL,
@@ -75,57 +75,58 @@ CREATE TABLE passwords (
 );
 
 -- Enable RLS
-ALTER TABLE passwords ENABLE ROW LEVEL SECURITY;
+ALTER TABLE vault ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for passwords table
-CREATE POLICY "Users can view own passwords" ON passwords
+CREATE POLICY "Users can view own vault" ON vault
     FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own passwords" ON passwords
+CREATE POLICY "Users can insert own vault" ON vault
     FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own passwords" ON passwords
+CREATE POLICY "Users can update own vault" ON vault
     FOR UPDATE TO authenticated USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete own passwords" ON passwords
+CREATE POLICY "Users can delete own vault" ON vault
     FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
 -- Create index for better performance
-CREATE INDEX idx_passwords_user_id ON passwords(user_id);
+CREATE INDEX idx_passwords_user_id ON vault(user_id);
 ```
 
-### Create User Salts Table
+### Create Utils Table
 
 Run this SQL script to create the salt storage table for cross-platform encryption:
 
 ```sql
--- Create user_salts table for cross-platform encryption salt storage
-CREATE TABLE user_salts (
+-- Create utils table for cross-platform encryption salt storage
+CREATE TABLE utils (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   salt text NOT NULL,
+  encMek text NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now()
 );
 
--- Add unique constraint to ensure one salt per user
-ALTER TABLE user_salts ADD CONSTRAINT unique_user_salt UNIQUE (user_id);
+-- Add unique constraint to ensure one entry per user
+ALTER TABLE utils ADD CONSTRAINT unique_utils UNIQUE (user_id);
 
 -- Enable RLS (Row Level Security)
-ALTER TABLE user_salts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE utils ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for RLS
-CREATE POLICY "Users can view own salt" ON user_salts
+CREATE POLICY "Users can view own utils" ON utils
     FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own salt" ON user_salts
+CREATE POLICY "Users can insert own utils" ON utils
     FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own salt" ON user_salts
+CREATE POLICY "Users can update own utils" ON utils
     FOR UPDATE TO authenticated USING (auth.uid() = user_id);
 
 -- Create index for better performance
-CREATE INDEX idx_user_salts_user_id ON user_salts(user_id);
+CREATE INDEX idx_utils_user_id ON utils(user_id);
 
 -- Add trigger to update updated_at column
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -136,8 +137,8 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_user_salts_updated_at 
-    BEFORE UPDATE ON user_salts 
+CREATE TRIGGER update_utils_updated_at 
+    BEFORE UPDATE ON utils 
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 ```
@@ -163,10 +164,10 @@ You can customize email templates under **Authentication** → **Email Templates
 
 Your tables should already have RLS enabled from the SQL scripts above. You can verify this in the **Database** → **Tables** section:
 
-1. Click on your `passwords` table
+1. Click on your vault table
 2. Go to the **Policies** tab
 3. Verify you see policies for SELECT, INSERT, UPDATE, and DELETE
-4. Repeat for the `user_salts` table
+4. Repeat for the utils table
 
 ## Step 6: Test Your Setup
 

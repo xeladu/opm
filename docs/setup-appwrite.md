@@ -32,8 +32,8 @@ Create a file `config.json` in the project root with the following content:
         "endpoint": "https://cloud.appwrite.io/v1",
         "project": "your-project-id",
         "databaseId": "your-database-id",
-        "passwordCollectionId": "your-collection-id",
-        "saltCollectionId": "your-collection-id",
+        "vaultCollectionId": "your-collection-id",
+        "utilsCollectionId": "your-collection-id",
     }
 }
 ```
@@ -44,9 +44,9 @@ Create a file `config.json` in the project root with the following content:
 | --- | --- |
 | endpoint | Appwrite server endpoint (cloud or self-hosted) |
 | project | Your Appwrite project ID |
-| databaseId | ID of the database to store password entries |
-| passwordCollectionId | ID of the collection to store password entries |
-| saltCollectionId | ID of the collection to store encryption/decryption salts |
+| databaseId | ID of the project database |
+| vaultCollectionId | ID of the collection to store vault entries |
+| utilsCollectionId | ID of the collection to store encryption/decryption utilities |
 
 ### Finding Your Configuration Values
 
@@ -98,15 +98,15 @@ Create a file `config.json` in the project root with the following content:
    - **Database ID**: `opm-database`
 4. Click "Create"
 
-### Create Password Entries Collection
+### Create Vault Entries Collection
 
 1. Inside your database, click "Create Collection"
 2. Enter details:
-   - **Name**: Passwords
-   - **Collection ID**: `passwords` (your choice)
+   - **Name**: Vault (your choice)
+   - **Collection ID**: `vault` (your choice)
 3. Click "Create"
 
-#### Add Attributes to Passwords Collection
+#### Add Attributes to Vault Collection
 
 Add these attributes one by one by clicking "Create Attribute":
 
@@ -121,9 +121,9 @@ Add these attributes one by one by clicking "Create Attribute":
 | `urls` | String (Array) | 1024 | ❌ | - |
 | `comments` | String | 1024 | ❌ | - |
 
-#### Set Permissions for Passwords Collection
+#### Set Permissions for Vault Collection
 
-1. Go to the **Settings** tab of your passwords collection
+1. Go to the **Settings** tab of your vault collection
 2. Enable **Document Security**
 3. Set **Collection Permissions**:
    - **Create**: Role `users` (any authenticated user can create)
@@ -133,22 +133,21 @@ Add these attributes one by one by clicking "Create Attribute":
 
 **Document-level permissions** will be automatically set by the app to restrict access to the document creator only.
 
-### Create User Salts Collection
+### Create Utils Collection
 
 1. Create another collection:
-   - **Name**: User Salts  
-   - **Collection ID**: `user_salts` (your choice)
+   - **Name**: Utils (your choice) 
+   - **Collection ID**: `utils` (your choice)
 
-#### Add Attributes to User Salts Collection
+#### Add Attributes to Utils Collection
 
 | Attribute | Type | Size | Required | Default |
 | --- | --- | --- | --- | --- |
 | `user_id` | String | 255 | ✅ | - |
 | `salt` | String | 255 | ✅ | - |
-| `created_at` | String | 255 | ❌ | - |
-| `updated_at` | String | 255 | ❌ | - |
+| `encMek` | String | 255 | ✅ | - |
 
-#### Set Permissions for User Salts Collection
+#### Set Permissions for Utils Collection
 
 1. Enable **Document Security**
 2. Set **Collection Permissions**:
@@ -157,9 +156,9 @@ Add these attributes one by one by clicking "Create Attribute":
    - **Update**: Role `users`
    - **Delete**: Role `users`
 
-#### Create Index for User Salts
+#### Create Index for Utils
 
-1. Go to **Indexes** tab in the user_salts collection
+1. Go to **Indexes** tab in the utils collection
 2. Click "Create Index"
 3. Set:
    - **Index Key**: `user_id`

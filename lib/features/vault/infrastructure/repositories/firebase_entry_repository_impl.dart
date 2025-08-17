@@ -18,7 +18,7 @@ class FirebaseEntryRepositoryImpl implements VaultRepository {
       throw Exception('No user signed in');
     }
 
-    return FirebaseFirestore.instance.collection('${config.passwordCollectionPrefix}_${user.uid}');
+    return FirebaseFirestore.instance.collection('${config.vaultCollectionPrefix}_${user.uid}');
   }
 
   @override

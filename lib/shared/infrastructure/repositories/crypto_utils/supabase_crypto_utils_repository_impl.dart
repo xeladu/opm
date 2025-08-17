@@ -13,7 +13,7 @@ class SupabaseCryptoUtilsRepositoryImpl implements CryptoUtilsRepository {
     try {
       final response = await client
           .from(tableName)
-          .select('salt')
+          .select('salt, encMek')
           .eq('user_id', userId)
           .maybeSingle();
 

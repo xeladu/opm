@@ -30,8 +30,8 @@ Create a file `config.json` in the project root with the following content:
         "messagingSenderId": "...",
         "appId": "...",
         "measurementId": "...",
-        "passwordCollectionPrefix": "passwords",
-        "saltCollectionName": "salts",
+        "vaultCollectionPrefix": "vault",
+        "utilsCollectionName": "utils",
     }
 }
 ```
@@ -47,8 +47,8 @@ Create a file `config.json` in the project root with the following content:
 | messagingSenderId | Required for identifying the Firebase project |
 | appId | Required for identifying the Firebase project |
 | measurementId | Required for identifying the Firebase project |
-| passwordCollectionPrefix | Collection name prefix for passwords to be used in Firestore |
-| saltCollectionName | Collection name for salts to be used in Firestore |
+| vaultCollectionPrefix | Collection name prefix for personal vaults to be used in Firestore |
+| utilsCollectionName | Collection name for encryption utilities to be used in Firestore |
 
 You can find these configuration values in your Firebase dashboard:
 1. Go to Project Settings (⚙️ icon)
@@ -82,17 +82,18 @@ Go to the "Rules" tab in Firestore and replace the default rules with:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow users to read and write their own salt for cross-platform encryption
-    match /user_salts/{userId} {
+    // Vault utils rule
+    match /utils/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Allow users to access their own password entries
+    // Vault rule (replace 'vault_' with your prefix followed by an underscore!)
     match /{collection}/{document=**} {
-      allow read, write: if request.auth != null && collection == 'passwords_' + request.auth.uid;
+      allow read, write: if request.auth != null && collection == 'vault_' + request.auth.uid;
     }
   }
 }
+
 ```
 
 Click "Publish" to deploy the rules.

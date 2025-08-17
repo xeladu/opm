@@ -55,6 +55,7 @@ class Bootstrapper {
           _supabaseClient = SupabaseClient(
             _appConfig!.supabaseConfig!.url,
             _appConfig!.supabaseConfig!.anonKey,
+            authOptions: AuthClientOptions(authFlowType: AuthFlowType.implicit),
           );
         case HostingProvider.appwrite:
           _appwriteClient = Client();

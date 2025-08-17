@@ -29,7 +29,7 @@ class SupabaseAuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await client.auth.signOut();
+    await client.auth.signOut(scope: SignOutScope.global);
   }
 
   @override

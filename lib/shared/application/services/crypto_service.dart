@@ -68,7 +68,8 @@ class CryptoService {
         cryptoUtils.copyWith(newSalt: base64Encode(salt), encMek: newEncryptedMasterEncryptionKey),
       );
 
-      _masterEncryptionKey = base64Decode(newEncryptedMasterEncryptionKey);
+      // store the raw generated master encryption key (not the encrypted blob)
+      _masterEncryptionKey = newMasterEncryptionKey;
     } else {
       // decrypt the existing key
       _masterEncryptionKey = base64Decode(

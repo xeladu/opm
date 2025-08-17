@@ -40,8 +40,8 @@ class FirebaseConfig {
   final String messagingSenderId;
   final String appId;
   final String measurementId;
-  final String passwordCollectionPrefix;
-  final String saltCollectionName;
+  final String vaultCollectionPrefix;
+  final String utilsCollectionName;
 
   FirebaseConfig({
     required this.apiKey,
@@ -51,8 +51,8 @@ class FirebaseConfig {
     required this.messagingSenderId,
     required this.appId,
     required this.measurementId,
-    required this.passwordCollectionPrefix,
-    required this.saltCollectionName,
+    required this.vaultCollectionPrefix,
+    required this.utilsCollectionName,
   });
 
   factory FirebaseConfig.fromJson(Map<String, dynamic> json) {
@@ -64,8 +64,8 @@ class FirebaseConfig {
       messagingSenderId: json['messagingSenderId'] as String,
       appId: json['appId'] as String,
       measurementId: json['measurementId'] as String,
-      passwordCollectionPrefix: json["passwordCollectionPrefix"] as String,
-      saltCollectionName: json["saltCollectionName"] as String,
+      vaultCollectionPrefix: json["vaultCollectionPrefix"] as String,
+      utilsCollectionName: json["utilsCollectionName"] as String,
     );
   }
 }
@@ -74,15 +74,15 @@ class AppwriteConfig {
   final String endpoint;
   final String projectId;
   final String databaseId;
-  final String passwordCollectionId;
-  final String saltCollectionId;
+  final String vaultCollectionId;
+  final String utilsCollectionId;
 
   AppwriteConfig({
     required this.endpoint,
     required this.projectId,
     required this.databaseId,
-    required this.saltCollectionId,
-    required this.passwordCollectionId,
+    required this.utilsCollectionId,
+    required this.vaultCollectionId,
   });
 
   factory AppwriteConfig.fromJson(Map<String, dynamic> json) {
@@ -90,8 +90,8 @@ class AppwriteConfig {
       endpoint: json['endpoint'] as String,
       projectId: json['projectId'] as String,
       databaseId: json["databaseId"] as String,
-      passwordCollectionId: json["passwordCollectionId"] as String,
-      saltCollectionId: json["saltCollectionId"] as String,
+      vaultCollectionId: json["vaultCollectionId"] as String,
+      utilsCollectionId: json["utilsCollectionId"] as String,
     );
   }
 }
@@ -99,22 +99,22 @@ class AppwriteConfig {
 class SupabaseConfig {
   final String url;
   final String anonKey;
-  final String passwordDbName;
-  final String saltDbName;
+  final String vaultDbName;
+  final String utilsDbName;
 
   SupabaseConfig({
     required this.url,
     required this.anonKey,
-    required this.passwordDbName,
-    required this.saltDbName,
+    required this.vaultDbName,
+    required this.utilsDbName,
   });
 
   factory SupabaseConfig.fromJson(Map<String, dynamic> json) {
     return SupabaseConfig(
       url: json['url'] as String,
       anonKey: json['anonKey'] as String,
-      passwordDbName: json["passwordDbName"] as String,
-      saltDbName: json["saltDbName"] as String,
+      vaultDbName: json["vaultDbName"] as String,
+      utilsDbName: json["utilsDbName"] as String,
     );
   }
 }

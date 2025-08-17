@@ -6,6 +6,7 @@ import 'package:open_password_manager/features/auth/application/use_cases/sign_i
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
+import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_list_page.dart';
 import 'package:open_password_manager/features/settings/infrastructure/providers/settings_provider.dart';
 import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
@@ -106,6 +107,9 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
       final cryptoService = ref.read(cryptoServiceProvider);
       await cryptoService.init(activeUser.id, data['password'], enableBiometricSignIn);
+
+      // clear cache of previous sessions
+      ref.invalidate(allEntriesProvider);
 
       if (mounted) {
         ToastService.show(context, 'Sign in successful!');
