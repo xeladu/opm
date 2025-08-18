@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/export_vault.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
+import 'package:open_password_manager/shared/presentation/loading.dart';
 import 'package:open_password_manager/shared/presentation/sheets/export_sheet.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -17,7 +18,11 @@ void main() {
             builder: (context) => ElevatedButton(
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
-                builder: (context) => ExportSheet(onSelected: (option) {}),
+                builder: (context) => ExportSheet(
+                  onSelected: (option) async {
+                    return true;
+                  },
+                ),
                 context: context,
               ),
             ),
@@ -25,9 +30,7 @@ void main() {
         ),
       );
 
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
@@ -50,8 +53,9 @@ void main() {
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
                 builder: (context) => ExportSheet(
-                  onSelected: (option) {
+                  onSelected: (option) async {
                     result = option;
+                    return true;
                   },
                 ),
                 context: context,
@@ -61,9 +65,7 @@ void main() {
         ),
       );
 
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
@@ -82,6 +84,42 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(result, ExportOption.csv);
+    });
+
+    testWidgets("Test running import", (tester) async {
+      final sut = MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              child: Text("Sheet me!"),
+              onPressed: () => showShadSheet(
+                builder: (context) => ExportSheet(
+                  onSelected: (option) async {
+                    await Future.delayed(Duration(milliseconds: 100));
+                    return true;
+                  },
+                ),
+                context: context,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
+
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExportSheet), findsOneWidget);
+
+      await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Export"));
+      await tester.pump();
+
+      expect(find.byType(Loading), findsOneWidget);
+      expect(find.byType(ExportSheet), findsOneWidget);
+
+      await tester.pumpAndSettle();
     });
   });
 }

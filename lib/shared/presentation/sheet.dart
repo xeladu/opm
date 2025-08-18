@@ -14,6 +14,7 @@ class Sheet extends StatelessWidget {
   final bool hideSecondaryButton;
   final Future<bool> Function()? onPrimaryButtonPressed;
   final Future<bool> Function()? onSecondaryButtonPressed;
+  final bool preventDismiss;
 
   const Sheet({
     super.key,
@@ -25,30 +26,35 @@ class Sheet extends StatelessWidget {
     this.primaryButtonCaption,
     this.secondaryButtonCaption,
     this.hideSecondaryButton = false,
+    this.preventDismiss = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: ShadSheet(
-        constraints: BoxConstraints(maxWidth: dialogMaxWidth),
-        title: Text(title),
-        description: description == null
-            ? null
-            : Text(description!, textAlign: TextAlign.left),
-        actions: [
-          if (!hideSecondaryButton)
-            SecondaryButton(
-              caption: secondaryButtonCaption ?? "Cancel",
-              onPressed: () async => await _secondaryPressed(context),
+    return PopScope(
+      canPop: !preventDismiss,
+      child: SafeArea(
+        child: ShadSheet(
+          closeIcon: preventDismiss ? const SizedBox() : null,
+          constraints: BoxConstraints(maxWidth: dialogMaxWidth),
+          title: Text(title),
+          description: description == null ? null : Text(description!, textAlign: TextAlign.left),
+          actions: [
+            if (!hideSecondaryButton)
+              SecondaryButton(
+                enabled: !preventDismiss,
+                caption: secondaryButtonCaption ?? "Cancel",
+                onPressed: () async => await _secondaryPressed(context),
+              ),
+            PrimaryButton(
+              enabled: !preventDismiss,
+              caption: primaryButtonCaption ?? "Save",
+              onPressed: () async => await _primaryPressed(context),
             ),
-          PrimaryButton(
-            caption: primaryButtonCaption ?? "Save",
-            onPressed: () async => await _primaryPressed(context),
-          ),
-        ],
+          ],
 
-        child: content,
+          child: content,
+        ),
       ),
     );
   }

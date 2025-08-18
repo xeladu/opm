@@ -22,9 +22,7 @@ void main() {
         ),
       );
 
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
@@ -71,9 +69,7 @@ void main() {
         ),
       );
 
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
@@ -122,9 +118,7 @@ void main() {
         ),
       );
 
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
@@ -149,7 +143,7 @@ void main() {
       expect(secondaryPressed, isTrue);
     });
 
-    testWidgets("Test prevent sheet closing", (tester) async {
+    testWidgets("Test prevent sheet closing from child", (tester) async {
       bool primaryPressed = false;
       bool secondaryPressed = false;
       final sut = Scaffold(
@@ -175,9 +169,7 @@ void main() {
         ),
       );
 
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
@@ -195,6 +187,44 @@ void main() {
 
       expect(find.byType(Sheet), findsOneWidget);
       expect(secondaryPressed, isTrue);
+    });
+
+    testWidgets("Test disable sheet closing", (tester) async {
+      final sut = Scaffold(
+        body: Builder(
+          builder: (context) => ElevatedButton(
+            child: Text("Sheet me!"),
+            onPressed: () async => await showShadSheet(
+              builder: (context) => Sheet(preventDismiss: true, title: "My title", content: Card()),
+              context: context,
+            ),
+          ),
+        ),
+      );
+
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
+
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Sheet), findsOneWidget);
+
+      expect(
+        find.byIcon(LucideIcons.x),
+        findsNothing,
+        reason: "Default sheet close button should not be found",
+      );
+
+      expect(
+        find.byWidgetPredicate((w) => w is PrimaryButton && !w.enabled),
+        findsOneWidget,
+        reason: "PrimaryButton should be disabled",
+      );
+      expect(
+        find.byWidgetPredicate((w) => w is SecondaryButton && !w.enabled),
+        findsOneWidget,
+        reason: "PrimaryButton should be disabled",
+      );
     });
   });
 }

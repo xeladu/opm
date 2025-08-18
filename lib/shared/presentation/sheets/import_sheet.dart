@@ -4,13 +4,15 @@ import 'package:open_password_manager/features/vault/application/use_cases/impor
 import 'package:open_password_manager/shared/application/providers/file_picker_service_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
+import 'package:open_password_manager/shared/presentation/loading.dart';
 import 'package:open_password_manager/shared/presentation/sheet.dart';
+import 'package:open_password_manager/shared/utils/csv_helper.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class ImportSheet extends ConsumerStatefulWidget {
-  final Function(ImportProvider, String) onSelected;
+  final Future<bool> Function(ImportProvider, String) onSelected;
 
   const ImportSheet({super.key, required this.onSelected});
 
@@ -22,10 +24,13 @@ class _State extends ConsumerState<ImportSheet> {
   ImportProvider _selectedProvider = ImportProvider.opm;
   String _filePath = "";
   String _fileContent = "";
+  int _fileLength = 0;
+  bool _importing = false;
 
   @override
   Widget build(BuildContext context) {
     return Sheet(
+      preventDismiss: _importing,
       title: "Import Data",
       description:
           "You can import data from other password manager tools or an OPM backup here. Create a CSV export from the current password manager and select it here. The importer will convert the data and add all entries to your OPM vault.\n\n"
@@ -44,13 +49,15 @@ class _State extends ConsumerState<ImportSheet> {
           Row(
             spacing: sizeXS,
             children: [
-              PrimaryButton(caption: "Pick CSV file", onPressed: _pickFile),
+              PrimaryButton(caption: "Pick CSV file", onPressed: _pickFile, enabled: !_importing),
               if (_filePath.isNotEmpty)
                 GlyphButton.important(
+                  enabled: !_importing,
                   onTap: () {
                     setState(() {
                       _filePath = "";
                       _fileContent = "";
+                      _fileLength = 0;
                     });
                   },
                   icon: LucideIcons.trash,
@@ -69,6 +76,7 @@ class _State extends ConsumerState<ImportSheet> {
             textAlign: TextAlign.left,
           ),
           ShadSelect<ImportProvider>(
+            enabled: !_importing,
             maxWidth: selectLargeWidth,
             minWidth: selectLargeWidth,
             initialValue: ImportProvider.opm,
@@ -82,6 +90,7 @@ class _State extends ConsumerState<ImportSheet> {
               });
             },
           ),
+          if (_importing) Loading(text: "Importing $_fileLength entries. Please wait!"),
         ],
       ),
       onPrimaryButtonPressed: () async {
@@ -90,8 +99,12 @@ class _State extends ConsumerState<ImportSheet> {
           return false;
         }
 
-        widget.onSelected(_selectedProvider, _fileContent);
-        return true;
+        setState(() => _importing = true);
+
+        final success = await widget.onSelected(_selectedProvider, _fileContent);
+
+        setState(() => _importing = false);
+        return success;
       },
     );
   }
@@ -109,6 +122,7 @@ class _State extends ConsumerState<ImportSheet> {
     setState(() {
       _filePath = file.path ?? "";
       _fileContent = content;
+      _fileLength = CsvHelper.countCsvRows(content);
     });
   }
 }

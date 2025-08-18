@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/export_vault.dart';
+import 'package:open_password_manager/shared/presentation/loading.dart';
 import 'package:open_password_manager/shared/presentation/sheet.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class ExportSheet extends StatefulWidget {
-  final Function(ExportOption) onSelected;
+  final Future<bool> Function(ExportOption) onSelected;
 
   const ExportSheet({super.key, required this.onSelected});
 
@@ -15,27 +16,27 @@ class ExportSheet extends StatefulWidget {
 
 class _State extends State<ExportSheet> {
   ExportOption _selectedOption = ExportOption.json;
+  bool _exporting = false;
 
   @override
   Widget build(BuildContext context) {
     return Sheet(
+      preventDismiss: _exporting,
       title: "Choose Export Format",
       description:
           "You are about to export your entire vault to a cleartext file. Do not share it via email or on social media. Make sure to delete it properly as soon as possible!\n\nPlease select your desired export format and confirm.",
       primaryButtonCaption: "Export",
       content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ShadSelect<ExportOption>(
+            enabled: !_exporting,
             maxWidth: selectSmallWidth,
             minWidth: selectSmallWidth,
             initialValue: ExportOption.json,
-            selectedOptionBuilder: (context, selection) =>
-                Text(selection.name.toUpperCase()),
+            selectedOptionBuilder: (context, selection) => Text(selection.name.toUpperCase()),
             options: ExportOption.values.map(
-              (entry) => ShadOption(
-                value: entry,
-                child: Text(entry.name.toUpperCase()),
-              ),
+              (entry) => ShadOption(value: entry, child: Text(entry.name.toUpperCase())),
             ),
             onChanged: (option) {
               setState(() {
@@ -43,11 +44,22 @@ class _State extends State<ExportSheet> {
               });
             },
           ),
+          if (_exporting) Loading(text: "Export is running. Please wait!"),
         ],
       ),
       onPrimaryButtonPressed: () async {
-        widget.onSelected(_selectedOption);
-        return true;
+        try {
+          setState(() {
+            _exporting = true;
+          });
+
+          final success = await widget.onSelected(_selectedOption);
+          return success;
+        } finally {
+          setState(() {
+            _exporting = false;
+          });
+        }
       },
     );
   }

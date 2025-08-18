@@ -7,6 +7,7 @@ import 'package:open_password_manager/features/auth/presentation/pages/sign_in_p
 import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/export_vault.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/import_vault.dart';
+import 'package:open_password_manager/features/vault/domain/exceptions/export_exception.dart';
 import 'package:open_password_manager/features/vault/domain/exceptions/import_exception.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/import_repository_provider.dart';
@@ -89,23 +90,36 @@ class UserMenu extends ConsumerWidget {
     );
   }
 
-  Future<void> _onExportOptionSelected(
+  Future<bool> _onExportOptionSelected(
     BuildContext context,
     WidgetRef ref,
     ExportOption option,
   ) async {
-    final exportRepo = ref.read(exportRepositoryProvider);
-    final vaultRepo = ref.read(vaultRepositoryProvider);
+    try {
+      final exportRepo = ref.read(exportRepositoryProvider);
+      final vaultRepo = ref.read(vaultRepositoryProvider);
 
-    final useCase = ExportVault(vaultRepo, exportRepo);
-    await useCase(option);
+      final useCase = ExportVault(vaultRepo, exportRepo);
+      await useCase(option);
 
-    if (context.mounted) {
-      ToastService.show(context, "Vault export completed!");
+      if (context.mounted) {
+        ToastService.show(context, "Vault export completed!");
+      }
+      return true;
+    } on ExportException catch (ex) {
+      if (context.mounted) {
+        ToastService.showError(context, ex.message);
+      }
+      return false;
+    } on Exception catch (ex) {
+      if (context.mounted) {
+        ToastService.showError(context, ex.toString());
+      }
+      return false;
     }
   }
 
-  Future<void> _onImportOptionSelected(
+  Future<bool> _onImportOptionSelected(
     BuildContext context,
     WidgetRef ref,
     ImportProvider provider,
@@ -119,18 +133,20 @@ class UserMenu extends ConsumerWidget {
       await useCase(provider, fileContent);
 
       ref.invalidate(allEntriesProvider);
-
       if (context.mounted) {
         ToastService.show(context, "Vault import completed!");
       }
+      return true;
     } on ImportException catch (ex) {
       if (context.mounted) {
         ToastService.showError(context, ex.message);
       }
+      return false;
     } on Exception catch (ex) {
       if (context.mounted) {
         ToastService.showError(context, ex.toString());
       }
+      return false;
     }
   }
 

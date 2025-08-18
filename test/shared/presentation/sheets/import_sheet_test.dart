@@ -9,6 +9,7 @@ import 'package:open_password_manager/shared/application/providers/file_picker_s
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
+import 'package:open_password_manager/shared/presentation/loading.dart';
 import 'package:open_password_manager/shared/presentation/sheets/import_sheet.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -30,7 +31,11 @@ void main() {
             builder: (context) => ElevatedButton(
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
-                builder: (context) => ImportSheet(onSelected: (_, _) {}),
+                builder: (context) => ImportSheet(
+                  onSelected: (_, _) async {
+                    return true;
+                  },
+                ),
                 context: context,
               ),
             ),
@@ -76,9 +81,10 @@ void main() {
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
                 builder: (context) => ImportSheet(
-                  onSelected: (provider, content) {
+                  onSelected: (provider, content) async {
                     importProvider = provider;
                     fileContent = content;
+                    return true;
                   },
                 ),
                 context: context,
@@ -140,7 +146,11 @@ void main() {
             builder: (context) => ElevatedButton(
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
-                builder: (context) => ImportSheet(onSelected: (_, _) {}),
+                builder: (context) => ImportSheet(
+                  onSelected: (_, _) async {
+                    return true;
+                  },
+                ),
                 context: context,
               ),
             ),
@@ -185,9 +195,10 @@ void main() {
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
                 builder: (context) => ImportSheet(
-                  onSelected: (provider, content) {
+                  onSelected: (provider, content) async {
                     importProvider = provider;
                     fileContent = content;
+                    return true;
                   },
                 ),
                 context: context,
@@ -211,6 +222,66 @@ void main() {
       expect(importProvider, isNull);
       expect(fileContent, isNull);
       expect(find.byType(ImportSheet), findsOneWidget);
+    });
+
+    testWidgets("Test running import", (tester) async {
+      when(mockFilePickerService.pickFile()).thenAnswer(
+        (_) => Future.value(
+          FilePickerResult([
+            PlatformFile(
+              path: "folder/subfolder",
+              name: "my-file",
+              size: 64,
+              bytes: Uint8List.fromList([116, 101, 115, 116]),
+            ),
+          ]),
+        ),
+      );
+
+      final sut = MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              child: Text("Sheet me!"),
+              onPressed: () => showShadSheet(
+                builder: (context) => ImportSheet(
+                  onSelected: (provider, content) async {
+                    await Future.delayed(Duration(milliseconds: 100));
+                    return true;
+                  },
+                ),
+                context: context,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          filePickerServiceProvider.overrideWithValue(mockFilePickerService),
+        ]),
+      );
+
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsOneWidget);
+
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Pick CSV file"),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining("folder/subfolder"), findsOneWidget);
+
+      await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Import"));
+      await tester.pump();
+
+      expect(find.byType(Loading), findsOneWidget);
+      expect(find.byType(ImportSheet), findsOneWidget);
+
+      await tester.pumpAndSettle();
     });
   });
 }
