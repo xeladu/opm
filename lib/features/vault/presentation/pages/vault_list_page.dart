@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_password_manager/features/vault/application/providers/all_entries_loading_state_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_entry_button.dart';
@@ -23,7 +24,8 @@ class _State extends ConsumerState<VaultListPage> {
     final filterQuery = ref.watch(filterQueryProvider);
 
     return allPasswords.when(
-      loading: () => Loading(text: "Getting your vault ready"),
+      loading: () =>
+          Loading(text: ref.watch(allEntriesLoadingStateProvider) ?? "Getting your vault ready"),
       error: (error, stackTrace) => Text(error.toString()),
       data: (passwords) {
         final filteredPasswords = filterQuery.isEmpty
@@ -31,9 +33,7 @@ class _State extends ConsumerState<VaultListPage> {
             : passwords.where((entry) {
                 return entry.name.toLowerCase().contains(filterQuery) ||
                     entry.username.toLowerCase().contains(filterQuery) ||
-                    entry.urls.any(
-                      (url) => url.toLowerCase().contains(filterQuery),
-                    );
+                    entry.urls.any((url) => url.toLowerCase().contains(filterQuery));
               }).toList();
 
         return ResponsiveAppFrame(
@@ -44,10 +44,7 @@ class _State extends ConsumerState<VaultListPage> {
           ),
           desktopContent: Padding(
             padding: const EdgeInsets.all(sizeXS),
-            child: VaultListDesktop(
-              passwords: filteredPasswords,
-              vaultEmpty: passwords.isEmpty,
-            ),
+            child: VaultListDesktop(passwords: filteredPasswords, vaultEmpty: passwords.isEmpty),
           ),
           mobileButton: AddEntryButton(),
         );

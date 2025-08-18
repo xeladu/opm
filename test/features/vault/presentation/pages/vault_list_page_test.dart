@@ -24,7 +24,7 @@ void main() {
       testWidgets('Test default elements ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
 
-        when(mockVaultRepository.getAllEntries()).thenAnswer(
+        when(mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate'))).thenAnswer(
           (_) => Future.value([
             TestDataGenerator.randomVaultEntry(),
             TestDataGenerator.randomVaultEntry(),

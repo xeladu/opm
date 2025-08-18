@@ -611,9 +611,11 @@ class MockVaultRepository extends _i1.Mock implements _i22.VaultRepository {
           as _i6.Future<void>);
 
   @override
-  _i6.Future<List<_i13.VaultEntry>> getAllEntries() =>
+  _i6.Future<List<_i13.VaultEntry>> getAllEntries({
+    dynamic Function(String)? onUpdate,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#getAllEntries, []),
+            Invocation.method(#getAllEntries, [], {#onUpdate: onUpdate}),
             returnValue: _i6.Future<List<_i13.VaultEntry>>.value(
               <_i13.VaultEntry>[],
             ),

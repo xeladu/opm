@@ -25,18 +25,14 @@ class FirebaseEntryRepositoryImpl implements VaultRepository {
   Future<void> addEntry(VaultEntry entry) async {
     final encryptedEntry = await entry.encrypt(cryptoRepo.encrypt);
 
-    await _userPasswordEntriesCollection()
-        .doc(entry.id)
-        .set(encryptedEntry.toJson());
+    await _userPasswordEntriesCollection().doc(entry.id).set(encryptedEntry.toJson());
   }
 
   @override
   Future<void> editEntry(VaultEntry entry) async {
     final encryptedEntry = await entry.encrypt(cryptoRepo.encrypt);
 
-    await _userPasswordEntriesCollection()
-        .doc(entry.id)
-        .update(encryptedEntry.toJson());
+    await _userPasswordEntriesCollection().doc(entry.id).update(encryptedEntry.toJson());
   }
 
   @override
@@ -45,17 +41,23 @@ class FirebaseEntryRepositoryImpl implements VaultRepository {
   }
 
   @override
-  Future<List<VaultEntry>> getAllEntries() async {
+  Future<List<VaultEntry>> getAllEntries({Function(String info)? onUpdate}) async {
     final snapshot = await _userPasswordEntriesCollection().get();
-    final entries = snapshot.docs
-        .map((doc) => VaultEntry.fromJson(doc.data()))
-        .toList();
+    final entries = snapshot.docs.map((doc) => VaultEntry.fromJson(doc.data())).toList();
 
-    final list = await Future.wait(
-      entries.map((entry) => entry.decrypt(cryptoRepo.decrypt)),
-    );
+    if (onUpdate != null) onUpdate("${entries.length} entries loaded ...");
+
+    final list = <VaultEntry>[];
+    for (var i = 0; i < entries.length; i++) {
+      list.add(await entries[i].decrypt(cryptoRepo.decrypt));
+
+      if (onUpdate != null) onUpdate("Decrypting entry $i of ${entries.length} ...");
+      await Future.delayed(Duration.zero);
+    }
 
     list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    if (onUpdate != null) onUpdate("Sorting data ...");
 
     return list;
   }

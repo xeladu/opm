@@ -152,7 +152,9 @@ void main() {
 
         when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
 
-        when(mockVaultRepository.getAllEntries()).thenAnswer((_) => Future.value([]));
+        when(
+          mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate')),
+        ).thenAnswer((_) => Future.value([]));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
@@ -236,7 +238,9 @@ void main() {
 
         when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
 
-        when(mockVaultRepository.getAllEntries()).thenAnswer((_) => Future.value([]));
+        when(
+          mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate')),
+        ).thenAnswer((_) => Future.value([]));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
@@ -258,7 +262,7 @@ void main() {
         verify(mockStorageService.hasMasterKey()).called(1);
         verify(mockBiometricAuthRepository.authenticate()).called(1);
         verify(mockCryptoService.init(any, any, any)).called(1);
-        verify(mockVaultRepository.getAllEntries()).called(1);
+        verify(mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate'))).called(1);
         expect(find.byType(ShadToast), findsOneWidget);
         expect(find.textContaining("Sign in successful"), findsOneWidget);
         expect(find.byType(VaultListPage), findsOneWidget);
@@ -283,7 +287,9 @@ void main() {
 
         when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
 
-        when(mockVaultRepository.getAllEntries()).thenAnswer((_) => Future.value([]));
+        when(
+          mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate')),
+        ).thenAnswer((_) => Future.value([]));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
@@ -341,7 +347,9 @@ void main() {
 
         when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
 
-        when(mockVaultRepository.getAllEntries()).thenAnswer((_) => Future.value([]));
+        when(
+          mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate')),
+        ).thenAnswer((_) => Future.value([]));
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [

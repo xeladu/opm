@@ -26,10 +26,7 @@ class SupabaseEntryRepositoryImpl implements VaultRepository {
   Future<void> editEntry(VaultEntry entry) async {
     final encryptedEntry = await entry.encrypt(cryptoRepo.encrypt);
 
-    await client
-        .from(tableName)
-        .update(encryptedEntry.toJson())
-        .eq('id', entry.id);
+    await client.from(tableName).update(encryptedEntry.toJson()).eq('id', entry.id);
   }
 
   @override
@@ -38,17 +35,25 @@ class SupabaseEntryRepositoryImpl implements VaultRepository {
   }
 
   @override
-  Future<List<VaultEntry>> getAllEntries() async {
+  Future<List<VaultEntry>> getAllEntries({Function(String info)? onUpdate}) async {
     final response = await client.from(tableName).select();
     final entries = (response as List)
         .map((json) => VaultEntry.fromJson(json as Map<String, dynamic>))
         .toList();
 
-    final list = await Future.wait(
-      entries.map((entry) => entry.decrypt(cryptoRepo.decrypt)),
-    );
+    if (onUpdate != null) onUpdate("${entries.length} entries loaded ...");
+
+    final list = <VaultEntry>[];
+    for (var i = 0; i < entries.length; i++) {
+      list.add(await entries[i].decrypt(cryptoRepo.decrypt));
+
+      if (onUpdate != null) onUpdate("Decrypting entry $i of ${entries.length} ...");
+      await Future.delayed(Duration.zero);
+    }
 
     list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    if (onUpdate != null) onUpdate("Sorting data ...");
 
     return list;
   }
