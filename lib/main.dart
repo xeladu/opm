@@ -52,38 +52,37 @@ void main() async {
     final serviceFactory = ServiceFactory();
     final repoFactory = RepositoryFactory(serviceFactory);
 
-    final cryptoUtilsProvider = repoFactory.getCryptoUtilsProvider(providerConfig);
+    final cryptoUtilsProvider = repoFactory.getCryptoUtilsRepository(providerConfig);
+    final filePickerService = serviceFactory.getFilePickerService();
+    final storageService = serviceFactory.getStorageService();
+    final cryptoService = serviceFactory.getCryptoService(cryptoUtilsProvider, storageService);
 
-    final storageProvider = serviceFactory.getStorageService();
-    final filePickerProvider = serviceFactory.getFilePickerService();
-    final cryptoProvider = serviceFactory.getCryptoService(cryptoUtilsProvider, storageProvider);
-
-    final authProvider = repoFactory.getAuthProvider(providerConfig);
-    final clipboardProvider = repoFactory.getClipboardProvider();
-    final cryptoRepoProvider = repoFactory.getCryptoProvider(cryptoProvider);
-    final biometricAuthProvider = repoFactory.getBiometricAuthProvider();
-    final exportProvider = repoFactory.getExportProvider();
-    final importProvider = repoFactory.getImportProvider();
-    final passwordGeneratorProvider = repoFactory.getPasswordGeneratorProvider();
-    final settingsProvider = repoFactory.getSettingsProvider(storageProvider);
-    final vaultProvider = repoFactory.getVaultProvider(providerConfig, cryptoProvider);
+    final autoRepo = repoFactory.getAuthRepository(providerConfig);
+    final clipboardRepo = repoFactory.getClipboardRepository();
+    final cryptoRepo = repoFactory.getCryptoRepository(cryptoService);
+    final biometricAuthRepo = repoFactory.getBiometricAuthRepository();
+    final exportRepo = repoFactory.getExportRepository();
+    final importRepo = repoFactory.getImportRepository();
+    final passwordGeneratorRepo = repoFactory.getPasswordGeneratorRepository();
+    final settingsRepo = repoFactory.getSettingsRepository(storageService);
+    final vaultRepo = repoFactory.getVaultRepository(providerConfig, cryptoService);
 
     runApp(
       ProviderScope(
         overrides: [
-          authRepositoryProvider.overrideWithValue(authProvider),
-          clipboardRepositoryProvider.overrideWithValue(clipboardProvider),
-          cryptographyRepositoryProvider.overrideWithValue(cryptoRepoProvider),
-          cryptoServiceProvider.overrideWithValue(cryptoProvider),
-          biometricAuthRepositoryProvider.overrideWithValue(biometricAuthProvider),
-          exportRepositoryProvider.overrideWithValue(exportProvider),
-          filePickerServiceProvider.overrideWithValue(filePickerProvider),
-          importRepositoryProvider.overrideWithValue(importProvider),
-          passwordGeneratorRepositoryProvider.overrideWithValue(passwordGeneratorProvider),
+          authRepositoryProvider.overrideWithValue(autoRepo),
+          clipboardRepositoryProvider.overrideWithValue(clipboardRepo),
+          cryptographyRepositoryProvider.overrideWithValue(cryptoRepo),
+          cryptoServiceProvider.overrideWithValue(cryptoService),
+          biometricAuthRepositoryProvider.overrideWithValue(biometricAuthRepo),
+          exportRepositoryProvider.overrideWithValue(exportRepo),
+          filePickerServiceProvider.overrideWithValue(filePickerService),
+          importRepositoryProvider.overrideWithValue(importRepo),
+          passwordGeneratorRepositoryProvider.overrideWithValue(passwordGeneratorRepo),
           cryptoUtilsRepositoryProvider.overrideWithValue(cryptoUtilsProvider),
-          settingsRepositoryProvider.overrideWithValue(settingsProvider),
-          storageServiceProvider.overrideWithValue(storageProvider),
-          vaultRepositoryProvider.overrideWithValue(vaultProvider),
+          settingsRepositoryProvider.overrideWithValue(settingsRepo),
+          storageServiceProvider.overrideWithValue(storageService),
+          vaultRepositoryProvider.overrideWithValue(vaultRepo),
         ],
         child: const OpmApp(),
       ),

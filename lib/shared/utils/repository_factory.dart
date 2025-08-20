@@ -34,7 +34,7 @@ class RepositoryFactory {
   final ServiceFactory serviceFactory;
   RepositoryFactory(this.serviceFactory);
 
-  AuthRepository getAuthProvider(ProviderConfig config) {
+  AuthRepository getAuthRepository(ProviderConfig config) {
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
         return FirebaseAuthRepositoryImpl();
@@ -53,24 +53,24 @@ class RepositoryFactory {
     }
   }
 
-  ExportRepository getExportProvider() {
+  ExportRepository getExportRepository() {
     return ExportRepositoryImpl.instance;
   }
 
-  ImportRepository getImportProvider() {
+  ImportRepository getImportRepository() {
     return ImportRepositoryImpl.instance;
   }
 
-  CryptographyRepository getCryptoProvider(CryptoService cryptoService) {
+  CryptographyRepository getCryptoRepository(CryptoService cryptoService) {
     return CryptographyRepositoryImpl(cryptoService);
   }
 
-  PasswordGeneratorRepository getPasswordGeneratorProvider() {
+  PasswordGeneratorRepository getPasswordGeneratorRepository() {
     return PasswordGeneratorRepositoryImpl.instance;
   }
 
-  VaultRepository getVaultProvider(ProviderConfig config, CryptoService cryptoService) {
-    final cryptoProvider = getCryptoProvider(cryptoService);
+  VaultRepository getVaultRepository(ProviderConfig config, CryptoService cryptoService) {
+    final cryptoProvider = getCryptoRepository(cryptoService);
 
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
@@ -101,11 +101,11 @@ class RepositoryFactory {
     }
   }
 
-  ClipboardRepository getClipboardProvider() {
+  ClipboardRepository getClipboardRepository() {
     return ClipboardRepositoryImpl.instance;
   }
 
-  CryptoUtilsRepository getCryptoUtilsProvider(ProviderConfig config) {
+  CryptoUtilsRepository getCryptoUtilsRepository(ProviderConfig config) {
     switch (config.hostingProvider) {
       case HostingProvider.firebase:
         return FirebaseCryptoUtilsRepositoryImpl(
@@ -131,11 +131,11 @@ class RepositoryFactory {
     }
   }
 
-  BiometricAuthRepository getBiometricAuthProvider() {
+  BiometricAuthRepository getBiometricAuthRepository() {
     return BiometricAuthRepositoryImpl();
   }
 
-  SettingsRepository getSettingsProvider(StorageService storage) {
+  SettingsRepository getSettingsRepository(StorageService storage) {
     return SettingsRepositoryImpl(storage: storage);
   }
 }

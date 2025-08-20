@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -14,37 +17,52 @@ class Favicon extends StatefulWidget {
 class _State extends State<Favicon> {
   @override
   Widget build(BuildContext context) {
-    try {
-      final uri = Uri.parse(widget.url);
+    final faviconUrl = _getFaviconUrl();
 
-      if (uri.hasScheme) {
-        return Image.network(
-          _getFaviconUrl(uri.host),
-          width: sizeM,
-          height: sizeM,
-          errorBuilder: (context, error, stackTrace) => Icon(
-            LucideIcons.earth400,
-            size: sizeM,
-            color: ShadTheme.of(context).colorScheme.mutedForeground,
-          ),
-        );
-      } else {
-        return Icon(
-          LucideIcons.earth400,
-          size: sizeM,
-          color: ShadTheme.of(context).colorScheme.mutedForeground,
-        );
-      }
-    } catch (_) {
+    // If we couldn't construct a favicon URL, show a stable placeholder.
+    if (faviconUrl.isEmpty) {
       return Icon(
         LucideIcons.earth400,
         size: sizeM,
         color: ShadTheme.of(context).colorScheme.mutedForeground,
       );
     }
+
+    // Use host-based cache key when possible to keep keys short.
+    final cacheKey = Uri.tryParse(faviconUrl)?.host ?? base64Encode(utf8.encode(faviconUrl));
+
+    return CachedNetworkImage(
+      imageUrl: faviconUrl,
+      cacheKey: cacheKey,
+      width: sizeM,
+      height: sizeM,
+      fit: BoxFit.contain,
+      imageBuilder: (context, imageProvider) => Image(
+        image: imageProvider,
+        width: sizeM,
+        height: sizeM,
+        fit: BoxFit.contain,
+      ),
+      errorWidget: (context, url, error) => Icon(
+        LucideIcons.earth400,
+        size: sizeM,
+        color: ShadTheme.of(context).colorScheme.mutedForeground,
+      ),
+      placeholder: (context, url) => Icon(
+        LucideIcons.earth400,
+        size: sizeM,
+        color: ShadTheme.of(context).colorScheme.mutedForeground,
+      ),
+    );
   }
 
-  String _getFaviconUrl(String host) {
-    return 'https://icons.duckduckgo.com/ip3/$host.ico';
+  String _getFaviconUrl() {
+    final uri = Uri.tryParse(widget.url);
+
+    if (uri != null && uri.hasScheme) {
+      return 'https://icons.duckduckgo.com/ip3/${uri.host}.ico';
+    } else {
+      return "";
+    }
   }
 }
