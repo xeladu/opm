@@ -62,18 +62,14 @@ class VaultListEntry extends ConsumerWidget {
         tapPosition = details.globalPosition;
       },
       onLongPress: () async => await showPopup(context, ref, tapPosition),
-      onSecondaryTap: isMobile
-          ? null
-          : () async => await showPopup(context, ref, tapPosition),
+      onSecondaryTap: isMobile ? null : () async => await showPopup(context, ref, tapPosition),
       onDoubleTap: () async => isMobile
           ? await _handleEditMobile(context, ref, entry)
           : await _handleEditDesktop(context, ref, entry),
       onTap: () async => await onTap(context, ref),
       child: ListTile(
         minTileHeight: minVaultEntryTileHeight,
-        shape: RoundedRectangleBorder(
-          borderRadius: ShadTheme.of(context).radius,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: ShadTheme.of(context).radius),
         tileColor: selected ? ShadTheme.of(context).colorScheme.accent : null,
         contentPadding: EdgeInsets.symmetric(horizontal: sizeXS),
         splashColor: Colors.transparent,
@@ -86,12 +82,14 @@ class VaultListEntry extends ConsumerWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: entry.username.isEmpty ? null : Text(
-          entry.username,
-          style: ShadTheme.of(context).textTheme.muted,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        subtitle: entry.username.isEmpty
+            ? null
+            : Text(
+                entry.username,
+                style: ShadTheme.of(context).textTheme.muted,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
         leading: Favicon(url: entry.urls.isEmpty ? "" : entry.urls.first),
         trailing: isMobile
             ? VaultListEntryPopup(
@@ -121,11 +119,7 @@ class VaultListEntry extends ConsumerWidget {
     }
   }
 
-  Future<void> showPopup(
-    BuildContext context,
-    WidgetRef ref,
-    Offset? tapPosition,
-  ) async {
+  Future<void> showPopup(BuildContext context, WidgetRef ref, Offset? tapPosition) async {
     final selection = await PopupService.showPopup<PopupSelection>(
       context,
       VaultListEntryPopup.menuItems,
@@ -165,12 +159,7 @@ class VaultListEntry extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleCopy(
-    BuildContext context,
-    WidgetRef ref,
-    String toCopy,
-    String item,
-  ) async {
+  Future<void> _handleCopy(BuildContext context, WidgetRef ref, String toCopy, String item) async {
     ref.read(clipboardRepositoryProvider).copyToClipboard(toCopy);
 
     if (context.mounted) {
@@ -187,22 +176,14 @@ class VaultListEntry extends ConsumerWidget {
     await launchUrl(uri);
   }
 
-  Future<void> _handleViewDesktop(
-    BuildContext context,
-    WidgetRef ref,
-    VaultEntry entry,
-  ) async {
+  Future<void> _handleViewDesktop(BuildContext context, WidgetRef ref, VaultEntry entry) async {
     final confirmed = await _confirmAction(context, ref);
     if (!confirmed) return;
 
     ref.read(selectedEntryProvider.notifier).setEntry(entry);
   }
 
-  Future<void> _handleViewMobile(
-    BuildContext context,
-    WidgetRef ref,
-    VaultEntry entry,
-  ) async {
+  Future<void> _handleViewMobile(BuildContext context, WidgetRef ref, VaultEntry entry) async {
     final confirmed = await _confirmAction(context, ref);
     if (!confirmed) return;
 
@@ -211,25 +192,15 @@ class VaultListEntry extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleEditDesktop(
-    BuildContext context,
-    WidgetRef ref,
-    VaultEntry entry,
-  ) async {
+  Future<void> _handleEditDesktop(BuildContext context, WidgetRef ref, VaultEntry entry) async {
     final confirmed = await _confirmAction(context, ref);
     if (!confirmed) return;
 
     ref.read(selectedEntryProvider.notifier).setEntry(entry);
-    ref
-        .read(addEditModeActiveProvider.notifier)
-        .setMode(!ref.read(addEditModeActiveProvider));
+    ref.read(addEditModeActiveProvider.notifier).setMode(!ref.read(addEditModeActiveProvider));
   }
 
-  Future<void> _handleEditMobile(
-    BuildContext context,
-    WidgetRef ref,
-    VaultEntry entry,
-  ) async {
+  Future<void> _handleEditMobile(BuildContext context, WidgetRef ref, VaultEntry entry) async {
     final confirmed = await _confirmAction(context, ref);
     if (!confirmed) return;
 
@@ -246,11 +217,7 @@ class VaultListEntry extends ConsumerWidget {
     }
   }
 
-  Future<void> _delete(
-    BuildContext context,
-    WidgetRef ref,
-    VaultEntry entry,
-  ) async {
+  Future<void> _delete(BuildContext context, WidgetRef ref, VaultEntry entry) async {
     final confirmed = await _confirmAction(context, ref);
     if (!confirmed) return;
 
@@ -272,17 +239,17 @@ class VaultListEntry extends ConsumerWidget {
     final editModeActive = ref.read(addEditModeActiveProvider);
     final hasChanges = ref.read(hasChangesProvider);
 
-    if (editModeActive || hasChanges) {
+    if ((editModeActive && hasChanges) || hasChanges) {
       // ask for confirmation before leaving the edit mode
       final confirm = await DialogService.showCancelDialog(context);
 
-      if (confirm != true) return false;
-
-      ref.read(addEditModeActiveProvider.notifier).setMode(false);
-      ref.read(hasChangesProvider.notifier).setHasChanges(false);
-
-      return true;
+      if (confirm != true) {
+        return false;
+      }
     }
+
+    ref.read(addEditModeActiveProvider.notifier).setMode(false);
+    ref.read(hasChangesProvider.notifier).setHasChanges(false);
 
     return true;
   }

@@ -41,20 +41,19 @@ class AddEditVaultEntryPage extends ConsumerWidget {
     final editModeActive = ref.read(addEditModeActiveProvider);
     final hasChanges = ref.read(hasChangesProvider);
 
-    if (editModeActive || hasChanges) {
+    if ((editModeActive && hasChanges) || hasChanges) {
       // ask for confirmation before leaving the edit mode
       final confirm = await DialogService.showCancelDialog(context);
 
-      if (confirm == true && context.mounted) {
-        ref.read(addEditModeActiveProvider.notifier).setMode(false);
-        ref.read(hasChangesProvider.notifier).setHasChanges(false);
-        Navigator.of(context).pop();
+      if (confirm != true) {
         return;
       }
-    } else {
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
+    }
+
+    ref.read(addEditModeActiveProvider.notifier).setMode(false);
+    ref.read(hasChangesProvider.notifier).setHasChanges(false);
+    if (context.mounted) {
+      Navigator.of(context).pop();
     }
   }
 
