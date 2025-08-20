@@ -12,6 +12,7 @@ import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:flutter/services.dart';
 
 class RegisterForm extends ConsumerStatefulWidget {
   const RegisterForm({super.key});
@@ -28,68 +29,82 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
   Widget build(BuildContext context) {
     return ShadForm(
       key: _formKey,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Image.asset("images/opm-banner-dark.png")),
-            const SizedBox(height: sizeS),
-            Text(
-              "Open Password Manager",
-              style: ShadTheme.of(context).textTheme.h3,
+      child: Shortcuts(
+        shortcuts: <LogicalKeySet, Intent>{
+          LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+          LogicalKeySet(LogicalKeyboardKey.numpadEnter): const ActivateIntent(),
+        },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            ActivateIntent: CallbackAction<Intent>(onInvoke: (intent) {
+              _handleCreateAccount();
+              return null;
+            }),
+          },
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: Image.asset("images/opm-banner-dark.png")),
+                const SizedBox(height: sizeS),
+                Text(
+                  "Open Password Manager",
+                  style: ShadTheme.of(context).textTheme.h3,
+                ),
+                const SizedBox(height: sizeXS),
+                Text(
+                  "Create a new account",
+                  textAlign: TextAlign.left,
+                  style: ShadTheme.of(context).textTheme.muted,
+                ),
+                const SizedBox(height: sizeXS),
+                EmailFormField(),
+                const SizedBox(height: sizeS),
+                PasswordFormField(
+                  validator: (v) {
+                    final password =
+                        _formKey.currentState?.fields["password_confirm"]?.value ??
+                        "";
+                    if (v != password) return "Passwords do not match";
+                    return null;
+                  },
+                ),
+                const SizedBox(height: sizeS),
+                PasswordFormField(
+                  placeholder: "Confirm password",
+                  validator: (v) {
+                    final password =
+                        _formKey.currentState?.fields["password"]?.value ?? "";
+                    if (v != password) return "Passwords do not match";
+                    return null;
+                  },
+                ),
+                SizedBox(height: sizeS),
+                Center(
+                  child: _isLoading
+                      ? LoadingButton.primary()
+                      : PrimaryButton(
+                          caption: "Create Account",
+                          icon: LucideIcons.squareUserRound,
+                          onPressed: _handleCreateAccount,
+                        ),
+                ),
+                SizedBox(height: sizeS),
+                Center(
+                  child: SecondaryButton(
+                    caption: 'Already have an account? Sign in',
+                    onPressed: () async => _isLoading
+                        ? null
+                        : await NavigationService.replaceCurrent(
+                            context,
+                            SignInPage(),
+                          ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: sizeXS),
-            Text(
-              "Create a new account",
-              textAlign: TextAlign.left,
-              style: ShadTheme.of(context).textTheme.muted,
-            ),
-            const SizedBox(height: sizeXS),
-            EmailFormField(),
-            const SizedBox(height: sizeS),
-            PasswordFormField(
-              validator: (v) {
-                final password =
-                    _formKey.currentState?.fields["password_confirm"]?.value ??
-                    "";
-                if (v != password) return "Passwords do not match";
-                return null;
-              },
-            ),
-            const SizedBox(height: sizeS),
-            PasswordFormField(
-              placeholder: "Confirm password",
-              validator: (v) {
-                final password =
-                    _formKey.currentState?.fields["password"]?.value ?? "";
-                if (v != password) return "Passwords do not match";
-                return null;
-              },
-            ),
-            SizedBox(height: sizeM),
-            Center(
-              child: _isLoading
-                  ? LoadingButton.primary()
-                  : PrimaryButton(
-                      caption: "Create Account",
-                      icon: LucideIcons.squareUserRound,
-                      onPressed: _handleCreateAccount,
-                    ),
-            ),
-            SizedBox(height: sizeS),
-            Center(
-              child: SecondaryButton(
-                caption: 'Already have an account? Sign in',
-                onPressed: () async => _isLoading
-                    ? null
-                    : await NavigationService.replaceCurrent(
-                        context,
-                        SignInPage(),
-                      ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

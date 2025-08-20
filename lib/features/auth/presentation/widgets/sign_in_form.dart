@@ -22,6 +22,7 @@ import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:flutter/services.dart';
 
 class SignInForm extends ConsumerStatefulWidget {
   const SignInForm({super.key});
@@ -40,44 +41,59 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
     return ShadForm(
       key: _formKey,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Image.asset("images/opm-banner-dark.png")),
-            const SizedBox(height: sizeS),
-            Text("Open Password Manager", style: ShadTheme.of(context).textTheme.h3),
-            const SizedBox(height: sizeXS),
-            Text(
-              "Sign in to your account",
-              textAlign: TextAlign.left,
-              style: ShadTheme.of(context).textTheme.muted,
+      child: Shortcuts(
+        shortcuts: <LogicalKeySet, Intent>{
+          LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+          LogicalKeySet(LogicalKeyboardKey.numpadEnter): const ActivateIntent(),
+        },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            ActivateIntent: CallbackAction<Intent>(onInvoke: (intent) {
+              // Trigger primary button action when Enter is pressed.
+              _handleSignIn();
+              return null;
+            }),
+          },
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: Image.asset("images/opm-banner-dark.png")),
+                const SizedBox(height: sizeS),
+                Text("Open Password Manager", style: ShadTheme.of(context).textTheme.h3),
+                const SizedBox(height: sizeXS),
+                Text(
+                  "Sign in to your account",
+                  textAlign: TextAlign.left,
+                  style: ShadTheme.of(context).textTheme.muted,
+                ),
+                const SizedBox(height: sizeXS),
+                EmailFormField(),
+                const SizedBox(height: sizeS),
+                PasswordFormField(),
+                const SizedBox(height: sizeM),
+                Center(
+                  child: _isLoading
+                      ? LoadingButton.primary()
+                      : PrimaryButton(
+                          caption: "Sign In",
+                          icon: LucideIcons.logIn,
+                          onPressed: _handleSignIn,
+                        ),
+                ),
+                const SizedBox(height: sizeS),
+                Center(
+                  child: SecondaryButton(
+                    caption: "Don't have an account? Sign up",
+                    onPressed: () async => _isLoading
+                        ? null
+                        : await NavigationService.replaceCurrent(context, CreateAccountPage()),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: sizeXS),
-            EmailFormField(),
-            const SizedBox(height: sizeS),
-            PasswordFormField(),
-            const SizedBox(height: sizeM),
-            Center(
-              child: _isLoading
-                  ? LoadingButton.primary()
-                  : PrimaryButton(
-                      caption: "Sign In",
-                      icon: LucideIcons.logIn,
-                      onPressed: _handleSignIn,
-                    ),
-            ),
-            const SizedBox(height: sizeS),
-            Center(
-              child: SecondaryButton(
-                caption: "Don't have an account? Sign up",
-                onPressed: () async => _isLoading
-                    ? null
-                    : await NavigationService.replaceCurrent(context, CreateAccountPage()),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
