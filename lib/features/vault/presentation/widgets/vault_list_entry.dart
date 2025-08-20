@@ -70,6 +70,7 @@ class VaultListEntry extends ConsumerWidget {
           : await _handleEditDesktop(context, ref, entry),
       onTap: () async => await onTap(context, ref),
       child: ListTile(
+        minTileHeight: minVaultEntryTileHeight,
         shape: RoundedRectangleBorder(
           borderRadius: ShadTheme.of(context).radius,
         ),
@@ -85,7 +86,7 @@ class VaultListEntry extends ConsumerWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: Text(
+        subtitle: entry.username.isEmpty ? null : Text(
           entry.username,
           style: ShadTheme.of(context).textTheme.muted,
           maxLines: 1,
