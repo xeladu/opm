@@ -29,7 +29,7 @@ class _State extends State<Favicon> {
     }
 
     // Use host-based cache key when possible to keep keys short.
-    final cacheKey = Uri.tryParse(faviconUrl)?.host ?? base64Encode(utf8.encode(faviconUrl));
+    final cacheKey = base64Encode(utf8.encode(faviconUrl));
 
     return CachedNetworkImage(
       imageUrl: faviconUrl,
