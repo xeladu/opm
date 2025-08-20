@@ -20,12 +20,7 @@ class AddEditForm extends ConsumerStatefulWidget {
   final VoidCallback onCancel;
   final VoidCallback onSave;
 
-  const AddEditForm({
-    super.key,
-    this.entry,
-    required this.onCancel,
-    required this.onSave,
-  });
+  const AddEditForm({super.key, this.entry, required this.onCancel, required this.onSave});
 
   @override
   ConsumerState<AddEditForm> createState() => _AddEditFormState();
@@ -45,15 +40,9 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
     super.initState();
     _nameController = TextEditingController(text: widget.entry?.name ?? "");
     _userController = TextEditingController(text: widget.entry?.username ?? "");
-    _passwordController = TextEditingController(
-      text: widget.entry?.password ?? "",
-    );
-    _urlsController = TextEditingController(
-      text: widget.entry?.urls.join('\n') ?? "",
-    );
-    _commentsController = TextEditingController(
-      text: widget.entry?.comments ?? "",
-    );
+    _passwordController = TextEditingController(text: widget.entry?.password ?? "");
+    _urlsController = TextEditingController(text: widget.entry?.urls.join('\n') ?? "");
+    _commentsController = TextEditingController(text: widget.entry?.comments ?? "");
 
     _addListeners();
 
@@ -110,17 +99,13 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
               controller: _userController,
               leading: Icon(LucideIcons.user),
               label: const Text('Username'),
-              placeholder: const Text(
-                "Your sign in name (will be autofilled on websites)",
-              ),
+              placeholder: const Text("Your sign in name (will be autofilled on websites)"),
             ),
             ShadInputFormField(
               controller: _passwordController,
               leading: Icon(LucideIcons.lock),
               label: const Text('Password'),
-              placeholder: const Text(
-                "Your sign in password (will be autofilled on websites)",
-              ),
+              placeholder: const Text("Your sign in password (will be autofilled on websites)"),
               obscureText: _obscurePassword,
               trailing: Row(
                 spacing: sizeXS,
@@ -151,9 +136,7 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
                     height: sizeS,
                     child: GlyphButton.ghost(
                       tooltip: "Show/hide value",
-                      icon: _obscurePassword
-                          ? LucideIcons.eyeOff
-                          : LucideIcons.eye,
+                      icon: _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
                       onTap: () {
                         setState(() => _obscurePassword = !_obscurePassword);
                       },
@@ -173,9 +156,7 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
             ShadInputFormField(
               controller: _commentsController,
               label: const Text('Comments'),
-              placeholder: const Text(
-                "Password hints, 2FA reset codes, secondary tokens, ...",
-              ),
+              placeholder: const Text("Password hints, 2FA reset codes, secondary tokens, ..."),
               maxLines: 2,
             ),
             Row(
@@ -183,7 +164,16 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (ref.watch(hasChangesProvider))
-                  ShadBadge.destructive(child: Text("Unsaved Changes")),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: ShadBadge.destructive(
+                        child: Text("Unsaved Changes", overflow: TextOverflow.ellipsis),
+                      ),
+                    ),
+                  ),
                 SecondaryButton(onPressed: _cancel, caption: 'Cancel'),
                 PrimaryButton(onPressed: _save, caption: 'Save'),
               ],
@@ -219,13 +209,9 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
     if (_formKey.currentState?.validate() ?? false) {
       final now = DateTime.now();
       final entry = VaultEntry(
-        id: widget.entry == null || widget.entry!.id.isEmpty
-            ? const Uuid().v4()
-            : widget.entry!.id,
+        id: widget.entry == null || widget.entry!.id.isEmpty ? const Uuid().v4() : widget.entry!.id,
         name: _nameController.text,
-        createdAt: widget.entry == null
-            ? now.toIso8601String()
-            : widget.entry!.createdAt,
+        createdAt: widget.entry == null ? now.toIso8601String() : widget.entry!.createdAt,
         updatedAt: now.toIso8601String(),
         username: _userController.text,
         password: _passwordController.text,
