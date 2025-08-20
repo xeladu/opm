@@ -79,8 +79,8 @@ Each backend provider requires a specific configuration file. Create a `config.j
     "supabaseConfig": {
         "url": "https://your-project.supabase.co",
         "anonKey": "your-anon-key",
-        "passwordDbName": "your-password-table-name",
-        "saltDbName": "your-salt-table-name"
+        "vaultDbName": "your-password-table-name",
+        "utilsDbName": "your-salt-table-name"
     }
 }
 ```
@@ -93,8 +93,8 @@ Each backend provider requires a specific configuration file. Create a `config.j
         "endpoint": "https://cloud.appwrite.io/v1",
         "project": "your-project-id",
         "databaseId": "opm-database",
-        "passwordCollectionId": "your-collection-id",
-        "saltCollectionId": "your-collection-id",
+        "vaultCollectionId": "your-collection-id",
+        "utilsCollectionId": "your-collection-id",
     }
 }
 ```
