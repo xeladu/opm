@@ -41,23 +41,31 @@ class FirebaseEntryRepositoryImpl implements VaultRepository {
   }
 
   @override
-  Future<List<VaultEntry>> getAllEntries({Function(String info)? onUpdate}) async {
+  Future<List<VaultEntry>> getAllEntries({
+    Function(String info, double? progress)? onUpdate,
+  }) async {
     final snapshot = await _userPasswordEntriesCollection().get();
     final entries = snapshot.docs.map((doc) => VaultEntry.fromJson(doc.data())).toList();
 
-    if (onUpdate != null) onUpdate("${entries.length} entries loaded ...");
+    if (onUpdate != null) {
+      onUpdate("${entries.length} entries loaded ...", null);
+    }
 
     final list = <VaultEntry>[];
     for (var i = 0; i < entries.length; i++) {
       list.add(await entries[i].decrypt(cryptoRepo.decrypt));
 
-      if (onUpdate != null) onUpdate("Decrypting entry $i of ${entries.length} ...");
+      if (onUpdate != null) {
+        onUpdate("Decrypting entry $i of ${entries.length} ...", i / entries.length);
+      }
       await Future.delayed(Duration.zero);
     }
 
     list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
-    if (onUpdate != null) onUpdate("Sorting data ...");
+    if (onUpdate != null) {
+      onUpdate("Sorting data ...", null);
+    }
 
     return list;
   }

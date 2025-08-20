@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_password_manager/features/vault/application/providers/all_entries_loading_state_provider.dart';
+import 'package:open_password_manager/shared/application/providers/loading_text_state_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_entry_button.dart';
@@ -25,7 +25,7 @@ class _State extends ConsumerState<VaultListPage> {
 
     return allPasswords.when(
       loading: () =>
-          Loading(text: ref.watch(allEntriesLoadingStateProvider) ?? "Getting your vault ready"),
+          Loading(text: ref.watch(loadingTextStateProvider) ?? "Getting your vault ready"),
       error: (error, stackTrace) => Text(error.toString()),
       data: (passwords) {
         final filteredPasswords = filterQuery.isEmpty

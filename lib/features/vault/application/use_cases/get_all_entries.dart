@@ -6,7 +6,7 @@ class GetAllEntries {
 
   GetAllEntries(this.repository);
 
-  Future<List<VaultEntry>> call({Function(String)? onUpdate}) async {
+  Future<List<VaultEntry>> call({Function(String, double?)? onUpdate}) async {
     return await repository.getAllEntries(onUpdate: onUpdate);
   }
 }
