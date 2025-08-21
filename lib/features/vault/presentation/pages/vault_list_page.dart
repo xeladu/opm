@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_password_manager/features/vault/application/providers/active_folder_provider.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/shared/application/providers/loading_text_state_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
@@ -20,37 +22,47 @@ class VaultListPage extends ConsumerStatefulWidget {
 class _State extends ConsumerState<VaultListPage> {
   @override
   Widget build(BuildContext context) {
-    final allPasswords = ref.watch(allEntriesProvider);
-    final filterQuery = ref.watch(filterQueryProvider);
+    final allEntriesState = ref.watch(allEntriesProvider);
 
-    return allPasswords.when(
+    return allEntriesState.when(
       loading: () =>
           Loading(text: ref.watch(loadingTextStateProvider) ?? "Getting your vault ready"),
       error: (error, stackTrace) => Text(error.toString()),
-      data: (passwords) {
-        final filteredPasswords = filterQuery.isEmpty
-            ? passwords
-            : passwords.where((entry) {
-                return entry.name.toLowerCase().contains(filterQuery) ||
-                    entry.username.toLowerCase().contains(filterQuery) ||
-                    entry.urls.any((url) => url.toLowerCase().contains(filterQuery));
-              }).toList();
+      data: (allEntries) {
+        final filteredEntries = _filterEntries(allEntries);
 
         return ResponsiveAppFrame(
           title: "Your vault",
           mobileContent: VaultListMobile(
-            passwords: filteredPasswords,
-            vaultEmpty: passwords.isEmpty,
+            entries: filteredEntries,
+            vaultEmpty: allEntries.isEmpty,
           ),
           desktopContent: Padding(
             padding: const EdgeInsets.all(sizeXS),
-            child: VaultListDesktop(passwords: filteredPasswords, vaultEmpty: passwords.isEmpty),
+            child: VaultListDesktop(entries: filteredEntries, vaultEmpty: allEntries.isEmpty),
           ),
           mobileButton: AddEntryButton(),
         );
       },
     );
   }
-}
 
-typedef FilterFunction = void Function(String);
+  List<VaultEntry> _filterEntries(List<VaultEntry> allEntries) {
+    final filterQuery = ref.watch(filterQueryProvider);
+    final activeFolder = ref.watch(activeFolderProvider);
+
+    var filteredEntries = filterQuery.isEmpty
+        ? allEntries
+        : allEntries.where((entry) {
+            return entry.name.toLowerCase().contains(filterQuery) ||
+                entry.username.toLowerCase().contains(filterQuery) ||
+                entry.urls.any((url) => url.toLowerCase().contains(filterQuery));
+          }).toList();
+
+    filteredEntries = activeFolder.isEmpty
+        ? filteredEntries
+        : filteredEntries.where((entry) => entry.folder == activeFolder).toList();
+
+    return filteredEntries;
+  }
+}

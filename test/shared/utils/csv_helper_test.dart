@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:open_password_manager/shared/utils/csv_helper.dart';
 
 void main() {
-  group('Test CsvHelper', () {
+  group('CsvHelper', () {
     test('parseCsv parses simple CSV', () {
       final csv = 'a,b,c\n1,2,3\n4,5,6';
       final result = CsvHelper.parseCsv(csv);

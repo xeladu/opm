@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
+import 'package:open_password_manager/features/vault/application/providers/all_entry_folders_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/has_changes_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/selected_entry_provider.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/add_entry.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/edit_entry.dart';
+import 'package:open_password_manager/features/vault/domain/entities/folder.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
@@ -34,6 +37,8 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
   late TextEditingController _passwordController;
   late TextEditingController _urlsController;
   late TextEditingController _commentsController;
+  late ShadSelectController<String> _folderController;
+  bool _hasEntries = false;
 
   @override
   void initState() {
@@ -43,11 +48,21 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
     _passwordController = TextEditingController(text: widget.entry?.password ?? "");
     _urlsController = TextEditingController(text: widget.entry?.urls.join('\n') ?? "");
     _commentsController = TextEditingController(text: widget.entry?.comments ?? "");
+    _folderController = ShadSelectController(
+      initialValue: {
+        widget.entry == null || widget.entry!.folder.isEmpty ? "" : widget.entry!.folder,
+      },
+    );
 
     _addListeners();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(hasChangesProvider.notifier).setHasChanges(false);
+      ref.read(allEntryFoldersProvider).whenData((folders) {
+        setState(() {
+          _hasEntries = folders.isNotEmpty;
+        });
+      });
     });
   }
 
@@ -62,6 +77,9 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
       _passwordController.text = widget.entry?.password ?? "";
       _urlsController.text = widget.entry?.urls.join('\n') ?? "";
       _commentsController.text = widget.entry?.comments ?? "";
+      _folderController.value = {
+        widget.entry == null || widget.entry!.folder.isEmpty ? "" : widget.entry!.folder,
+      };
 
       _addListeners();
     }
@@ -86,6 +104,7 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
       key: _formKey,
       child: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           spacing: sizeXS,
           children: [
             ShadInputFormField(
@@ -161,6 +180,61 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
             ),
             Row(
               spacing: sizeS,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return ShadSelectFormField<String>(
+                        controller: _folderController,
+                        label: const Text("Folder"),
+                        placeholder: const Text(" - no folder assigned - "),
+                        enabled: _hasEntries,
+                        minWidth: constraints.maxWidth,
+                        selectedOptionBuilder: (context, value) =>
+                            Text(value, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        options: ref
+                            .watch(allEntryFoldersProvider)
+                            .when(
+                              data: (folders) {
+                                _addDefaultFolder(folders);
+                                return folders.map(
+                                  (folder) => ShadOption<String>(
+                                    key: Key('folder-${folder.name}'),
+                                    value: folder.name,
+                                    child: Text(folder.name),
+                                  ),
+                                );
+                              },
+                              loading: () => [
+                                ShadOption<String>(value: "", child: Text("Loading")),
+                              ],
+                              error: (_, _) => [
+                                ShadOption<String>(
+                                  value: "",
+                                  child: Text(" - no folder assigned - "),
+                                ),
+                              ],
+                            ),
+                        onChanged: (_) async {
+                          // listener for controller doesn't work, so we trigger the check manually
+                          await Future.delayed(Duration.zero);
+                          ref.read(hasChangesProvider.notifier).setHasChanges(_anyChangesMade);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                GlyphButton(
+                  tooltip: "Create a new folder",
+                  onTap: _handleCreateFolder,
+                  icon: LucideIcons.folderPlus,
+                ),
+              ],
+            ),
+            const SizedBox(height: sizeXS),
+            Row(
+              spacing: sizeS,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (ref.watch(hasChangesProvider))
@@ -185,24 +259,31 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
   }
 
   bool get _anyChangesMade {
+    bool changesMade = false;
     final isEdit = widget.entry != null;
 
     if (isEdit) {
       final entry = widget.entry!;
       final urlsText = entry.urls.join('\n');
 
-      return _nameController.text != entry.name ||
+      changesMade =
+          _nameController.text != entry.name ||
           _userController.text != entry.username ||
           _passwordController.text != entry.password ||
           _urlsController.text != urlsText ||
-          _commentsController.text != entry.comments;
+          _commentsController.text != entry.comments ||
+          _folderController.value.first != entry.folder;
     } else {
-      return _nameController.text.isNotEmpty ||
+      changesMade =
+          _nameController.text.isNotEmpty ||
           _userController.text.isNotEmpty ||
           _passwordController.text.isNotEmpty ||
           _urlsController.text.isNotEmpty ||
-          _commentsController.text.isNotEmpty;
+          _commentsController.text.isNotEmpty ||
+          _folderController.value.first != "";
     }
+
+    return changesMade;
   }
 
   Future<void> _save() async {
@@ -221,6 +302,7 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
             .where((e) => e.isNotEmpty)
             .toList(),
         comments: _commentsController.text,
+        folder: _folderController.value.isEmpty ? "" : _folderController.value.first,
       );
 
       final repo = ref.read(vaultRepositoryProvider);
@@ -259,6 +341,8 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
     _passwordController.addListener(_listenForChanges);
     _urlsController.addListener(_listenForChanges);
     _commentsController.addListener(_listenForChanges);
+
+    // ShadSelectController is not firing when a value changes so we cannot use a listener
   }
 
   void _removeListeners() {
@@ -267,5 +351,32 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
     _passwordController.removeListener(_listenForChanges);
     _urlsController.removeListener(_listenForChanges);
     _commentsController.removeListener(_listenForChanges);
+  }
+
+  Future<void> _handleCreateFolder() async {
+    final newFolderName = await DialogService.showFolderCreationDialog(context, ref);
+
+    // Delay required for the animated dialog to close. Otherwise, an error message is shown.
+    await Future.delayed(Duration(milliseconds: 250));
+
+    if (newFolderName != null) {
+      ref.read(allEntryFoldersProvider.notifier).addFolder(newFolderName);
+    }
+  }
+
+  void _addDefaultFolder(List<Folder> folders) {
+    if (folders.any((folder) => folder.isDefaultFolder)) return;
+
+    folders.insert(
+      0,
+      Folder(
+        name: "No folder",
+        isDefaultFolder: true,
+        entryCount: ref.read(allEntriesProvider).maybeWhen(
+              data: (list) => list.length,
+              orElse: () => 0,
+            ),
+      ),
+    );
   }
 }

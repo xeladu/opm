@@ -58,6 +58,7 @@ class ImportRepositoryImpl extends ImportRepository {
           comments: map['Notes'] ?? '',
           createdAt: DateTime.now().toIso8601String(),
           updatedAt: DateTime.now().toIso8601String(),
+          folder: '',
         ),
       );
     }
@@ -78,7 +79,7 @@ class ImportRepositoryImpl extends ImportRepository {
   /// | login_password   | password         |
   /// | login_uri        | urls (as list)   |
   /// | notes            | comments         |
-  /// | folder           | (ignored)        |
+  /// | folder           | folder           |
   /// | favorite         | (ignored)        |
   /// | type             | (ignored)        |
   /// | fields           | (ignored)        |
@@ -109,6 +110,7 @@ class ImportRepositoryImpl extends ImportRepository {
           comments: map['notes'] ?? '',
           createdAt: DateTime.now().toIso8601String(),
           updatedAt: DateTime.now().toIso8601String(),
+          folder: map['folder'] ?? '',
         ),
       );
     }
@@ -152,6 +154,7 @@ class ImportRepositoryImpl extends ImportRepository {
           comments: map['Comments'] ?? '',
           createdAt: DateTime.now().toIso8601String(),
           updatedAt: DateTime.now().toIso8601String(),
+          folder: '',
         ),
       );
     }
@@ -170,7 +173,7 @@ class ImportRepositoryImpl extends ImportRepository {
   /// | Password         | password         |
   /// | Website Address  | urls (as list)   |
   /// | Notes            | comments         |
-  /// | Folder           | (ignored)        |
+  /// | Folder           | folder           |
   /// | Shared Folder    | (ignored)        |
   /// | Custom Fields    | (ignored)        |
   ///
@@ -200,6 +203,7 @@ class ImportRepositoryImpl extends ImportRepository {
           comments: map['Notes'] ?? '',
           createdAt: DateTime.now().toIso8601String(),
           updatedAt: DateTime.now().toIso8601String(),
+          folder: map['Group'] ?? '',
         ),
       );
     }
@@ -218,7 +222,7 @@ class ImportRepositoryImpl extends ImportRepository {
   /// | password  | password         |
   /// | url       | urls (as list)   |
   /// | extra     | comments         |
-  /// | grouping  | (ignored)        |
+  /// | grouping  | folder           |
   /// | fav       | (ignored)        |
   ///
   /// All other fields are ignored. createdAt/updatedAt are set to now. id is generated.
@@ -245,6 +249,7 @@ class ImportRepositoryImpl extends ImportRepository {
           comments: map['extra'] ?? '',
           createdAt: DateTime.now().toIso8601String(),
           updatedAt: DateTime.now().toIso8601String(),
+          folder: map['grouping'] ?? '',
         ),
       );
     }
@@ -258,7 +263,7 @@ class ImportRepositoryImpl extends ImportRepository {
   ///
   /// | CSV Field      | VaultEntry Field |
   /// |----------------|------------------|
-  /// | id             | (ignored)         |
+  /// | id             | (ignored)        |
   /// | name           | name             |
   /// | username       | username         |
   /// | password       | password         |
@@ -266,6 +271,7 @@ class ImportRepositoryImpl extends ImportRepository {
   /// | comments       | comments         |
   /// | createdAt      | createdAt        |
   /// | updatedAt      | updatedAt        |
+  /// | group          | folder           |
   @override
   Future<List<VaultEntry>> importFromOpm(String csvContent) async {
     final rows = CsvHelper.parseCsv(csvContent);
@@ -295,6 +301,7 @@ class ImportRepositoryImpl extends ImportRepository {
           updatedAt: map['updatedAt'] != null
               ? DateTime.parse(map['updatedAt']!).toIso8601String()
               : DateTime.now().toIso8601String(),
+          folder: map['group'] ?? '',
         ),
       );
     }

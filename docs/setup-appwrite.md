@@ -120,6 +120,7 @@ Add these attributes one by one by clicking "Create Attribute":
 | `password` | String | 256 | ✅ | - |
 | `urls` | String (Array) | 1024 | ❌ | - |
 | `comments` | String | 1024 | ❌ | - |
+| `folder` | String | 256 | ❌ | - |
 
 #### Set Permissions for Vault Collection
 

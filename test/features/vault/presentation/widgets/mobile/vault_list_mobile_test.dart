@@ -16,7 +16,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: VaultListMobile(
-            passwords: [
+            entries: [
               TestDataGenerator.randomVaultEntry(),
               TestDataGenerator.randomVaultEntry(),
             ],
@@ -35,7 +35,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: VaultListMobile(
-            passwords: [
+            entries: [
               TestDataGenerator.randomVaultEntry(),
               TestDataGenerator.randomVaultEntry(),
             ],
@@ -54,7 +54,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: VaultListMobile(
-            passwords: [
+            entries: [
               TestDataGenerator.randomVaultEntry(),
               TestDataGenerator.randomVaultEntry(),
             ],

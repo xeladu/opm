@@ -8,14 +8,10 @@ import 'package:open_password_manager/shared/application/providers/show_search_f
 import 'package:open_password_manager/style/ui.dart';
 
 class VaultListMobile extends ConsumerWidget {
-  final List<VaultEntry> passwords;
+  final List<VaultEntry> entries;
   final bool vaultEmpty;
 
-  const VaultListMobile({
-    super.key,
-    required this.passwords,
-    required this.vaultEmpty,
-  });
+  const VaultListMobile({super.key, required this.entries, required this.vaultEmpty});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,7 +23,7 @@ class VaultListMobile extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (showSearchField) ...[
-            Text("${passwords.length} entries found"),
+            Text("${entries.length} entries found"),
             SizedBox(height: sizeXS),
             VaultSearchField(),
           ],
@@ -36,20 +32,15 @@ class VaultListMobile extends ConsumerWidget {
             child: vaultEmpty
                 ? Center(
                     child: EmptyList(
-                      message:
-                          "Your vault is empty!\r\nStart by adding your first entry",
+                      message: "Your vault is empty!\r\nStart by adding your first entry",
                     ),
                   )
                 : ListView.builder(
                     padding: EdgeInsets.only(bottom: sizeXL),
-                    itemCount: passwords.length,
+                    itemCount: entries.length,
                     itemBuilder: (context, index) {
-                      final entry = passwords[index];
-                      return VaultListEntry(
-                        entry: entry,
-                        selected: false,
-                        isMobile: true,
-                      );
+                      final entry = entries[index];
+                      return VaultListEntry(entry: entry, selected: false, isMobile: true);
                     },
                   ),
           ),

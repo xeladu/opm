@@ -33,6 +33,7 @@ class AddEditVaultEntryPage extends ConsumerWidget {
           ),
         ),
         hideSearchButton: true,
+        hideFolderButton: true,
       ),
     );
   }

@@ -22,36 +22,23 @@ class VaultEntryDetails extends StatelessWidget {
         spacing: sizeXS,
         children: [
           PlainTextFormField.readOnly(label: "Name", value: entry.name),
-          PlainTextFormField.readOnly(
-            label: "Username",
-            value: entry.username,
-            canCopy: true,
-          ),
+          PlainTextFormField.readOnly(label: "Username", value: entry.username, canCopy: true),
           PlainTextFormField.readOnly(
             label: "Password",
             value: entry.password,
             canToggle: true,
             canCopy: true,
           ),
-          PlainTextFormField.readOnly(
-            label: "URLs",
-            value: entry.urls.join('\n'),
-            maxLines: 3,
-          ),
-          PlainTextFormField.readOnly(
-            label: "Comments",
-            value: entry.comments,
-            maxLines: 2,
-          ),
+          PlainTextFormField.readOnly(label: "URLs", value: entry.urls.join('\n'), maxLines: 3),
+          PlainTextFormField.readOnly(label: "Comments", value: entry.comments, maxLines: 2),
+          PlainTextFormField.readOnly(label: "Folder", value: entry.folder),
           PlainTextFormField.readOnly(
             label: "Created At",
-            value:
-                "${df.format(createdAtDate)} (${timeago.format(createdAtDate, locale: 'en')})",
+            value: "${df.format(createdAtDate)} (${timeago.format(createdAtDate, locale: 'en')})",
           ),
           PlainTextFormField.readOnly(
             label: "Updated At",
-            value:
-                "${df.format(updatedAtDate)} (${timeago.format(updatedAtDate, locale: 'en')})",
+            value: "${df.format(updatedAtDate)} (${timeago.format(updatedAtDate, locale: 'en')})",
           ),
         ],
       ),

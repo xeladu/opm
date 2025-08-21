@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
 import 'package:open_password_manager/shared/application/providers/show_search_field_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
+import 'package:open_password_manager/shared/presentation/sheets/folder_sheet.dart';
 import 'package:open_password_manager/shared/presentation/user_menu.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -15,6 +16,7 @@ class ResponsiveAppFrame extends ConsumerStatefulWidget {
   final Widget? mobileContent;
   final Widget? desktopContent;
   final bool hideSearchButton;
+  final bool hideFolderButton;
 
   const ResponsiveAppFrame({
     super.key,
@@ -25,11 +27,10 @@ class ResponsiveAppFrame extends ConsumerStatefulWidget {
     this.content,
     this.title,
     this.hideSearchButton = false,
+    this.hideFolderButton = false,
   }) : assert(
          (content != null && mobileContent == null && desktopContent == null) ||
-             (content == null &&
-                 mobileContent != null &&
-                 desktopContent != null),
+             (content == null && mobileContent != null && desktopContent != null),
          'Either provide content, or both mobileContent and desktopContent.',
        );
 
@@ -51,6 +52,21 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
         }
 
         final actionButtons = [
+          if (isMobile && !widget.hideFolderButton)
+            Padding(
+              padding: EdgeInsets.only(right: sizeXS),
+              child: GlyphButton.ghost(
+                icon: LucideIcons.folder,
+                size: sizeM,
+                onTap: () async {
+                  await showShadSheet<String>(
+                    context: context,
+                    side: ShadSheetSide.right,
+                    builder: (context) => FolderSheet(),
+                  );
+                },
+              ),
+            ),
           if (isMobile && !widget.hideSearchButton)
             Padding(
               padding: EdgeInsets.only(right: sizeXS),
@@ -81,14 +97,9 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
             title: widget.title != null ? Text(widget.title!) : null,
             actions: actionButtons,
           ),
-          body:
-              widget.content ??
-              (isMobile ? widget.mobileContent : widget.desktopContent),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerFloat,
-          floatingActionButton: (isMobile
-              ? widget.mobileButton
-              : widget.desktopButton),
+          body: widget.content ?? (isMobile ? widget.mobileContent : widget.desktopContent),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          floatingActionButton: (isMobile ? widget.mobileButton : widget.desktopButton),
         );
       },
     );

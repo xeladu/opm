@@ -21,24 +21,20 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 
 class VaultListDesktop extends ConsumerWidget {
-  final List<VaultEntry> passwords;
+  final List<VaultEntry> entries;
   final bool vaultEmpty;
 
-  const VaultListDesktop({
-    super.key,
-    required this.passwords,
-    required this.vaultEmpty,
-  });
+  const VaultListDesktop({super.key, required this.entries, required this.vaultEmpty});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedPasswordEntry = ref.watch(selectedEntryProvider);
+    final selectedVaultEntry = ref.watch(selectedEntryProvider);
     final addEditModeActive = ref.watch(addEditModeActiveProvider);
 
     final leftPanelContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("${passwords.length} entries found"),
+        Text("${entries.length} entries found"),
         SizedBox(height: sizeXS),
         VaultSearchField(),
         SizedBox(height: sizeS),
@@ -46,17 +42,16 @@ class VaultListDesktop extends ConsumerWidget {
           child: vaultEmpty
               ? Center(
                   child: EmptyList(
-                    message:
-                        "Your vault is empty!\r\nStart by adding your first entry",
+                    message: "Your vault is empty!\r\nStart by adding your first entry",
                   ),
                 )
               : ListView.builder(
-                  itemCount: passwords.length,
+                  itemCount: entries.length,
                   itemBuilder: (context, index) {
-                    final entry = passwords[index];
+                    final entry = entries[index];
                     return VaultListEntry(
                       entry: entry,
-                      selected: selectedPasswordEntry?.id == entry.id,
+                      selected: selectedVaultEntry?.id == entry.id,
                       isMobile: false,
                     );
                   },
@@ -70,21 +65,20 @@ class VaultListDesktop extends ConsumerWidget {
       ],
     );
 
-    final rightPanelContent =
-        selectedPasswordEntry == null && !addEditModeActive
+    final rightPanelContent = selectedVaultEntry == null && !addEditModeActive
         ? SizedBox()
         : Column(
             children: [
               Expanded(
                 child: addEditModeActive
                     ? AddEditForm(
-                        entry: selectedPasswordEntry,
+                        entry: selectedVaultEntry,
                         onCancel: () => _cancel(ref),
                         onSave: () => _save(ref),
                       )
                     : VaultEntryDetails(
-                        key: ValueKey(selectedPasswordEntry!.id),
-                        entry: selectedPasswordEntry,
+                        key: ValueKey(selectedVaultEntry!.id),
+                        entry: selectedVaultEntry,
                       ),
               ),
               Separator.horizontal(),
@@ -103,19 +97,13 @@ class VaultListDesktop extends ConsumerWidget {
           id: 1,
           defaultSize: .5,
           minSize: .33,
-          child: Padding(
-            padding: const EdgeInsets.all(sizeS),
-            child: leftPanelContent,
-          ),
+          child: Padding(padding: const EdgeInsets.all(sizeS), child: leftPanelContent),
         ),
         ShadResizablePanel(
           id: 2,
           defaultSize: .5,
           minSize: .33,
-          child: Padding(
-            padding: const EdgeInsets.all(sizeS),
-            child: rightPanelContent,
-          ),
+          child: Padding(padding: const EdgeInsets.all(sizeS), child: rightPanelContent),
         ),
       ],
     );
@@ -144,9 +132,7 @@ class VaultListDesktop extends ConsumerWidget {
   }
 
   void _edit(WidgetRef ref) {
-    ref
-        .read(addEditModeActiveProvider.notifier)
-        .setMode(!ref.read(addEditModeActiveProvider));
+    ref.read(addEditModeActiveProvider.notifier).setMode(!ref.read(addEditModeActiveProvider));
   }
 
   Future<void> _duplicate(WidgetRef ref) async {

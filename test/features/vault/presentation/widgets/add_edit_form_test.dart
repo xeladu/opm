@@ -13,6 +13,11 @@ import '../../../../mocking/mocks.mocks.dart';
 
 void main() {
   group("AddEditForm", () {
+    late MockVaultRepository mockVaultRepository;
+    setUp(() {
+      mockVaultRepository = MockVaultRepository();
+    });
+
     testWidgets("Test add form", (tester) async {
       final sut = Material(
         child: Scaffold(
@@ -38,7 +43,46 @@ void main() {
       expect(find.text("my-pass"), findsOneWidget);
       expect(find.textContaining("url1"), findsOneWidget);
       expect(find.textContaining("url2"), findsOneWidget);
+      expect(find.text("my-folder"), findsOneWidget);
     });
+
+    testWidgets("Test change folder", (tester) async {
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.vaultEntry(folder: "folder1"),
+          TestDataGenerator.vaultEntry(folder: "folder2"),
+        ]),
+      );
+      final sut = Material(
+        child: Scaffold(
+          body: AddEditForm(entry: TestDataGenerator.vaultEntry(), onCancel: () {}, onSave: () {}),
+        ),
+      );
+      await AppSetup.pumpPage(tester, sut, [
+        vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+      ]);
+
+      expect(find.byType(ShadInputFormField), findsNWidgets(5));
+      expect(find.text("my-name"), findsOneWidget);
+      expect(find.text("my-user"), findsOneWidget);
+      expect(find.text("my-pass"), findsOneWidget);
+      expect(find.textContaining("url1"), findsOneWidget);
+      expect(find.textContaining("url2"), findsOneWidget);
+      expect(find.text("my-folder"), findsOneWidget);
+
+      // TODO This test does not trigger the selection dropdown
+
+      expect(find.byType(ShadSelectFormField<String>), findsOneWidget);
+      await tester.tap(find.byType(ShadSelectFormField<String>));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ShadOption<String>), findsNWidgets(3));
+      await tester.tap(find.byType(ShadOption<String>).last);
+      await tester.pumpAndSettle();
+
+      expect(find.text("folder2"), findsOneWidget);
+      expect(find.text("my-folder"), findsNothing);
+    }, skip: true);
 
     testWidgets("Test invalid save", (tester) async {
       bool saved = false;

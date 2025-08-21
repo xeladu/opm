@@ -20,6 +20,7 @@ class VaultEntryDetailPage extends ConsumerWidget {
       ),
       mobileButton: EditEntryButton(entry: entry),
       hideSearchButton: true,
+      hideFolderButton: true,
     );
   }
 }

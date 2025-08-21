@@ -12,6 +12,7 @@ class TestDataGenerator {
     String? password,
     List<String>? urls,
     String? comments,
+    String? folder,
   }) {
     return VaultEntry(
       id: id ?? "1",
@@ -22,6 +23,7 @@ class TestDataGenerator {
       password: password ?? "my-pass",
       urls: urls ?? ["url1", "url2"],
       comments: comments ?? "my-comments",
+      folder: folder ?? "my-folder",
     );
   }
 
@@ -49,6 +51,7 @@ class TestDataGenerator {
       password: "my-pass-${Random().nextInt(1000)}",
       urls: ["url-${Random().nextInt(1000)}", "url-${Random().nextInt(1000)}"],
       comments: "my-comments-${Random().nextInt(1000)}",
+      folder: "my-folder-${Random().nextInt(1000)}",
     );
   }
 }

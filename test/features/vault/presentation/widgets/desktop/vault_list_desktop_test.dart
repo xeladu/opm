@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_edit_form.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/desktop/vault_list_desktop.dart';
@@ -32,7 +34,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: VaultListDesktop(
-            passwords: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
+            entries: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
             vaultEmpty: false,
           ),
         ),
@@ -52,7 +54,7 @@ void main() {
 
     testWidgets("Test empty list", (tester) async {
       final sut = Material(
-        child: Scaffold(body: VaultListDesktop(passwords: [], vaultEmpty: true)),
+        child: Scaffold(body: VaultListDesktop(entries: [], vaultEmpty: true)),
       );
       await AppSetup.pumpPage(tester, sut, []);
 
@@ -68,15 +70,21 @@ void main() {
     });
 
     testWidgets("Test add entry", (tester) async {
+      when(
+        mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate")),
+      ).thenAnswer((_) => Future.value([TestDataGenerator.vaultEntry()]));
+
       final sut = Material(
         child: Scaffold(
           body: VaultListDesktop(
-            passwords: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
+            entries: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
             vaultEmpty: false,
           ),
         ),
       );
-      await AppSetup.pumpPage(tester, sut, []);
+      await AppSetup.pumpPage(tester, sut, [
+        vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+      ]);
 
       await tester.tap(find.byType(SecondaryButton));
       await tester.pumpAndSettle();
@@ -93,12 +101,15 @@ void main() {
     });
 
     testWidgets("Test edit entry and save", (tester) async {
+      when(
+        mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate")),
+      ).thenAnswer((_) => Future.value([TestDataGenerator.vaultEntry()]));
       when(mockVaultRepository.editEntry(any)).thenAnswer((_) => Future.value());
 
       final sut = Material(
         child: Scaffold(
           body: VaultListDesktop(
-            passwords: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
+            entries: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
             vaultEmpty: false,
           ),
         ),
@@ -122,6 +133,9 @@ void main() {
       expect(find.byType(VaultEntryDetails), findsNothing);
       expect(find.byType(VaultEntryActions), findsOneWidget);
 
+      await tester.ensureVisible(
+        find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Save"),
+      );
       await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Save"));
       await tester.pumpAndSettle();
 
@@ -133,15 +147,23 @@ void main() {
     testWidgets("Test edit entry and cancel", (tester) async {
       suppressOverflowErrors();
 
+      when(
+        mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate")),
+      ).thenAnswer((_) => Future.value([TestDataGenerator.vaultEntry()]));
+
       final sut = Material(
         child: Scaffold(
           body: VaultListDesktop(
-            passwords: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
+            entries: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
             vaultEmpty: false,
           ),
         ),
       );
       await AppSetup.pumpPage(tester, sut, []);
+
+      final container = ProviderScope.containerOf(tester.element(find.byType(VaultListDesktop)));
+      container.read(allEntriesProvider);
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byType(VaultListEntry).first);
       await tester.pump(Duration(milliseconds: 100));
@@ -161,6 +183,9 @@ void main() {
       await tester.enterText(find.byType(ShadInputFormField).first, "abc");
       await tester.pumpAndSettle();
 
+      await tester.ensureVisible(
+        find.byWidgetPredicate((w) => w is SecondaryButton && w.caption == "Cancel"),
+      );
       await tester.tap(
         find.byWidgetPredicate((w) => w is SecondaryButton && w.caption == "Cancel"),
       );
@@ -180,7 +205,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: VaultListDesktop(
-            passwords: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
+            entries: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
             vaultEmpty: false,
           ),
         ),
@@ -207,7 +232,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: VaultListDesktop(
-            passwords: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
+            entries: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
             vaultEmpty: false,
           ),
         ),
@@ -250,7 +275,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: VaultListDesktop(
-            passwords: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
+            entries: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
             vaultEmpty: false,
           ),
         ),

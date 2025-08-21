@@ -13,3 +13,4 @@ const double dialogMaxWidth = 480;
 const double selectLargeWidth = 240;
 const double selectSmallWidth = 120;
 const double minVaultEntryTileHeight = 64;
+const double minFolderEntryTileHeight = 48;

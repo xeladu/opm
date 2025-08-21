@@ -16,7 +16,7 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, []);
 
-      expect(find.byType(PlainTextFormField), findsNWidgets(7));
+      expect(find.byType(PlainTextFormField), findsNWidgets(8));
       expect(find.text("my-name"), findsOneWidget);
       expect(find.text("my-comments"), findsOneWidget);
       expect(find.textContaining("2020/01/01, 01:01:01"), findsOneWidget);
@@ -25,6 +25,7 @@ void main() {
       expect(find.textContaining("url1"), findsOneWidget);
       expect(find.textContaining("url2"), findsOneWidget);
       expect(find.text("my-user"), findsOneWidget);
+      expect(find.text("my-folder"), findsOneWidget);
     });
   });
 }
