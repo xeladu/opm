@@ -1,6 +1,35 @@
 name: "Prepare Flutter"
 description: "Sets up the Flutter environment, prepares the code, and validates it"
 
+inputs:
+  firebase_api_key:
+    description: 'Firebase API key'
+    required: true
+  firebase_auth_domain:
+    description: 'Firebase auth domain'
+    required: true
+  firebase_project_id:
+    description: 'Firebase project id'
+    required: true
+  firebase_storage_bucket:
+    description: 'Firebase storage bucket'
+    required: true
+  firebase_messaging_sender_id:
+    description: 'Firebase messaging sender id'
+    required: true
+  firebase_app_id:
+    description: 'Firebase app id'
+    required: true
+  firebase_measurement_id:
+    description: 'Firebase measurement id'
+    required: true
+  firebase_vault_collection_prefix:
+    description: 'Vault collection prefix'
+    required: true
+  firebase_utils_collection_name:
+    description: 'Utils collection name'
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -16,15 +45,15 @@ runs:
 
     - name: Generate config.json
       env:
-        FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-        FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
-        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-        FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-        FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-        FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
-        FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
-        FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
-        FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+        FIREBASE_API_KEY: ${{ inputs.firebase_api_key }}
+        FIREBASE_AUTH_DOMAIN: ${{ inputs.firebase_auth_domain }}
+        FIREBASE_PROJECT_ID: ${{ inputs.firebase_project_id }}
+        FIREBASE_STORAGE_BUCKET: ${{ inputs.firebase_storage_bucket }}
+        FIREBASE_MESSAGING_SENDER_ID: ${{ inputs.firebase_messaging_sender_id }}
+        FIREBASE_APP_ID: ${{ inputs.firebase_app_id }}
+        FIREBASE_MEASUREMENT_ID: ${{ inputs.firebase_measurement_id }}
+        FIREBASE_VAULT_COLLECTION_PREFIX: ${{ inputs.firebase_vault_collection_prefix }}
+        FIREBASE_UTILS_COLLECTION_NAME: ${{ inputs.firebase_utils_collection_name }}
       run: |
         dart run scripts/generate_config.dart config.json
       shell: bash

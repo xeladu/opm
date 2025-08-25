@@ -15,9 +15,15 @@ jobs:
       - name: Prepare Flutter
         uses: ./.github/workflows/steps/prepare-flutter
         with:
-          flutter-version: "3.35.1"
-          channel: "stable"
-          output-path: config.json
+          firebase_api_key: ${{ secrets.FIREBASE_API_KEY }}
+          firebase_auth_domain: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          firebase_project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
+          firebase_storage_bucket: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          firebase_messaging_sender_id: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          firebase_app_id: ${{ secrets.FIREBASE_APP_ID }}
+          firebase_measurement_id: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          firebase_vault_collection_prefix: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
+          firebase_utils_collection_name: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
 
       - name: Build web app
         run: flutter build web
