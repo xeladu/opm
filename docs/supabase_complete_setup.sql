@@ -14,7 +14,8 @@ CREATE TABLE passwords (
   username text NOT NULL,
   password text NOT NULL,
   urls text[],
-  comments text
+  comments text,
+  folder text
 );
 
 -- Enable RLS for passwords table
