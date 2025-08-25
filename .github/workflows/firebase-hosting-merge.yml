@@ -9,70 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        name: Checkout code
+        name: Checkout Code
 
-      - uses: subosito/flutter-action@v2
-        name: Set up Flutter actions
+      - name: Prepare Flutter
+        uses: ./.github/workflows/steps/prepare-flutter
         with:
-          flutter-version: 3.35.1
-          channel: "stable"
-
-      - name: Generate config.json
-        env:
-          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
-          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
-          FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
-          FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
-        run: |
-          dart run scripts/generate_config.dart config.json
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Analyze project
-        run: flutter analyze
-
-      - name: Run tests and measure coverage
-        run: |
-          flutter test --coverage
-
-          LH_TOTAL=0
-          LF_TOTAL=0
-
-          while IFS= read -r line; do
-              if [[ $line == LH:* ]]; then
-                  LH_VALUE=${line#LH:}
-                  ((LH_TOTAL+=LH_VALUE))
-              elif [[ $line == LF:* ]]; then
-                  LF_VALUE=${line#LF:}
-                  ((LF_TOTAL+=LF_VALUE))
-              fi
-          done < coverage/lcov.info
-
-          if [[ $LF_TOTAL -gt 0 ]]; then
-              TOTAL_COVERAGE=$(awk "BEGIN {printf \"%.1f\", ($LH_TOTAL/$LF_TOTAL)*100}")
-          else
-              TOTAL_COVERAGE=0
-          fi
-
-          if (( $(echo "$TOTAL_COVERAGE > 90" | bc -l) )); then
-              ICON="✅✅✅"
-          elif (( $(echo "$TOTAL_COVERAGE > 80" | bc -l) )); then
-              ICON="✅✅"
-          elif (( $(echo "$TOTAL_COVERAGE > 70" | bc -l) )); then
-              ICON="✅"
-          elif (( $(echo "$TOTAL_COVERAGE > 50" | bc -l) )); then
-              ICON="⚠️"
-          else
-              ICON="❌"
-          fi
-
-          echo "$ICON Total Coverage: $TOTAL_COVERAGE%"
+          flutter-version: '3.35.1'
+          channel: 'stable'
+          output-path: config.json
 
       - name: Build web app
         run: flutter build web
