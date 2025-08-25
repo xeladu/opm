@@ -8,7 +8,7 @@
             "name": "open_password_manager",
             "request": "launch",
             "type": "dart",
-            "args": ["--web-experimental-hot-reload"]
+            "args": [""]
         },
         {
             "name": "open_password_manager (profile mode)",
