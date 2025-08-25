@@ -35,7 +35,6 @@ runs:
   steps:
     - name: Install Flutter SDK
       run: |
-        echo ''
         echo ' --- Install Flutter SDK ---'
       shell: bash
 
@@ -57,28 +56,24 @@ runs:
         FIREBASE_VAULT_COLLECTION_PREFIX: ${{ inputs.firebase_vault_collection_prefix }}
         FIREBASE_UTILS_COLLECTION_NAME: ${{ inputs.firebase_utils_collection_name }}
       run: |
-        echo ''
         echo ' --- Generate Firebase Configuration File ---'
         dart run scripts/generate_config.dart config.json
       shell: bash
 
     - name: Get Flutter Dependencies
       run: |
-        echo ''
         echo ' --- Get Flutter Dependencies ---'
         flutter pub get
       shell: bash
 
     - name: Analyze Project
       run: |
-        echo ''
         echo ' --- Analyze Project ---'
         flutter analyze
       shell: bash
 
     - name: Run Tests
       run: |
-        echo ''
         echo ' --- Run Tests ---'
         flutter test --coverage
 
