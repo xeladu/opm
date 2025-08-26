@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/presentation/widgets/strength_indicator.dart';
 import 'package:open_password_manager/shared/presentation/inputs/plain_text_form_field.dart';
 import 'package:open_password_manager/style/ui.dart';
 
@@ -19,26 +20,70 @@ class VaultEntryDetails extends StatelessWidget {
 
     return SingleChildScrollView(
       child: Column(
-        spacing: sizeXS,
         children: [
-          PlainTextFormField.readOnly(label: "Name", value: entry.name),
-          PlainTextFormField.readOnly(label: "Username", value: entry.username, canCopy: true),
-          PlainTextFormField.readOnly(
-            label: "Password",
-            value: entry.password,
-            canToggle: true,
-            canCopy: true,
+          ShadCard(
+            padding: EdgeInsets.all(sizeS),
+            child: Column(
+              spacing: sizeXS,
+              children: [PlainTextFormField.readOnly(label: "Name", value: entry.name)],
+            ),
           ),
-          PlainTextFormField.readOnly(label: "URLs", value: entry.urls.join('\n'), maxLines: 3),
-          PlainTextFormField.readOnly(label: "Comments", value: entry.comments, maxLines: 2),
-          PlainTextFormField.readOnly(label: "Folder", value: entry.folder),
-          PlainTextFormField.readOnly(
-            label: "Created At",
-            value: "${df.format(createdAtDate)} (${timeago.format(createdAtDate, locale: 'en')})",
+          const SizedBox(height: sizeXS),
+          ShadCard(
+            padding: EdgeInsets.all(sizeS),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: sizeXS,
+              children: [
+                if (entry.username.isNotEmpty)
+                  PlainTextFormField.readOnly(
+                    label: "Username",
+                    value: entry.username,
+                    canCopy: true,
+                  ),
+                if (entry.password.isNotEmpty) ...[
+                  PlainTextFormField.readOnly(
+                    label: "Password",
+                    value: entry.password,
+                    canToggle: true,
+                    canCopy: true,
+                  ),
+                  StrengthIndicator(password: entry.password),
+                ],
+                if (entry.urls.isNotEmpty)
+                  PlainTextFormField.readOnly(
+                    label: "URLs",
+                    value: entry.urls.join('\n'),
+                    maxLines: 3,
+                  ),
+                if (entry.comments.isNotEmpty)
+                  PlainTextFormField.readOnly(
+                    label: "Comments",
+                    value: entry.comments,
+                    canCopy: true,
+                  ),
+                PlainTextFormField.readOnly(label: "Folder", value: entry.folder),
+              ],
+            ),
           ),
-          PlainTextFormField.readOnly(
-            label: "Updated At",
-            value: "${df.format(updatedAtDate)} (${timeago.format(updatedAtDate, locale: 'en')})",
+          const SizedBox(height: sizeXS),
+          ShadCard(
+            padding: EdgeInsets.all(sizeS),
+            child: Column(
+              spacing: sizeXS,
+              children: [
+                PlainTextFormField.readOnly(
+                  label: "Created At",
+                  value:
+                      "${df.format(createdAtDate)} (${timeago.format(createdAtDate, locale: 'en')})",
+                ),
+                PlainTextFormField.readOnly(
+                  label: "Updated At",
+                  value:
+                      "${df.format(updatedAtDate)} (${timeago.format(updatedAtDate, locale: 'en')})",
+                ),
+              ],
+            ),
           ),
         ],
       ),

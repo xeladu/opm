@@ -13,7 +13,7 @@ class PlainTextFormField extends ConsumerStatefulWidget {
   final bool canCopy;
   final bool canToggle;
   final bool readOnly;
-  final int maxLines;
+  final int? maxLines;
 
   const PlainTextFormField({
     super.key,
@@ -23,7 +23,7 @@ class PlainTextFormField extends ConsumerStatefulWidget {
     this.canCopy = false,
     this.canToggle = false,
     this.readOnly = false,
-    this.maxLines = 1,
+    this.maxLines,
   });
 
   const PlainTextFormField.readOnly({
@@ -33,7 +33,7 @@ class PlainTextFormField extends ConsumerStatefulWidget {
     required String? value,
     bool canCopy = false,
     bool canToggle = false,
-    int maxLines = 1,
+    int? maxLines,
   }) : this(
          key: key,
          label: label,
@@ -54,22 +54,37 @@ class _State extends ConsumerState<PlainTextFormField> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.readOnly && (widget.value == null || widget.value!.isEmpty)) {
+      return const SizedBox();
+    }
+
     return ShadInputFormField(
       id: widget.label,
       style: widget.readOnly
           ? ShadTheme.of(context).textTheme.muted
           : ShadTheme.of(context).textTheme.p,
-      maxLines: widget.maxLines,
+      minLines: 1,
+      maxLines: widget.canToggle ? 1 : widget.maxLines,
       initialValue: widget.value,
       readOnly: widget.readOnly,
+      padding: EdgeInsets.zero,
+      inputPadding: widget.readOnly ? EdgeInsets.fromLTRB(sizeXXS, 0, 0, sizeXS) : EdgeInsets.zero,
+      decoration: widget.readOnly
+          ? ShadDecoration(
+              border: ShadBorder(
+                padding: EdgeInsets.zero,
+                top: ShadBorderSide(width: 0),
+                left: ShadBorderSide(width: 0),
+                bottom: ShadBorderSide(width: 0),
+                right: ShadBorderSide(width: 0),
+              ),
+            )
+          : null,
       obscureText: !widget.canToggle ? false : _obscured,
       label: Text(widget.label),
       leading: widget.icon == null
           ? null
-          : Padding(
-              padding: EdgeInsets.all(sizeXXS),
-              child: Icon(widget.icon!),
-            ),
+          : Padding(padding: EdgeInsets.all(sizeXXS), child: Icon(widget.icon!)),
       trailing: !widget.canCopy && !widget.canToggle
           ? null
           : Row(
@@ -81,9 +96,7 @@ class _State extends ConsumerState<PlainTextFormField> {
                     child: GlyphButton.ghost(
                       icon: LucideIcons.copy,
                       onTap: () async {
-                        ref
-                            .read(clipboardRepositoryProvider)
-                            .copyToClipboard(widget.value ?? "");
+                        ref.read(clipboardRepositoryProvider).copyToClipboard(widget.value ?? "");
 
                         if (context.mounted) {
                           ToastService.show(context, "${widget.label} copied!");
