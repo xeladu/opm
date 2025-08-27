@@ -96,6 +96,7 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
           appBar: AppBar(
             title: widget.title != null ? Text(widget.title!) : null,
             actions: actionButtons,
+            surfaceTintColor: Colors.transparent,
           ),
           body: widget.content ?? (isMobile ? widget.mobileContent : widget.desktopContent),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
