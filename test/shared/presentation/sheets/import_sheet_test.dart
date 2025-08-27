@@ -32,7 +32,7 @@ void main() {
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
                 builder: (context) => ImportSheet(
-                  onSelected: (_, _) async {
+                  onSelected: (_, _, _) async {
                     return true;
                   },
                 ),
@@ -49,19 +49,35 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ImportSheet), findsOneWidget);
+      expect(find.byType(ShadTabs<String>), findsOneWidget);
+
+      // csv tab
       expect(find.text("Open Password Manager"), findsOneWidget);
-      expect(find.text(" - no file selected - "), findsOneWidget);
+      expect(find.text("Select CSV file"), findsOneWidget);
       expect(find.byType(PrimaryButton), findsNWidgets(2));
       expect(find.byType(SecondaryButton), findsOneWidget);
       expect(find.text("Import"), findsOneWidget);
       expect(find.text("Cancel"), findsOneWidget);
+
+      await tester.tap(find.byType(ShadTab<String>).last);
+      await tester.pumpAndSettle();
+
+      // json tab
+      expect(find.text("Select JSON file"), findsOneWidget);
+      expect(find.byType(PrimaryButton), findsNWidgets(2));
+      expect(find.byType(SecondaryButton), findsOneWidget);
+      expect(find.text("Import"), findsOneWidget);
+      expect(find.text("Cancel"), findsOneWidget);
+      expect(find.byType(ShadCard), findsOneWidget);
     });
 
     testWidgets("Test import data", (tester) async {
       ImportProvider? importProvider;
       String? fileContent;
 
-      when(mockFilePickerService.pickFile()).thenAnswer(
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -81,7 +97,7 @@ void main() {
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
                 builder: (context) => ImportSheet(
-                  onSelected: (provider, content) async {
+                  onSelected: (provider, content, _) async {
                     importProvider = provider;
                     fileContent = content;
                     return true;
@@ -126,8 +142,116 @@ void main() {
       expect(find.byType(ImportSheet), findsNothing);
     });
 
+    testWidgets("Test import backup", (tester) async {
+      ImportProvider? importProvider;
+      String? fileContent;
+      String? fileType;
+
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
+        (_) => Future.value(
+          FilePickerResult([
+            PlatformFile(
+              path: "folder/subfolder",
+              name: "my-file",
+              size: 64,
+              bytes: Uint8List.fromList([
+                123,
+                32,
+                34,
+                97,
+                34,
+                58,
+                32,
+                52,
+                44,
+                32,
+                34,
+                98,
+                34,
+                58,
+                32,
+                116,
+                114,
+                117,
+                101,
+                44,
+                32,
+                34,
+                101,
+                110,
+                116,
+                114,
+                105,
+                101,
+                115,
+                34,
+                58,
+                32,
+                91,
+                93,
+                32,
+                125,
+              ]),
+            ),
+          ]),
+        ),
+      );
+
+      final sut = MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              child: Text("Sheet me!"),
+              onPressed: () => showShadSheet(
+                builder: (context) => ImportSheet(
+                  onSelected: (provider, content, type) async {
+                    importProvider = provider;
+                    fileContent = content;
+                    fileType = type;
+                    return true;
+                  },
+                ),
+                context: context,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          filePickerServiceProvider.overrideWithValue(mockFilePickerService),
+        ]),
+      );
+
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ImportSheet), findsOneWidget);
+
+      await tester.tap(find.byType(ShadTab<String>).last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Pick JSON file"),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byWidgetPredicate((w) => w is PrimaryButton && w.caption == "Import"));
+      await tester.pumpAndSettle();
+
+      expect(importProvider, ImportProvider.opm);
+      expect(fileContent, isNotEmpty);
+      expect(fileType, "json");
+      expect(find.byType(ImportSheet), findsNothing);
+    });
+
     testWidgets("Test pick and clear file", (tester) async {
-      when(mockFilePickerService.pickFile()).thenAnswer(
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -147,7 +271,7 @@ void main() {
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
                 builder: (context) => ImportSheet(
-                  onSelected: (_, _) async {
+                  onSelected: (_, _, _) async {
                     return true;
                   },
                 ),
@@ -195,7 +319,7 @@ void main() {
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
                 builder: (context) => ImportSheet(
-                  onSelected: (provider, content) async {
+                  onSelected: (provider, content, _) async {
                     importProvider = provider;
                     fileContent = content;
                     return true;
@@ -225,7 +349,9 @@ void main() {
     });
 
     testWidgets("Test running import", (tester) async {
-      when(mockFilePickerService.pickFile()).thenAnswer(
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -245,7 +371,7 @@ void main() {
               child: Text("Sheet me!"),
               onPressed: () => showShadSheet(
                 builder: (context) => ImportSheet(
-                  onSelected: (provider, content) async {
+                  onSelected: (provider, content, _) async {
                     await Future.delayed(Duration(milliseconds: 100));
                     return true;
                   },

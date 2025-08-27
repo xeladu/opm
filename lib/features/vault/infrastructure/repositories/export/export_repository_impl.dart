@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
 
-import 'export_repository_web.dart'
-    if (dart.library.io) 'export_repository_io.dart';
+import 'export_repository_web.dart' if (dart.library.io) 'export_repository_io.dart';
 
 class ExportRepositoryImpl implements ExportRepository {
   static ExportRepositoryImpl? _instance;
@@ -27,6 +26,7 @@ class ExportRepositoryImpl implements ExportRepository {
       'password',
       'urls',
       'comments',
+      'folder',
     ];
     final csvBuffer = StringBuffer();
     csvBuffer.writeln(headers.join(','));
@@ -41,10 +41,9 @@ class ExportRepositoryImpl implements ExportRepository {
         entry.password,
         entry.urls.join(';').replaceAll('\n', ''),
         entry.comments.replaceAll('\n', ' '),
+        entry.folder,
       ];
-      csvBuffer.writeln(
-        row.map((e) => '"${e.toString().replaceAll('"', '""')}"').join(','),
-      );
+      csvBuffer.writeln(row.map((e) => '"${e.toString().replaceAll('"', '""')}"').join(','));
     }
 
     await _download(csvBuffer.toString(), 'csv', 'export');
@@ -52,16 +51,21 @@ class ExportRepositoryImpl implements ExportRepository {
 
   @override
   Future<void> exportPasswordEntriesJson(List<VaultEntry> entries) async {
-    final jsonEntries = entries.map((entry) => {
-      'id': entry.id,
-      'name': entry.name,
-      'createdAt': entry.createdAt,
-      'updatedAt': entry.updatedAt,
-      'user': entry.username,
-      'password': entry.password,
-      'urls': entry.urls,
-      'comments': entry.comments,
-    }).toList();
+    final jsonEntries = entries
+        .map(
+          (entry) => {
+            'id': entry.id,
+            'name': entry.name,
+            'createdAt': entry.createdAt,
+            'updatedAt': entry.updatedAt,
+            'user': entry.username,
+            'password': entry.password,
+            'urls': entry.urls,
+            'comments': entry.comments,
+            'folder': entry.folder,
+          },
+        )
+        .toList();
 
     final jsonData = {
       'version': '1.0',
@@ -74,11 +78,7 @@ class ExportRepositoryImpl implements ExportRepository {
     await _download(jsonString, 'json', 'export');
   }
 
-  Future<void> _download(
-    String content,
-    String fileType,
-    String fileName,
-  ) async {
+  Future<void> _download(String content, String fileType, String fileName) async {
     await downloadFile(content, fileType, fileName);
   }
 }

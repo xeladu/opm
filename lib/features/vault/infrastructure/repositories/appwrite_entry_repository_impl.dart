@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
 import 'package:appwrite/appwrite.dart';
@@ -93,5 +94,31 @@ class AppwriteEntryRepositoryImpl implements VaultRepository {
     }
 
     return list;
+  }
+
+  @override
+  Future<void> deleteAllEntries() async {
+    // List all documents in the vault collection
+    final docs = await _db.listDocuments(
+      databaseId: config.databaseId,
+      collectionId: config.vaultCollectionId,
+    );
+
+    for (final doc in docs.documents) {
+      try {
+        // Attempt to delete each document. Appwrite permissions will prevent
+        // deletion of documents not owned by the current user, so we simply
+        // ignore failures (permission errors) and continue.
+        await _db.deleteDocument(
+          databaseId: config.databaseId,
+          collectionId: config.vaultCollectionId,
+          documentId: doc.$id,
+        );
+      } catch (_) {
+        debugPrint("Deletion failed!");
+        // Ignore errors deleting documents we don't own
+        continue;
+      }
+    }
   }
 }

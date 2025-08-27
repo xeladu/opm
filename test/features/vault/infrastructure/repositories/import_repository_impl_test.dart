@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:open_password_manager/features/vault/domain/exceptions/import_exception.dart';
 import 'package:open_password_manager/features/vault/infrastructure/repositories/import_repository_impl.dart';
 
 void main() {
@@ -47,6 +48,28 @@ void main() {
         final result = await repo.importFrom1Password(csv);
         expect(result, isEmpty);
       });
+
+      test('1Password validate CSV', () async {
+        expect(
+          () => repo.validate1PasswordFile(""),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No content")),
+        );
+
+        expect(
+          () => repo.validate1PasswordFile("Title,Username,Password,Website,Notes"),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No data")),
+        );
+
+        final missingHeaderCsv = "Title,Username,Password\nrow";
+        expect(
+          () => repo.validate1PasswordFile(missingHeaderCsv),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", contains("Website"))),
+        );
+
+        final validCsv =
+            "Title,Username,Password,Website,Notes\nExample,me@example.com,secret,https://example.com,note";
+        expect(() => repo.validate1PasswordFile(validCsv), returnsNormally);
+      });
     });
 
     group("Bitwarden", () {
@@ -90,6 +113,27 @@ void main() {
         final csv = '';
         final result = await repo.importFromBitwarden(csv);
         expect(result, isEmpty);
+      });
+
+      test('Bitwarden validate CSV', () async {
+        expect(
+          () => repo.validateBitwardenFile(""),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No content")),
+        );
+        expect(
+          () => repo.validateBitwardenFile("name,login_username,login_password,login_uri,notes"),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No data")),
+        );
+        final missingHeaderCsv = "name,login_username,login_password\nrow";
+        expect(
+          () => repo.validateBitwardenFile(missingHeaderCsv),
+          throwsA(
+            isA<ImportException>().having((e) => e.message, "message", contains("login_uri")),
+          ),
+        );
+        final validCsv =
+            "name,login_username,login_password,login_uri,notes\nExample,me@example.com,secret,https://example.com,note";
+        expect(() => repo.validateBitwardenFile(validCsv), returnsNormally);
       });
     });
 
@@ -135,6 +179,25 @@ void main() {
         final result = await repo.importFromKeeper(csv);
         expect(result, isEmpty);
       });
+
+      test('Keeper validate CSV', () async {
+        expect(
+          () => repo.validateKeeperFile(""),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No content")),
+        );
+        expect(
+          () => repo.validateKeeperFile("Title,Login,Password,Website Address,Notes"),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No data")),
+        );
+        final missingHeaderCsv = "Title,Login\nrow";
+        expect(
+          () => repo.validateKeeperFile(missingHeaderCsv),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", contains("Password"))),
+        );
+        final validCsv =
+            "Title,Login,Password,Website Address,Notes\nExample,me@example.com,secret,https://example.com,note";
+        expect(() => repo.validateKeeperFile(validCsv), returnsNormally);
+      });
     });
 
     group("LastPass", () {
@@ -178,6 +241,25 @@ void main() {
         final csv = '';
         final result = await repo.importFromLastPass(csv);
         expect(result, isEmpty);
+      });
+
+      test('LastPass validate CSV', () async {
+        expect(
+          () => repo.validateLastPassFile(""),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No content")),
+        );
+        expect(
+          () => repo.validateLastPassFile("name,username,password,url,extra"),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No data")),
+        );
+        final missingHeaderCsv = "name,username,password\nrow";
+        expect(
+          () => repo.validateLastPassFile(missingHeaderCsv),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", contains("url"))),
+        );
+        final validCsv =
+            "name,username,password,url,extra\nExample,me@example.com,secret,https://example.com,note";
+        expect(() => repo.validateLastPassFile(validCsv), returnsNormally);
       });
     });
 
@@ -228,6 +310,106 @@ void main() {
         final result = await repo.importFromKeepass(csv);
 
         expect(result, isEmpty);
+      });
+
+      test('KeePass validate CSV', () async {
+        expect(
+          () => repo.validateKeepassFile(""),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No content")),
+        );
+        expect(
+          () => repo.validateKeepassFile("Account,Login Name,Password,Web Site,Comments"),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No data")),
+        );
+        final missingHeaderCsv = "Account,Login Name\nrow";
+        expect(
+          () => repo.validateKeepassFile(missingHeaderCsv),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", contains("Password"))),
+        );
+        final validCsv =
+            "Account,Login Name,Password,Web Site,Comments\nExample,me@example.com,secret,https://example.com,note";
+        expect(() => repo.validateKeepassFile(validCsv), returnsNormally);
+      });
+    });
+
+    group("OPM CSV", () {
+      test('OPM valid CSV', () async {
+        final createdAt = DateTime(2020, 1, 1, 0, 0, 0, 0).toIso8601String();
+        final updatedAt = DateTime(2021, 1, 1, 0, 0, 0, 0).toIso8601String();
+        final csv =
+            '"id","name","user","password","comments","urls","createdAt","updatedAt","folder"\n'
+            '"1234","Test","abc@def.com","abc12345","my-comment","http://www.somepage.net;http://www.somepage.net","$createdAt","$updatedAt","my-folder"';
+        final result = await repo.importFromOpm(csv);
+
+        expect(result, hasLength(1));
+        final entry = result.first;
+
+        expect(entry.name, 'Test');
+        expect(entry.username, 'abc@def.com');
+        expect(entry.password, 'abc12345');
+        expect(entry.urls, ['http://www.somepage.net', 'http://www.somepage.net']);
+        expect(entry.comments, 'my-comment');
+        expect(entry.folder, "my-folder");
+        expect(entry.createdAt, createdAt);
+        expect(entry.updatedAt, updatedAt);
+      });
+
+      test('OPM partially valid CSV', () async {
+        final createdAt = DateTime(2020, 1, 1, 0, 0, 0, 0).toIso8601String();
+        final updatedAt = DateTime(2021, 1, 1, 0, 0, 0, 0).toIso8601String();
+        final csv =
+            '"id","name","user","password","comments","urls","createdAt","updatedAt","folder"\n'
+            '"1234","Test","","abc12345","","http://www.somepage.net;http://www.somepage.net","$createdAt","$updatedAt",""';
+        final result = await repo.importFromOpm(csv);
+
+        expect(result, hasLength(1));
+        final entry = result.first;
+
+        expect(entry.name, 'Test');
+        expect(entry.username, '');
+        expect(entry.password, 'abc12345');
+        expect(entry.urls, ['http://www.somepage.net', 'http://www.somepage.net']);
+        expect(entry.comments, '');
+        expect(entry.folder, "");
+        expect(entry.createdAt, createdAt);
+        expect(entry.updatedAt, updatedAt);
+      });
+
+      test('OPM invalid CSV', () async {
+        final csv =
+            '"id","name","user","password","comments","urls","createdAt","updatedAt","folder"\n'
+            '"1234","Test","abc@def.com","abc12345","my-comment","http://www.somepage.net;http://www.somepage.net"';
+        final result = await repo.importFromOpm(csv);
+
+        expect(result, isEmpty);
+      });
+
+      test('OPM empty CSV', () async {
+        final csv = '';
+        final result = await repo.importFromOpm(csv);
+
+        expect(result, isEmpty);
+      });
+
+      test('OPM validate CSV', () async {
+        expect(
+          () => repo.validateOpmFile(""),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No content")),
+        );
+        expect(
+          () => repo.validateOpmFile("name,user,password,urls,comments,createdAt,updatedAt"),
+          throwsA(isA<ImportException>().having((e) => e.message, "message", "No data")),
+        );
+        final missingHeaderCsv = "name,user,password,urls\nrow";
+        expect(
+          () => repo.validateOpmFile(missingHeaderCsv),
+          throwsA(
+            isA<ImportException>().having((e) => e.message, "message", contains("createdAt")),
+          ),
+        );
+        final validCsv =
+            "name,user,password,urls,comments,createdAt,updatedAt\nExample,me@example.com,secret,https://example.com,note,2020-01-01,2020-01-02";
+        expect(() => repo.validateOpmFile(validCsv), returnsNormally);
       });
     });
   });

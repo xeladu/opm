@@ -8,7 +8,8 @@ class ImportVault {
 
   ImportVault(this.vaultRepo, this.importRepo);
 
-  Future<void> call(ImportProvider provider, String fileContent) async {
+  Future<void> call(ImportProvider provider, String fileContent, String fileType) async {
+    bool clearVault = false;
     List<VaultEntry> importedEntries = [];
 
     switch (provider) {
@@ -28,8 +29,18 @@ class ImportVault {
         importRepo.validateLastPassFile(fileContent);
         importedEntries = await importRepo.importFromLastPass(fileContent);
       case ImportProvider.opm:
-        importRepo.validateOpmFile(fileContent);
-        importedEntries = await importRepo.importFromOpm(fileContent);
+        if (fileType == "json") {
+          importRepo.validateOpmBackup(fileContent);
+          importedEntries = await importRepo.importOpmBackup(fileContent);
+          clearVault = true;
+        } else {
+          importRepo.validateOpmFile(fileContent);
+          importedEntries = await importRepo.importFromOpm(fileContent);
+        }
+    }
+
+    if (clearVault){
+      await vaultRepo.deleteAllEntries();
     }
 
     for (final newEntry in importedEntries) {

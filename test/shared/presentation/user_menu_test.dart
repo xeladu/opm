@@ -146,6 +146,7 @@ void main() {
     });
 
     testWidgets("Test import OPM", (tester) async {
+      suppressOverflowErrors();
       when(mockImportRepository.validateOpmFile(any)).thenAnswer((_) {});
       when(mockImportRepository.importFromOpm(any)).thenAnswer(
         (_) => Future.value([
@@ -153,7 +154,7 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile()).thenAnswer(
+      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -197,10 +198,11 @@ void main() {
 
       verify(mockImportRepository.importFromOpm(any)).called(1);
       verify(mockImportRepository.validateOpmFile(any)).called(1);
-      verify(mockFilePickerService.pickFile()).called(1);
+      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
     });
 
     testWidgets("Test import 1Password", (tester) async {
+      suppressOverflowErrors();
       when(mockImportRepository.validate1PasswordFile(any)).thenAnswer((_) {});
       when(mockImportRepository.importFrom1Password(any)).thenAnswer(
         (_) => Future.value([
@@ -208,7 +210,7 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile()).thenAnswer(
+      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -258,10 +260,11 @@ void main() {
 
       verify(mockImportRepository.importFrom1Password(any)).called(1);
       verify(mockImportRepository.validate1PasswordFile(any)).called(1);
-      verify(mockFilePickerService.pickFile()).called(1);
+      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
     });
 
     testWidgets("Test import LastPass", (tester) async {
+      suppressOverflowErrors();
       when(mockImportRepository.validateLastPassFile(any)).thenAnswer((_) {});
       when(mockImportRepository.importFromLastPass(any)).thenAnswer(
         (_) => Future.value([
@@ -269,7 +272,7 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile()).thenAnswer(
+      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -319,10 +322,11 @@ void main() {
 
       verify(mockImportRepository.importFromLastPass(any)).called(1);
       verify(mockImportRepository.validateLastPassFile(any)).called(1);
-      verify(mockFilePickerService.pickFile()).called(1);
+      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
     });
 
     testWidgets("Test import Bitwarden", (tester) async {
+      suppressOverflowErrors();
       when(mockImportRepository.validateBitwardenFile(any)).thenAnswer((_) {});
       when(mockImportRepository.importFromBitwarden(any)).thenAnswer(
         (_) => Future.value([
@@ -330,7 +334,7 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile()).thenAnswer(
+      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -380,10 +384,11 @@ void main() {
 
       verify(mockImportRepository.importFromBitwarden(any)).called(1);
       verify(mockImportRepository.validateBitwardenFile(any)).called(1);
-      verify(mockFilePickerService.pickFile()).called(1);
+      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
     });
 
     testWidgets("Test import KeePass", (tester) async {
+      suppressOverflowErrors();
       when(mockImportRepository.validateKeepassFile(any)).thenAnswer((_) {});
       when(mockImportRepository.importFromKeepass(any)).thenAnswer(
         (_) => Future.value([
@@ -391,7 +396,7 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile()).thenAnswer(
+      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -441,10 +446,11 @@ void main() {
 
       verify(mockImportRepository.importFromKeepass(any)).called(1);
       verify(mockImportRepository.validateKeepassFile(any)).called(1);
-      verify(mockFilePickerService.pickFile()).called(1);
+      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
     });
 
     testWidgets("Test import Keeper", (tester) async {
+      suppressOverflowErrors();
       when(mockImportRepository.validateKeeperFile(any)).thenAnswer((_) {});
       when(mockImportRepository.importFromKeeper(any)).thenAnswer(
         (_) => Future.value([
@@ -452,7 +458,7 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile()).thenAnswer(
+      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -502,7 +508,7 @@ void main() {
 
       verify(mockImportRepository.importFromKeeper(any)).called(1);
       verify(mockImportRepository.validateKeeperFile(any)).called(1);
-      verify(mockFilePickerService.pickFile()).called(1);
+      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
     });
 
     testWidgets("Test settings", (tester) async {

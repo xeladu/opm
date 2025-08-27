@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/exceptions/database_exception.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 
@@ -15,7 +16,7 @@ class FirebaseEntryRepositoryImpl implements VaultRepository {
   CollectionReference<Map<String, dynamic>> _userPasswordEntriesCollection() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw Exception('No user signed in');
+      throw DatabaseException(message: 'No user signed in');
     }
 
     return FirebaseFirestore.instance.collection('${config.vaultCollectionPrefix}_${user.uid}');
@@ -68,5 +69,26 @@ class FirebaseEntryRepositoryImpl implements VaultRepository {
     }
 
     return list;
+  }
+
+  @override
+  Future<void> deleteAllEntries() async {
+    final colRef = _userPasswordEntriesCollection();
+
+    while (true) {
+      final snapshot = await colRef.limit(100).get();
+      final docs = snapshot.docs;
+      if (docs.isEmpty) return;
+
+      final WriteBatch batch = FirebaseFirestore.instance.batch();
+      for (final doc in docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+      
+      // Give Firestore a short breather on very large collections
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
   }
 }

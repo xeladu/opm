@@ -1,4 +1,5 @@
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/exceptions/database_exception.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
 
@@ -63,5 +64,15 @@ class SupabaseEntryRepositoryImpl implements VaultRepository {
     }
 
     return list;
+  }
+  
+  @override
+  Future<void> deleteAllEntries() {
+    final user = client.auth.currentUser;
+    if (user == null) {
+      throw DatabaseException(message: "User not authenticated!");
+    }
+
+    return client.from(tableName).delete().eq('user_id', user.id);
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/domain/exceptions/import_exception.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/import_repository.dart';
@@ -271,7 +273,7 @@ class ImportRepositoryImpl extends ImportRepository {
   /// | comments       | comments         |
   /// | createdAt      | createdAt        |
   /// | updatedAt      | updatedAt        |
-  /// | group          | folder           |
+  /// | folder         | folder           |
   @override
   Future<List<VaultEntry>> importFromOpm(String csvContent) async {
     final rows = CsvHelper.parseCsv(csvContent);
@@ -301,12 +303,80 @@ class ImportRepositoryImpl extends ImportRepository {
           updatedAt: map['updatedAt'] != null
               ? DateTime.parse(map['updatedAt']!).toIso8601String()
               : DateTime.now().toIso8601String(),
-          folder: map['group'] ?? '',
+          folder: map['folder'] ?? '',
         ),
       );
     }
 
     return entries;
+  }
+
+  @override
+  Future<List<VaultEntry>> importOpmBackup(String jsonContent) async {
+    final decoded = jsonDecode(jsonContent) as Map<String, dynamic>;
+    final entries = decoded['entries'] as List<dynamic>;
+
+    final result = <VaultEntry>[];
+
+    for (final e in entries) {
+      if (e is! Map<String, dynamic>) continue;
+
+      final id = (e['id'] is String && (e['id'] as String).isNotEmpty)
+          ? e['id'] as String
+          : Uuid().v4();
+      final name = e['name'] is String ? e['name'] as String : '';
+
+      String createdAt;
+      if (e['createdAt'] is String) {
+        try {
+          createdAt = DateTime.parse(e['createdAt'] as String).toIso8601String();
+        } catch (_) {
+          createdAt = DateTime.now().toIso8601String();
+        }
+      } else {
+        createdAt = DateTime.now().toIso8601String();
+      }
+
+      String updatedAt;
+      if (e['updatedAt'] is String) {
+        try {
+          updatedAt = DateTime.parse(e['updatedAt'] as String).toIso8601String();
+        } catch (_) {
+          updatedAt = DateTime.now().toIso8601String();
+        }
+      } else {
+        updatedAt = DateTime.now().toIso8601String();
+      }
+
+      final username = e['user'] is String ? e['user'] as String : '';
+      final password = e['password'] is String ? e['password'] as String : '';
+
+      final urls = <String>[];
+      if (e['urls'] is List) {
+        for (final u in e['urls']) {
+          if (u is String) urls.add(u);
+        }
+      }
+
+      final comments = e['comments'] is String ? e['comments'] as String : '';
+      final folder = e['folder'] is String ? e['folder'] as String : '';
+
+      result.add(
+        VaultEntry(
+          id: id,
+          name: name,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+          username: username,
+          password: password,
+          urls: urls,
+          comments: comments,
+          folder: folder,
+        ),
+      );
+    }
+
+    return result;
   }
 
   @override
@@ -522,6 +592,84 @@ class ImportRepositoryImpl extends ImportRepository {
       errorString = errorString.substring(0, errorString.length - 2);
 
       throw ImportException(message: errorString);
+    }
+  }
+
+  @override
+  void validateOpmBackup(String jsonContent) {
+    if (jsonContent.isEmpty) {
+      throw ImportException(message: "No content");
+    }
+
+    dynamic decoded;
+    try {
+      decoded = jsonDecode(jsonContent);
+    } catch (e) {
+      throw ImportException(message: "Invalid JSON");
+    }
+
+    if (decoded is! Map) {
+      throw ImportException(message: "Invalid backup format");
+    }
+
+    // Top-level required fields
+    final requiredTop = ['version', 'exportedAt', 'entryCount', 'entries'];
+    final missingTop = requiredTop.where((k) => !decoded.containsKey(k)).toList();
+
+    if (missingTop.isNotEmpty) {
+      var errorString = "The following expected top-level fields are missing:\n";
+      for (final m in missingTop) {
+        errorString += "$m, ";
+      }
+      errorString = errorString.substring(0, errorString.length - 2);
+      throw ImportException(message: errorString);
+    }
+
+    final entries = decoded['entries'];
+    if (entries is! List) {
+      throw ImportException(message: "Invalid entries array");
+    }
+
+    final entryCount = decoded["entryCount"] as int;
+    if (entries.length != entryCount) {
+      throw ImportException(
+        message: "'entryCount' is $entryCount, but found ${entries.length} entries!",
+      );
+    }
+
+    // Required fields per entry
+    final requiredEntryFields = [
+      'id',
+      'name',
+      'createdAt',
+      'updatedAt',
+      'user',
+      'password',
+      'urls',
+      'comments',
+      'folder',
+    ];
+
+    for (var i = 0; i < entries.length; i++) {
+      final entry = entries[i];
+      if (entry is! Map) {
+        throw ImportException(message: 'Entry at index $i is not an object');
+      }
+
+      final missing = requiredEntryFields.where((f) => !entry.containsKey(f)).toList();
+      if (missing.isNotEmpty) {
+        var errorString = 'Entry at index $i is missing the following fields:\n';
+        for (final m in missing) {
+          errorString += '$m, ';
+        }
+        errorString = errorString.substring(0, errorString.length - 2);
+        throw ImportException(message: errorString);
+      }
+
+      // urls should be a list (array) in JSON
+      if (entry['urls'] is! List) {
+        throw ImportException(message: 'Entry at index $i has invalid urls field (expected array)');
+      }
     }
   }
 }

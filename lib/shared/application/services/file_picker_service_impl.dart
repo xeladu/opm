@@ -1,10 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 
 class FilePickerServiceImpl {
-  Future<FilePickerResult?> pickFile() async {
+  Future<FilePickerResult?> pickFile({List<String>? allowedExtensions}) async {
     return await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ["csv"],
+      allowedExtensions: allowedExtensions ?? ["csv"],
       withData: true,
     );
   }

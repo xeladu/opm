@@ -13,4 +13,6 @@ abstract class ImportRepository {
   Future<List<VaultEntry>> importFromKeeper(String csvContent);
   void validateKeepassFile(String csvContent);
   Future<List<VaultEntry>> importFromKeepass(String csvContent);
+  void validateOpmBackup(String jsonContent);
+  Future<List<VaultEntry>> importOpmBackup(String jsonContent);
 }

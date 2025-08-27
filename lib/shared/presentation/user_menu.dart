@@ -77,8 +77,8 @@ class UserMenu extends ConsumerWidget {
                 side: ShadSheetSide.right,
                 context: context,
                 builder: (context) => ImportSheet(
-                  onSelected: (provider, content) =>
-                      _onImportOptionSelected(context, ref, provider, content),
+                  onSelected: (provider, content, type) =>
+                      _onImportOptionSelected(context, ref, provider, content, type),
                 ),
               );
             }
@@ -124,13 +124,14 @@ class UserMenu extends ConsumerWidget {
     WidgetRef ref,
     ImportProvider provider,
     String fileContent,
+    String fileType,
   ) async {
     try {
       final importRepo = ref.read(importRepositoryProvider);
       final vaultRepo = ref.read(vaultRepositoryProvider);
 
       final useCase = ImportVault(vaultRepo, importRepo);
-      await useCase(provider, fileContent);
+      await useCase(provider, fileContent, fileType);
 
       ref.invalidate(allEntriesProvider);
       if (context.mounted) {

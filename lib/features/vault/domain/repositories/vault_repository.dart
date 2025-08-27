@@ -4,5 +4,6 @@ abstract class VaultRepository {
   Future<void> addEntry(VaultEntry entry);
   Future<void> editEntry(VaultEntry entry);
   Future<void> deleteEntry(String id);
+  Future<void> deleteAllEntries();
   Future<List<VaultEntry>> getAllEntries({Function(String info, double? progress)? onUpdate});
 }

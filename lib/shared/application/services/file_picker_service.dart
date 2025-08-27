@@ -6,7 +6,7 @@ class FilePickerService {
 
   FilePickerService(this._picker);
 
-  Future<FilePickerResult?> pickFile() async {
-    return await _picker.pickFile();
+  Future<FilePickerResult?> pickFile({List<String>? allowedExtensions}) async {
+    return await _picker.pickFile(allowedExtensions: allowedExtensions);
   }
 }

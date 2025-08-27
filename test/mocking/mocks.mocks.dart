@@ -9,15 +9,18 @@ import 'dart:typed_data' as _i20;
 import 'package:file_picker/file_picker.dart' as _i15;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i9;
-import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart' as _i2;
+import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart'
+    as _i2;
 import 'package:open_password_manager/features/auth/domain/repositories/auth_repository.dart'
     as _i5;
 import 'package:open_password_manager/features/auth/domain/repositories/biometric_auth_repository.dart'
     as _i7;
-import 'package:open_password_manager/features/settings/domain/entities/settings.dart' as _i4;
+import 'package:open_password_manager/features/settings/domain/entities/settings.dart'
+    as _i4;
 import 'package:open_password_manager/features/settings/domain/repositories/settings_repository.dart'
     as _i18;
-import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart' as _i13;
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart'
+    as _i13;
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart'
     as _i12;
 import 'package:open_password_manager/features/vault/domain/repositories/import_repository.dart'
@@ -26,11 +29,16 @@ import 'package:open_password_manager/features/vault/domain/repositories/passwor
     as _i21;
 import 'package:open_password_manager/features/vault/domain/repositories/vault_repository.dart'
     as _i22;
-import 'package:open_password_manager/shared/application/services/crypto_service.dart' as _i10;
-import 'package:open_password_manager/shared/application/services/file_picker_service.dart' as _i14;
-import 'package:open_password_manager/shared/application/services/storage_service.dart' as _i19;
-import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart' as _i3;
-import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart' as _i11;
+import 'package:open_password_manager/shared/application/services/crypto_service.dart'
+    as _i10;
+import 'package:open_password_manager/shared/application/services/file_picker_service.dart'
+    as _i14;
+import 'package:open_password_manager/shared/application/services/storage_service.dart'
+    as _i19;
+import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart'
+    as _i3;
+import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart'
+    as _i11;
 import 'package:open_password_manager/shared/domain/repositories/crypto_utils_repository.dart'
     as _i17;
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart'
@@ -51,15 +59,18 @@ import 'package:open_password_manager/shared/domain/repositories/cryptography_re
 // ignore_for_file: subtype_of_sealed_class
 
 class _FakeOpmUser_0 extends _i1.SmartFake implements _i2.OpmUser {
-  _FakeOpmUser_0(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
+  _FakeOpmUser_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 class _FakeCryptoUtils_1 extends _i1.SmartFake implements _i3.CryptoUtils {
-  _FakeCryptoUtils_1(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
+  _FakeCryptoUtils_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 class _FakeSettings_2 extends _i1.SmartFake implements _i4.Settings {
-  _FakeSettings_2(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
+  _FakeSettings_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 /// A class which mocks [AuthRepository].
@@ -71,18 +82,30 @@ class MockAuthRepository extends _i1.Mock implements _i5.AuthRepository {
   }
 
   @override
-  _i6.Future<void> createAccount({required String? email, required String? password}) =>
+  _i6.Future<void> createAccount({
+    required String? email,
+    required String? password,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#createAccount, [], {#email: email, #password: password}),
+            Invocation.method(#createAccount, [], {
+              #email: email,
+              #password: password,
+            }),
             returnValue: _i6.Future<void>.value(),
             returnValueForMissingStub: _i6.Future<void>.value(),
           )
           as _i6.Future<void>);
 
   @override
-  _i6.Future<void> signIn({required String? email, required String? password}) =>
+  _i6.Future<void> signIn({
+    required String? email,
+    required String? password,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#signIn, [], {#email: email, #password: password}),
+            Invocation.method(#signIn, [], {
+              #email: email,
+              #password: password,
+            }),
             returnValue: _i6.Future<void>.value(),
             returnValueForMissingStub: _i6.Future<void>.value(),
           )
@@ -128,7 +151,8 @@ class MockAuthRepository extends _i1.Mock implements _i5.AuthRepository {
 /// A class which mocks [BiometricAuthRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockBiometricAuthRepository extends _i1.Mock implements _i7.BiometricAuthRepository {
+class MockBiometricAuthRepository extends _i1.Mock
+    implements _i7.BiometricAuthRepository {
   MockBiometricAuthRepository() {
     _i1.throwOnMissingStub(this);
   }
@@ -153,7 +177,8 @@ class MockBiometricAuthRepository extends _i1.Mock implements _i7.BiometricAuthR
 /// A class which mocks [CryptographyRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockCryptographyRepository extends _i1.Mock implements _i8.CryptographyRepository {
+class MockCryptographyRepository extends _i1.Mock
+    implements _i8.CryptographyRepository {
   MockCryptographyRepository() {
     _i1.throwOnMissingStub(this);
   }
@@ -163,7 +188,10 @@ class MockCryptographyRepository extends _i1.Mock implements _i8.CryptographyRep
       (super.noSuchMethod(
             Invocation.method(#encrypt, [plainText]),
             returnValue: _i6.Future<String>.value(
-              _i9.dummyValue<String>(this, Invocation.method(#encrypt, [plainText])),
+              _i9.dummyValue<String>(
+                this,
+                Invocation.method(#encrypt, [plainText]),
+              ),
             ),
           )
           as _i6.Future<String>);
@@ -173,7 +201,10 @@ class MockCryptographyRepository extends _i1.Mock implements _i8.CryptographyRep
       (super.noSuchMethod(
             Invocation.method(#decrypt, [plainText]),
             returnValue: _i6.Future<String>.value(
-              _i9.dummyValue<String>(this, Invocation.method(#decrypt, [plainText])),
+              _i9.dummyValue<String>(
+                this,
+                Invocation.method(#decrypt, [plainText]),
+              ),
             ),
           )
           as _i6.Future<String>);
@@ -201,7 +232,10 @@ class MockCryptoService extends _i1.Mock implements _i10.CryptoService {
       (super.noSuchMethod(
             Invocation.method(#encrypt, [plainText]),
             returnValue: _i6.Future<String>.value(
-              _i9.dummyValue<String>(this, Invocation.method(#encrypt, [plainText])),
+              _i9.dummyValue<String>(
+                this,
+                Invocation.method(#encrypt, [plainText]),
+              ),
             ),
           )
           as _i6.Future<String>);
@@ -211,7 +245,10 @@ class MockCryptoService extends _i1.Mock implements _i10.CryptoService {
       (super.noSuchMethod(
             Invocation.method(#decrypt, [plainText]),
             returnValue: _i6.Future<String>.value(
-              _i9.dummyValue<String>(this, Invocation.method(#decrypt, [plainText])),
+              _i9.dummyValue<String>(
+                this,
+                Invocation.method(#decrypt, [plainText]),
+              ),
             ),
           )
           as _i6.Future<String>);
@@ -220,7 +257,8 @@ class MockCryptoService extends _i1.Mock implements _i10.CryptoService {
 /// A class which mocks [ClipboardRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockClipboardRepository extends _i1.Mock implements _i11.ClipboardRepository {
+class MockClipboardRepository extends _i1.Mock
+    implements _i11.ClipboardRepository {
   MockClipboardRepository() {
     _i1.throwOnMissingStub(this);
   }
@@ -271,9 +309,13 @@ class MockFilePickerService extends _i1.Mock implements _i14.FilePickerService {
   }
 
   @override
-  _i6.Future<_i15.FilePickerResult?> pickFile() =>
+  _i6.Future<_i15.FilePickerResult?> pickFile({
+    List<String>? allowedExtensions,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#pickFile, []),
+            Invocation.method(#pickFile, [], {
+              #allowedExtensions: allowedExtensions,
+            }),
             returnValue: _i6.Future<_i15.FilePickerResult?>.value(),
           )
           as _i6.Future<_i15.FilePickerResult?>);
@@ -297,7 +339,9 @@ class MockImportRepository extends _i1.Mock implements _i16.ImportRepository {
   _i6.Future<List<_i13.VaultEntry>> importFromOpm(String? csvContent) =>
       (super.noSuchMethod(
             Invocation.method(#importFromOpm, [csvContent]),
-            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(<_i13.VaultEntry>[]),
+            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(
+              <_i13.VaultEntry>[],
+            ),
           )
           as _i6.Future<List<_i13.VaultEntry>>);
 
@@ -311,7 +355,9 @@ class MockImportRepository extends _i1.Mock implements _i16.ImportRepository {
   _i6.Future<List<_i13.VaultEntry>> importFromBitwarden(String? csvContent) =>
       (super.noSuchMethod(
             Invocation.method(#importFromBitwarden, [csvContent]),
-            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(<_i13.VaultEntry>[]),
+            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(
+              <_i13.VaultEntry>[],
+            ),
           )
           as _i6.Future<List<_i13.VaultEntry>>);
 
@@ -325,7 +371,9 @@ class MockImportRepository extends _i1.Mock implements _i16.ImportRepository {
   _i6.Future<List<_i13.VaultEntry>> importFrom1Password(String? csvContent) =>
       (super.noSuchMethod(
             Invocation.method(#importFrom1Password, [csvContent]),
-            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(<_i13.VaultEntry>[]),
+            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(
+              <_i13.VaultEntry>[],
+            ),
           )
           as _i6.Future<List<_i13.VaultEntry>>);
 
@@ -339,7 +387,9 @@ class MockImportRepository extends _i1.Mock implements _i16.ImportRepository {
   _i6.Future<List<_i13.VaultEntry>> importFromLastPass(String? csvContent) =>
       (super.noSuchMethod(
             Invocation.method(#importFromLastPass, [csvContent]),
-            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(<_i13.VaultEntry>[]),
+            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(
+              <_i13.VaultEntry>[],
+            ),
           )
           as _i6.Future<List<_i13.VaultEntry>>);
 
@@ -353,7 +403,9 @@ class MockImportRepository extends _i1.Mock implements _i16.ImportRepository {
   _i6.Future<List<_i13.VaultEntry>> importFromKeeper(String? csvContent) =>
       (super.noSuchMethod(
             Invocation.method(#importFromKeeper, [csvContent]),
-            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(<_i13.VaultEntry>[]),
+            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(
+              <_i13.VaultEntry>[],
+            ),
           )
           as _i6.Future<List<_i13.VaultEntry>>);
 
@@ -367,7 +419,25 @@ class MockImportRepository extends _i1.Mock implements _i16.ImportRepository {
   _i6.Future<List<_i13.VaultEntry>> importFromKeepass(String? csvContent) =>
       (super.noSuchMethod(
             Invocation.method(#importFromKeepass, [csvContent]),
-            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(<_i13.VaultEntry>[]),
+            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(
+              <_i13.VaultEntry>[],
+            ),
+          )
+          as _i6.Future<List<_i13.VaultEntry>>);
+
+  @override
+  void validateOpmBackup(String? jsonContent) => super.noSuchMethod(
+    Invocation.method(#validateOpmBackup, [jsonContent]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i6.Future<List<_i13.VaultEntry>> importOpmBackup(String? jsonContent) =>
+      (super.noSuchMethod(
+            Invocation.method(#importOpmBackup, [jsonContent]),
+            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(
+              <_i13.VaultEntry>[],
+            ),
           )
           as _i6.Future<List<_i13.VaultEntry>>);
 }
@@ -375,7 +445,8 @@ class MockImportRepository extends _i1.Mock implements _i16.ImportRepository {
 /// A class which mocks [CryptoUtilsRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockCryptoUtilsRepository extends _i1.Mock implements _i17.CryptoUtilsRepository {
+class MockCryptoUtilsRepository extends _i1.Mock
+    implements _i17.CryptoUtilsRepository {
   MockCryptoUtilsRepository() {
     _i1.throwOnMissingStub(this);
   }
@@ -385,7 +456,10 @@ class MockCryptoUtilsRepository extends _i1.Mock implements _i17.CryptoUtilsRepo
       (super.noSuchMethod(
             Invocation.method(#getCryptoUtils, [userId]),
             returnValue: _i6.Future<_i3.CryptoUtils>.value(
-              _FakeCryptoUtils_1(this, Invocation.method(#getCryptoUtils, [userId])),
+              _FakeCryptoUtils_1(
+                this,
+                Invocation.method(#getCryptoUtils, [userId]),
+              ),
             ),
           )
           as _i6.Future<_i3.CryptoUtils>);
@@ -403,7 +477,8 @@ class MockCryptoUtilsRepository extends _i1.Mock implements _i17.CryptoUtilsRepo
 /// A class which mocks [SettingsRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSettingsRepository extends _i1.Mock implements _i18.SettingsRepository {
+class MockSettingsRepository extends _i1.Mock
+    implements _i18.SettingsRepository {
   MockSettingsRepository() {
     _i1.throwOnMissingStub(this);
   }
@@ -484,7 +559,8 @@ class MockStorageService extends _i1.Mock implements _i19.StorageService {
 /// A class which mocks [PasswordGeneratorRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPasswordGeneratorRepository extends _i1.Mock implements _i21.PasswordGeneratorRepository {
+class MockPasswordGeneratorRepository extends _i1.Mock
+    implements _i21.PasswordGeneratorRepository {
   MockPasswordGeneratorRepository() {
     _i1.throwOnMissingStub(this);
   }
@@ -555,10 +631,23 @@ class MockVaultRepository extends _i1.Mock implements _i22.VaultRepository {
           as _i6.Future<void>);
 
   @override
-  _i6.Future<List<_i13.VaultEntry>> getAllEntries({dynamic Function(String, double?)? onUpdate}) =>
+  _i6.Future<void> deleteAllEntries() =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteAllEntries, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<List<_i13.VaultEntry>> getAllEntries({
+    dynamic Function(String, double?)? onUpdate,
+  }) =>
       (super.noSuchMethod(
             Invocation.method(#getAllEntries, [], {#onUpdate: onUpdate}),
-            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(<_i13.VaultEntry>[]),
+            returnValue: _i6.Future<List<_i13.VaultEntry>>.value(
+              <_i13.VaultEntry>[],
+            ),
           )
           as _i6.Future<List<_i13.VaultEntry>>);
 }
