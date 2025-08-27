@@ -151,6 +151,9 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     ref.listen<AsyncValue<bool>>(biometricAuthAvailableProvider, (prev, next) async {
       if (next.hasValue && next.value!) {
         try {
+          final isSettingEnabled = ref.read(settingsProvider).biometricAuthEnabled;
+          if (!isSettingEnabled) return;
+          
           final authRepo = ref.read(authRepositoryProvider);
           final biometricAuthRepo = ref.read(biometricAuthRepositoryProvider);
 

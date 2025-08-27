@@ -38,20 +38,30 @@ class BiometricAuthSetting extends ConsumerWidget {
           child: Row(
             spacing: sizeXS,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(LucideIcons.triangleAlert, color: Colors.red, size: sizeL),
-              Expanded(
-                child: Text(
-                  biometricAvailable.when(
-                    data: (value) => value
+            children: biometricAvailable.when(
+              data: (value) => [
+                Icon(
+                  LucideIcons.triangleAlert,
+                  color: value ? Colors.orange : Colors.red,
+                  size: sizeL,
+                ),
+                Expanded(
+                  child: Text(
+                    value
                         ? "Biometric authentication can impose security risks because the encryption key is stored on the device!"
                         : "Biometric authentication is not available for this device!",
-                    loading: () => "Biometric authentication is not available for this device!",
-                    error: (_, _) => "Biometric authentication is not available for this device!",
                   ),
                 ),
-              ),
-            ],
+              ],
+              loading: () => [
+                Icon(LucideIcons.triangleAlert, color: Colors.red, size: sizeL),
+                Expanded(child: Text("Biometric authentication is not available for this device!")),
+              ],
+              error: (_, _) => [
+                Icon(LucideIcons.triangleAlert, color: Colors.red, size: sizeL),
+                Expanded(child: Text("Biometric authentication is not available for this device!")),
+              ],
+            ),
           ),
         ),
       ],
