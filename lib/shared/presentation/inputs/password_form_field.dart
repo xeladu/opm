@@ -5,9 +5,10 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 class PasswordFormField extends StatefulWidget {
   final String? placeholder;
+  final VoidCallback? onChanged;
   final String? Function(String?)? validator;
 
-  const PasswordFormField({super.key, this.placeholder, this.validator});
+  const PasswordFormField({super.key, this.placeholder, this.validator, this.onChanged});
 
   @override
   State<PasswordFormField> createState() => _State();
@@ -19,13 +20,12 @@ class _State extends State<PasswordFormField> {
   @override
   Widget build(BuildContext context) {
     return ShadInputFormField(
-      id: widget.placeholder == null ? "password" : "password_confirm",
+      id: widget.placeholder == null
+          ? "password"
+          : widget.placeholder!.toLowerCase().replaceAll(" ", "_"),
       placeholder: Text(widget.placeholder ?? 'Password'),
       obscureText: _obscurePassword,
-      leading: const Padding(
-        padding: EdgeInsets.all(sizeXXS),
-        child: Icon(LucideIcons.lock),
-      ),
+      leading: const Padding(padding: EdgeInsets.all(sizeXXS), child: Icon(LucideIcons.lock)),
       trailing: SizedBox(
         width: sizeM,
         height: sizeM,
@@ -43,6 +43,9 @@ class _State extends State<PasswordFormField> {
             : widget.validator != null
             ? widget.validator!(v)
             : null;
+      },
+      onChanged: (_) {
+        if (widget.onChanged != null) widget.onChanged!();
       },
     );
   }

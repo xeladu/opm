@@ -4,6 +4,7 @@ import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:open_password_manager/features/vault/presentation/widgets/strength_indicator.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
@@ -42,6 +43,13 @@ void main() {
           find.byType(CreateAccoutPageDesktop),
           DisplaySizeHelper.isMobile(sizeEntry.value) ? findsNothing : findsOneWidget,
         );
+
+        expect(find.byType(StrengthIndicator), findsNothing);
+
+        await tester.enterText(find.byType(PasswordFormField).first, "abc");
+        await tester.pumpAndSettle();
+
+        expect(find.byType(StrengthIndicator), findsOneWidget);
       });
 
       testWidgets('Test non matching passwords ($deviceSizeName)', (tester) async {

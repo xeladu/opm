@@ -71,7 +71,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 const SizedBox(height: sizeXS),
                 EmailFormField(),
                 const SizedBox(height: sizeS),
-                PasswordFormField(),
+                PasswordFormField(placeholder: "Master Password",),
                 const SizedBox(height: sizeM),
                 Center(
                   child: _isLoading
@@ -112,7 +112,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
     try {
       final String emailCredential = data['email'];
-      final String passwordCredential = data['password'];
+      final String passwordCredential = data['master_password'];
       await useCase(email: emailCredential, password: passwordCredential);
 
       // Get user info first
@@ -122,7 +122,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
       final enableBiometricSignIn = await _askForBiometricLoginSetup();
 
       final cryptoService = ref.read(cryptoServiceProvider);
-      await cryptoService.init(activeUser.id, data['password'], enableBiometricSignIn);
+      await cryptoService.init(activeUser.id, data['master_password'], enableBiometricSignIn);
 
       // clear cache of previous sessions
       ref.invalidate(allEntriesProvider);
