@@ -4,6 +4,8 @@ import 'package:open_password_manager/features/auth/domain/entities/opm_user.dar
 import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
+import 'package:open_password_manager/features/settings/domain/entities/settings.dart';
+import 'package:open_password_manager/features/settings/infrastructure/providers/settings_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_list_page.dart';
 import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
@@ -22,6 +24,7 @@ import '../../../helper/test_error_suppression.dart';
 import '../../../helper/display_size.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
 
+import '../../../mocking/fakes.dart';
 import '../../../mocking/mocks.mocks.dart';
 
 void main() {
@@ -204,6 +207,9 @@ void main() {
           cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
           cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
           storageServiceProvider.overrideWithValue(mockStorageService),
+          settingsProvider.overrideWith(
+            () => FakeSettingState(Settings.empty().copyWith(newBiometricAuthEnabled: true)),
+          ),
         ]);
 
         // wait for biometric auth
@@ -251,6 +257,9 @@ void main() {
           cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
           storageServiceProvider.overrideWithValue(mockStorageService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          settingsProvider.overrideWith(
+            () => FakeSettingState(Settings.empty().copyWith(newBiometricAuthEnabled: true)),
+          ),
         ]);
 
         // wait for biometric auth
@@ -386,6 +395,39 @@ void main() {
 
         verify(mockCryptoService.init(any, any, false)).called(1);
         expect(find.byType(VaultListPage), findsOneWidget);
+      });
+
+      testWidgets('Test no biometric setup prompt when setting disabled ($deviceSizeName)', (
+        tester,
+      ) async {
+        await DisplaySizeHelper.setSize(tester, sizeEntry.value);
+        suppressOverflowErrors();
+
+        when(mockAuthRepository.isSessionExpired()).thenAnswer((_) => Future.value(false));
+        when(mockAuthRepository.getCurrentUser()).thenAnswer((_) => Future.value(OpmUser.empty()));
+
+        when(mockBiometricAuthRepository.isSupported()).thenAnswer((_) => Future.value(true));
+        when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(true));
+
+        final sut = SignInPage();
+        await AppSetup.pumpPage(tester, sut, [
+          authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          biometricAuthRepositoryProvider.overrideWithValue(mockBiometricAuthRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          settingsProvider.overrideWith(
+            () => FakeSettingState(Settings.empty().copyWith(newBiometricAuthEnabled: false)),
+          ),
+        ]);
+
+        // wait for biometric auth
+        await tester.pump(Duration(milliseconds: 300));
+
+        verifyNever(mockAuthRepository.signIn(email: 'a', password: 'b'));
+        verifyNever(mockAuthRepository.getCurrentUser());
+        verify(mockBiometricAuthRepository.isSupported()).called(1);
+        verify(mockStorageService.hasMasterKey()).called(1);
+        verifyNever(mockBiometricAuthRepository.authenticate());
+        expect(find.byType(SignInPage), findsOneWidget);
       });
 
       testWidgets('Test repository throws error ($deviceSizeName)', (tester) async {

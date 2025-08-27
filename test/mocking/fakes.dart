@@ -1,4 +1,6 @@
 import 'package:open_password_manager/features/auth/application/providers/biometric_auth_available_provider.dart';
+import 'package:open_password_manager/features/settings/domain/entities/settings.dart';
+import 'package:open_password_manager/features/settings/infrastructure/providers/settings_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
 
 class FakeFilterQueryState extends FilterQueryState {
@@ -17,6 +19,16 @@ class FakeBiometricAuthAvailableState extends BiometricAuthAvailableState {
 
   @override
   bool build() {
+    return value;
+  }
+}
+
+class FakeSettingState extends SettingsState {
+  final Settings value;
+  FakeSettingState(this.value);
+
+  @override
+  Settings build() {
     return value;
   }
 }
