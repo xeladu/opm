@@ -30,9 +30,10 @@ class _State extends ConsumerState<VaultListPage> {
       error: (error, stackTrace) => Text(error.toString()),
       data: (allEntries) {
         final filteredEntries = _filterEntries(allEntries);
+        final activeFolder = ref.read(activeFolderProvider);
 
         return ResponsiveAppFrame(
-          title: "Your vault",
+          title: activeFolder.isEmpty ? "Your vault" : activeFolder,
           mobileContent: VaultListMobile(
             entries: filteredEntries,
             vaultEmpty: allEntries.isEmpty,
