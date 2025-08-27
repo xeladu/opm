@@ -25,6 +25,7 @@ class VaultListActions extends StatelessWidget {
         ),
         Spacer(),
         GlyphButton(
+          tooltip: "Show folder selection",
           onTap: () {
             showShadSheet(
               context: context,
