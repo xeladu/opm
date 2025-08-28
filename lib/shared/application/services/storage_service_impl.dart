@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:open_password_manager/features/auth/domain/entities/offline_auth_data.dart';
 import 'package:open_password_manager/features/settings/domain/entities/settings.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
 
 class StorageServiceImpl {
   static AndroidOptions _getAndroidOptions() =>
@@ -14,6 +17,9 @@ class StorageServiceImpl {
 
   final _masterEncryptionKey = "masterKey";
   final _settingsKey = "settings";
+  final _offlineAuthDataKey = "offline_auth";
+  final _offlineVaultDataKey = "offline_vault";
+  final _offlineCryptoUtilsKey = "offline_crypto_utils";
 
   Future<bool> hasMasterKey() async {
     return await _storage.containsKey(key: _masterEncryptionKey);
@@ -35,5 +41,41 @@ class StorageServiceImpl {
   Future<Settings> loadAppSettings() async {
     final storageValue = await _storage.read(key: _settingsKey);
     return storageValue == null ? Settings.empty() : Settings.fromJson(jsonDecode(storageValue));
+  }
+
+  Future<void> storeOfflineAuthData(OfflineAuthData data) async {
+    await _storage.write(key: _offlineAuthDataKey, value: jsonEncode(data.toJson()));
+  }
+
+  Future<OfflineAuthData> loadOfflineAuthData() async {
+    final storageValue = await _storage.read(key: _offlineAuthDataKey);
+    return storageValue == null
+        ? OfflineAuthData.empty()
+        : OfflineAuthData.fromJson(jsonDecode(storageValue));
+  }
+
+  Future<void> storeOfflineVaultData(List<VaultEntry> data) async {
+    await _storage.write(
+      key: _offlineVaultDataKey,
+      value: jsonEncode(data.map((entry) => entry.toJson())),
+    );
+  }
+
+  Future<List<VaultEntry>> loadOfflineVaultData() async {
+    final storageValue = await _storage.read(key: _offlineVaultDataKey);
+    return storageValue == null
+        ? []
+        : (jsonDecode(storageValue) as List).map((item) => VaultEntry.fromJson(item)).toList();
+  }
+
+  Future<void> storeOfflineCryptoUtils(CryptoUtils data) async {
+    await _storage.write(key: _offlineCryptoUtilsKey, value: jsonEncode(data.toJson()));
+  }
+
+  Future<CryptoUtils> loadOfflineCryptoUtils() async {
+    final storageValue = await _storage.read(key: _offlineCryptoUtilsKey);
+    return storageValue == null
+        ? CryptoUtils.empty()
+        : CryptoUtils.fromJson(jsonDecode(storageValue));
   }
 }

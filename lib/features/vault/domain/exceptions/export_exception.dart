@@ -1,5 +1,5 @@
 class ExportException implements Exception {
   final String message;
 
-  ExportException({required this.message});
+  ExportException(this.message);
 }

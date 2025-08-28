@@ -70,7 +70,7 @@ class SupabaseEntryRepositoryImpl implements VaultRepository {
   Future<void> deleteAllEntries() {
     final user = client.auth.currentUser;
     if (user == null) {
-      throw DatabaseException(message: "User not authenticated!");
+      throw DatabaseException("User not authenticated!");
     }
 
     return client.from(tableName).delete().eq('user_id', user.id);

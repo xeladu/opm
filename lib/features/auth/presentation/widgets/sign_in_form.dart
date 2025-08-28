@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/auth/application/providers/biometric_auth_available_provider.dart';
+import 'package:open_password_manager/features/auth/application/providers/offline_auth_available_provider.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/biometric_sign_in.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/sign_in.dart';
+import 'package:open_password_manager/features/auth/domain/entities/offline_auth_data.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
@@ -11,11 +15,13 @@ import 'package:open_password_manager/features/vault/presentation/pages/vault_li
 import 'package:open_password_manager/features/settings/infrastructure/providers/settings_provider.dart';
 import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/loading_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
 import 'package:open_password_manager/shared/presentation/inputs/password_form_field.dart';
+import 'package:open_password_manager/shared/utils/crypto_helper.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
 import 'package:open_password_manager/shared/utils/log_service.dart';
 import 'package:open_password_manager/shared/utils/navigation_service.dart';
@@ -39,6 +45,8 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   Widget build(BuildContext context) {
     _showBiometricLogin();
 
+    ref.watch(offlineAuthAvailableProvider).whenData((value) => debugPrint(value.toString()));
+
     return ShadForm(
       key: _formKey,
       child: Shortcuts(
@@ -48,11 +56,13 @@ class _SignInFormState extends ConsumerState<SignInForm> {
         },
         child: Actions(
           actions: <Type, Action<Intent>>{
-            ActivateIntent: CallbackAction<Intent>(onInvoke: (intent) {
-              // Trigger primary button action when Enter is pressed.
-              _handleSignIn();
-              return null;
-            }),
+            ActivateIntent: CallbackAction<Intent>(
+              onInvoke: (intent) {
+                // Trigger primary button action when Enter is pressed.
+                _handleSignIn();
+                return null;
+              },
+            ),
           },
           child: SingleChildScrollView(
             child: Column(
@@ -71,7 +81,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 const SizedBox(height: sizeXS),
                 EmailFormField(),
                 const SizedBox(height: sizeS),
-                PasswordFormField(placeholder: "Master Password",),
+                PasswordFormField(placeholder: "Master Password"),
                 const SizedBox(height: sizeM),
                 Center(
                   child: _isLoading
@@ -115,6 +125,20 @@ class _SignInFormState extends ConsumerState<SignInForm> {
       final String passwordCredential = data['master_password'];
       await useCase(email: emailCredential, password: passwordCredential);
 
+      // cache for offline authentication
+      final salt = CryptoHelper.generateSecureRandomBytes(32);
+      final derivedKey = await CryptoHelper.deriveKey(passwordCredential, salt);
+
+      ref
+          .read(storageServiceProvider)
+          .storeOfflineAuthData(
+            OfflineAuthData(
+              salt: base64Encode(salt),
+              derivedKey: base64Encode(derivedKey),
+              email: emailCredential,
+            ),
+          );
+
       // Get user info first
       final activeUser = await authRepo.getCurrentUser();
       ref.read(opmUserProvider.notifier).setUser(activeUser);
@@ -153,7 +177,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
         try {
           final isSettingEnabled = ref.read(settingsProvider).biometricAuthEnabled;
           if (!isSettingEnabled) return;
-          
+
           final authRepo = ref.read(authRepositoryProvider);
           final biometricAuthRepo = ref.read(biometricAuthRepositoryProvider);
 

@@ -382,12 +382,12 @@ class ImportRepositoryImpl extends ImportRepository {
   @override
   void validate1PasswordFile(String csvContent) {
     if (csvContent.isEmpty) {
-      throw ImportException(message: "No content");
+      throw ImportException("No content");
     }
     final rows = CsvHelper.parseCsv(csvContent);
 
     if (rows.length < 2) {
-      throw ImportException(message: "No data");
+      throw ImportException("No data");
     }
 
     final header = rows.first;
@@ -410,19 +410,19 @@ class ImportRepositoryImpl extends ImportRepository {
       errorString += hasCommentsHeader ? "" : "Notes, ";
       errorString = errorString.substring(0, errorString.length - 2);
 
-      throw ImportException(message: errorString);
+      throw ImportException(errorString);
     }
   }
 
   @override
   void validateBitwardenFile(String csvContent) {
     if (csvContent.isEmpty) {
-      throw ImportException(message: "No content");
+      throw ImportException("No content");
     }
     final rows = CsvHelper.parseCsv(csvContent);
 
     if (rows.length < 2) {
-      throw ImportException(message: "No data");
+      throw ImportException("No data");
     }
 
     final header = rows.first;
@@ -445,19 +445,19 @@ class ImportRepositoryImpl extends ImportRepository {
       errorString += hasCommentsHeader ? "" : "notes, ";
       errorString = errorString.substring(0, errorString.length - 2);
 
-      throw ImportException(message: errorString);
+      throw ImportException(errorString);
     }
   }
 
   @override
   void validateKeepassFile(String csvContent) {
     if (csvContent.isEmpty) {
-      throw ImportException(message: "No content");
+      throw ImportException("No content");
     }
     final rows = CsvHelper.parseCsv(csvContent);
 
     if (rows.length < 2) {
-      throw ImportException(message: "No data");
+      throw ImportException("No data");
     }
 
     final header = rows.first;
@@ -480,19 +480,19 @@ class ImportRepositoryImpl extends ImportRepository {
       errorString += hasCommentsHeader ? "" : "Comments, ";
       errorString = errorString.substring(0, errorString.length - 2);
 
-      throw ImportException(message: errorString);
+      throw ImportException(errorString);
     }
   }
 
   @override
   void validateKeeperFile(String csvContent) {
     if (csvContent.isEmpty) {
-      throw ImportException(message: "No content");
+      throw ImportException("No content");
     }
     final rows = CsvHelper.parseCsv(csvContent);
 
     if (rows.length < 2) {
-      throw ImportException(message: "No data");
+      throw ImportException("No data");
     }
 
     final header = rows.first;
@@ -515,19 +515,19 @@ class ImportRepositoryImpl extends ImportRepository {
       errorString += hasCommentsHeader ? "" : "Notes, ";
       errorString = errorString.substring(0, errorString.length - 2);
 
-      throw ImportException(message: errorString);
+      throw ImportException(errorString);
     }
   }
 
   @override
   void validateLastPassFile(String csvContent) {
     if (csvContent.isEmpty) {
-      throw ImportException(message: "No content");
+      throw ImportException("No content");
     }
     final rows = CsvHelper.parseCsv(csvContent);
 
     if (rows.length < 2) {
-      throw ImportException(message: "No data");
+      throw ImportException("No data");
     }
 
     final header = rows.first;
@@ -550,19 +550,19 @@ class ImportRepositoryImpl extends ImportRepository {
       errorString += hasCommentsHeader ? "" : "extra, ";
       errorString = errorString.substring(0, errorString.length - 2);
 
-      throw ImportException(message: errorString);
+      throw ImportException(errorString);
     }
   }
 
   @override
   void validateOpmFile(String csvContent) {
     if (csvContent.isEmpty) {
-      throw ImportException(message: "No content");
+      throw ImportException("No content");
     }
     final rows = CsvHelper.parseCsv(csvContent);
 
     if (rows.length < 2) {
-      throw ImportException(message: "No data");
+      throw ImportException("No data");
     }
 
     final header = rows.first;
@@ -591,25 +591,25 @@ class ImportRepositoryImpl extends ImportRepository {
       errorString += hasUpdatedAtHeader ? "" : "updatedAt, ";
       errorString = errorString.substring(0, errorString.length - 2);
 
-      throw ImportException(message: errorString);
+      throw ImportException(errorString);
     }
   }
 
   @override
   void validateOpmBackup(String jsonContent) {
     if (jsonContent.isEmpty) {
-      throw ImportException(message: "No content");
+      throw ImportException("No content");
     }
 
     dynamic decoded;
     try {
       decoded = jsonDecode(jsonContent);
     } catch (e) {
-      throw ImportException(message: "Invalid JSON");
+      throw ImportException("Invalid JSON");
     }
 
     if (decoded is! Map) {
-      throw ImportException(message: "Invalid backup format");
+      throw ImportException("Invalid backup format");
     }
 
     // Top-level required fields
@@ -622,19 +622,17 @@ class ImportRepositoryImpl extends ImportRepository {
         errorString += "$m, ";
       }
       errorString = errorString.substring(0, errorString.length - 2);
-      throw ImportException(message: errorString);
+      throw ImportException(errorString);
     }
 
     final entries = decoded['entries'];
     if (entries is! List) {
-      throw ImportException(message: "Invalid entries array");
+      throw ImportException("Invalid entries array");
     }
 
     final entryCount = decoded["entryCount"] as int;
     if (entries.length != entryCount) {
-      throw ImportException(
-        message: "'entryCount' is $entryCount, but found ${entries.length} entries!",
-      );
+      throw ImportException("'entryCount' is $entryCount, but found ${entries.length} entries!");
     }
 
     // Required fields per entry
@@ -653,7 +651,7 @@ class ImportRepositoryImpl extends ImportRepository {
     for (var i = 0; i < entries.length; i++) {
       final entry = entries[i];
       if (entry is! Map) {
-        throw ImportException(message: 'Entry at index $i is not an object');
+        throw ImportException('Entry at index $i is not an object');
       }
 
       final missing = requiredEntryFields.where((f) => !entry.containsKey(f)).toList();
@@ -663,12 +661,12 @@ class ImportRepositoryImpl extends ImportRepository {
           errorString += '$m, ';
         }
         errorString = errorString.substring(0, errorString.length - 2);
-        throw ImportException(message: errorString);
+        throw ImportException(errorString);
       }
 
       // urls should be a list (array) in JSON
       if (entry['urls'] is! List) {
-        throw ImportException(message: 'Entry at index $i has invalid urls field (expected array)');
+        throw ImportException('Entry at index $i has invalid urls field (expected array)');
       }
     }
   }
