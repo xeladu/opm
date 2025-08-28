@@ -8,10 +8,11 @@ Open Password Manager is an open source password manager with encrypted storage 
 
 - Passwords are encrypted in the database
 - Works on iOS, Android, and the web
-- Can be self-hosted on Firebase, Supabase, or Appwrite
+- Can be self-hosted on various providers
 - No password-related data leaves the device unencrypted
 - Data is synched across all your devices
 - Export function for local backups
+- Offline function
 - Open source and transparent
 
 ## Supported Backend Providers
