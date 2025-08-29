@@ -16,7 +16,7 @@ class FirebaseEntryRepositoryImpl implements VaultRepository {
   CollectionReference<Map<String, dynamic>> _userPasswordEntriesCollection() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw DatabaseException(message: 'No user signed in');
+      throw DatabaseException('No user signed in');
     }
 
     return FirebaseFirestore.instance.collection('${config.vaultCollectionPrefix}_${user.uid}');

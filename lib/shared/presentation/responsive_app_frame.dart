@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
+import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
 import 'package:open_password_manager/shared/application/providers/show_search_field_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
+import 'package:open_password_manager/shared/presentation/no_internet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/folder_sheet.dart';
 import 'package:open_password_manager/shared/presentation/user_menu.dart';
 import 'package:open_password_manager/style/ui.dart';
@@ -40,9 +42,12 @@ class ResponsiveAppFrame extends ConsumerStatefulWidget {
 
 class _State extends ConsumerState<ResponsiveAppFrame> {
   bool? _lastIsMobile;
+  bool noInternetConnection = false;
 
   @override
   Widget build(BuildContext context) {
+    final notConnected = ref.watch(noConnectionProvider);
+
     return ShadResponsiveBuilder(
       builder: (context, breakpoint) {
         final isMobile = breakpoint < ShadTheme.of(context).breakpoints.sm;
@@ -52,6 +57,11 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
         }
 
         final actionButtons = [
+          if (notConnected)
+            Padding(
+              padding: EdgeInsets.only(right: sizeXS),
+              child: NoInternet(),
+            ),
           if (isMobile && !widget.hideFolderButton)
             Padding(
               padding: EdgeInsets.only(right: sizeXS),
@@ -100,7 +110,9 @@ class _State extends ConsumerState<ResponsiveAppFrame> {
           ),
           body: widget.content ?? (isMobile ? widget.mobileContent : widget.desktopContent),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-          floatingActionButton: (isMobile ? widget.mobileButton : widget.desktopButton),
+          floatingActionButton: (isMobile && !noInternetConnection
+              ? widget.mobileButton
+              : widget.desktopButton),
         );
       },
     );

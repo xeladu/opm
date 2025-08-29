@@ -14,6 +14,7 @@ import 'package:open_password_manager/features/vault/presentation/widgets/vault_
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_actions.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_search_field.dart';
+import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
 import 'package:open_password_manager/shared/presentation/separator.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
 import 'package:open_password_manager/style/ui.dart';
@@ -59,7 +60,7 @@ class VaultListDesktop extends ConsumerWidget {
         ),
         Separator.horizontal(),
         VaultListActions(
-          enabled: ref.watch(selectedEntryProvider) == null,
+          enabled: ref.watch(selectedEntryProvider) == null && !ref.watch(noConnectionProvider),
           onAdd: () => _addNewEntry(ref),
         ),
       ],
@@ -84,9 +85,9 @@ class VaultListDesktop extends ConsumerWidget {
               Separator.horizontal(),
               VaultEntryActions(
                 enabled: !addEditModeActive,
-                onDuplicate: () async => await _duplicate(ref),
-                onDelete: () async => await _delete(ref, context),
-                onEdit: () => _edit(ref),
+                onDuplicate: () async => await _duplicate(context, ref),
+                onDelete: () async => await _delete(context, ref),
+                onEdit: () async => await _edit(context, ref),
               ),
             ],
           );
@@ -131,11 +132,21 @@ class VaultListDesktop extends ConsumerWidget {
     ref.read(addEditModeActiveProvider.notifier).setMode(false);
   }
 
-  void _edit(WidgetRef ref) {
+  Future<void> _edit(BuildContext context, WidgetRef ref) async {
+    if (ref.read(noConnectionProvider)) {
+      await DialogService.showNoConnectionDialog(context);
+      return;
+    }
+
     ref.read(addEditModeActiveProvider.notifier).setMode(!ref.read(addEditModeActiveProvider));
   }
 
-  Future<void> _duplicate(WidgetRef ref) async {
+  Future<void> _duplicate(BuildContext context, WidgetRef ref) async {
+    if (ref.read(noConnectionProvider)) {
+      await DialogService.showNoConnectionDialog(context);
+      return;
+    }
+
     final original = ref.read(selectedEntryProvider)!;
     final selectedEntryCopy = original.copyWith(
       id: Uuid().v4(),
@@ -151,7 +162,12 @@ class VaultListDesktop extends ConsumerWidget {
     ref.invalidate(allEntriesProvider);
   }
 
-  Future<void> _delete(WidgetRef ref, BuildContext context) async {
+  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    if (ref.read(noConnectionProvider)) {
+      await DialogService.showNoConnectionDialog(context);
+      return;
+    }
+
     final confirm = await DialogService.showDeleteDialog(context);
 
     if (confirm == true) {

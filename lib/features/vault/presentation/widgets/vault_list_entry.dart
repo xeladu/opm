@@ -11,6 +11,7 @@ import 'package:open_password_manager/features/vault/presentation/pages/add_edit
 import 'package:open_password_manager/features/vault/presentation/pages/vault_entry_detail_page.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/favicon.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry_popup.dart';
+import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
 import 'package:open_password_manager/shared/utils/navigation_service.dart';
@@ -193,6 +194,14 @@ class VaultListEntry extends ConsumerWidget {
   }
 
   Future<void> _handleEditDesktop(BuildContext context, WidgetRef ref, VaultEntry entry) async {
+    if (noConnection(ref)) {
+      await DialogService.showNoConnectionDialog(context);
+      return;
+    }
+    if (noConnection(ref)) {
+      await DialogService.showNoConnectionDialog(context);
+      return;
+    }
     final confirmed = await _confirmAction(context, ref);
     if (!confirmed) return;
 
@@ -201,6 +210,11 @@ class VaultListEntry extends ConsumerWidget {
   }
 
   Future<void> _handleEditMobile(BuildContext context, WidgetRef ref, VaultEntry entry) async {
+    if (noConnection(ref)) {
+      await DialogService.showNoConnectionDialog(context);
+      return;
+    }
+
     final confirmed = await _confirmAction(context, ref);
     if (!confirmed) return;
 
@@ -218,6 +232,11 @@ class VaultListEntry extends ConsumerWidget {
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref, VaultEntry entry) async {
+    if (noConnection(ref)) {
+      await DialogService.showNoConnectionDialog(context);
+      return;
+    }
+
     final confirmed = await _confirmAction(context, ref);
     if (!confirmed) return;
 
@@ -252,5 +271,9 @@ class VaultListEntry extends ConsumerWidget {
     ref.read(hasChangesProvider.notifier).setHasChanges(false);
 
     return true;
+  }
+
+  bool noConnection(WidgetRef ref) {
+    return ref.read(noConnectionProvider);
   }
 }

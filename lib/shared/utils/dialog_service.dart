@@ -30,6 +30,8 @@ class DialogService {
               SecondaryButton(onPressed: onSecondary, caption: "Stay"),
               PrimaryButton(onPressed: onPrimary, caption: "Leave"),
             ],
+            crossAxisAlignment: CrossAxisAlignment.start,
+            descriptionTextAlign: TextAlign.start,
           ),
         );
       },
@@ -58,6 +60,8 @@ class DialogService {
               SecondaryButton(onPressed: onSecondary, caption: "Cancel"),
               PrimaryButton(onPressed: onPrimary, caption: "Delete"),
             ],
+            crossAxisAlignment: CrossAxisAlignment.start,
+            descriptionTextAlign: TextAlign.start,
           ),
         );
       },
@@ -86,6 +90,8 @@ class DialogService {
               SecondaryButton(onPressed: onSecondary, caption: "Skip for now"),
               PrimaryButton(onPressed: onPrimary, caption: "Enable"),
             ],
+            crossAxisAlignment: CrossAxisAlignment.start,
+            descriptionTextAlign: TextAlign.start,
           ),
         );
       },
@@ -123,6 +129,8 @@ class DialogService {
                 SecondaryButton(onPressed: onSecondary, caption: "Cancel"),
                 PrimaryButton(onPressed: onPrimary, caption: "Add"),
               ],
+              crossAxisAlignment: CrossAxisAlignment.start,
+              descriptionTextAlign: TextAlign.start,
               child: ShadForm(
                 key: formKey,
                 child: ShadInputFormField(
@@ -152,19 +160,40 @@ class DialogService {
 
     return null;
   }
+
+  /// Shows an info dialog with details about offline mode.
+  static Future<void> showNoConnectionDialog(BuildContext context) async {
+    if (context.mounted) {
+      await showShadDialog<String?>(
+        context: context,
+        builder: (context) {
+          void onPrimary() => Navigator.of(context).pop();
+
+          return _DialogKeyboardWrapper(
+            onPrimary: onPrimary,
+            child: ShadDialog.alert(
+              title: const Text('No Internet Connection'),
+              description: const Text(
+                'Your device is not connected to the internet. The app is in read-only mode. You can still see and copy your data, but you cannot add, delete, or change anything until the connection is restored.',
+              ),
+              actions: [PrimaryButton(onPressed: onPrimary, caption: "Close")],
+              crossAxisAlignment: CrossAxisAlignment.start,
+              descriptionTextAlign: TextAlign.start,
+            ),
+          );
+        },
+      );
+    }
+  }
 }
 
 /// Internal widget that maps Enter -> primary action and Escape -> secondary action.
 class _DialogKeyboardWrapper extends StatelessWidget {
   final VoidCallback onPrimary;
-  final VoidCallback onSecondary;
+  final VoidCallback? onSecondary;
   final Widget child;
 
-  const _DialogKeyboardWrapper({
-    required this.onPrimary,
-    required this.onSecondary,
-    required this.child,
-  });
+  const _DialogKeyboardWrapper({required this.onPrimary, required this.child, this.onSecondary});
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +213,7 @@ class _DialogKeyboardWrapper extends StatelessWidget {
           ),
           DismissIntent: CallbackAction<Intent>(
             onInvoke: (intent) {
-              onSecondary();
+              if (onSecondary != null) onSecondary!();
               return null;
             },
           ),

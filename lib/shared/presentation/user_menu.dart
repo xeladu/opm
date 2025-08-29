@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_password_manager/features/auth/application/providers/biometric_auth_available_provider.dart';
 import 'package:open_password_manager/features/auth/application/use_cases/sign_out.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
@@ -45,9 +44,6 @@ class UserMenu extends ConsumerWidget {
             final authRepo = ref.read(authRepositoryProvider);
             final useCase = SignOut(authRepo);
             await useCase();
-
-            // triggers biometric auth again if supported
-            ref.invalidate(biometricAuthAvailableProvider);
 
             if (context.mounted) {
               ToastService.show(context, "Sign out successful!");

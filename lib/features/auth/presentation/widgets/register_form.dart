@@ -9,6 +9,7 @@ import 'package:open_password_manager/shared/presentation/buttons/primary_button
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
 import 'package:open_password_manager/shared/presentation/inputs/password_form_field.dart';
+import 'package:open_password_manager/shared/utils/guard.dart';
 import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
@@ -64,7 +65,8 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                 PasswordFormField(
                   placeholder: "Master Password",
                   validator: (v) {
-                    final password = _formKey.currentState?.fields["confirm_master_password"]?.value ?? "";
+                    final password =
+                        _formKey.currentState?.fields["confirm_master_password"]?.value ?? "";
                     if (v != password) return "Passwords do not match";
                     return null;
                   },
@@ -97,7 +99,8 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                     _formKey.currentState!.fields.containsKey("master_password") &&
                     _formKey.currentState!.fields["master_password"].toString().isNotEmpty) ...[
                   StrengthIndicator(
-                    password: _formKey.currentState?.fields["master_password"]!.value.toString() ?? "",
+                    password:
+                        _formKey.currentState?.fields["master_password"]!.value.toString() ?? "",
                   ),
                   SizedBox(height: sizeS),
                 ],
@@ -130,36 +133,38 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
   Future<void> _handleCreateAccount() async {
     if (!(_formKey.currentState?.saveAndValidate() ?? false)) return;
 
-    final data = _formKey.currentState!.value;
-    final password = data['master_password'] ?? '';
+    runGuarded(
+      context: context,
+      errorMessage: "Could not create account!",
+      action: () async {
+        final data = _formKey.currentState!.value;
+        final email = data['email'];
+        final password = data['master_password'] ?? '';
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    final authRepo = ref.read(authRepositoryProvider);
-    final useCase = CreateAccount(authRepo);
-
-    try {
-      await useCase(email: data['email'], password: password);
-
-      if (mounted) {
-        ToastService.show(context, 'Account created!');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const SignInPage()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ToastService.show(context, 'Failed to create account: $e');
-      }
-    } finally {
-      if (mounted) {
         setState(() {
-          _isLoading = false;
+          _isLoading = true;
         });
-      }
-    }
+
+        final authRepo = ref.read(authRepositoryProvider);
+        final useCase = CreateAccount(authRepo);
+
+        await useCase(email: email, password: password);
+
+        if (mounted) {
+          ToastService.show(context, 'Account created!');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const SignInPage()),
+          );
+        }
+      },
+      onFinally: () async {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      },
+    );
   }
 }

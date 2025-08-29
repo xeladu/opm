@@ -136,6 +136,6 @@ class RepositoryFactory {
   }
 
   SettingsRepository getSettingsRepository(StorageService storage) {
-    return SettingsRepositoryImpl(storage: storage);
+    return SettingsRepositoryImpl(storageRepository: storage);
   }
 }

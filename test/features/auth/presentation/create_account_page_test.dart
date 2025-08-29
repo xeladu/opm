@@ -5,6 +5,7 @@ import 'package:open_password_manager/features/auth/infrastructure/providers/aut
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/strength_indicator.dart';
+import 'package:open_password_manager/shared/application/providers/offline_mode_available_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
@@ -12,6 +13,7 @@ import 'package:open_password_manager/shared/presentation/inputs/password_form_f
 import '../../../helper/app_setup.dart';
 import '../../../helper/display_size.dart';
 import '../../../helper/test_error_suppression.dart';
+import '../../../mocking/fakes.dart';
 import '../../../mocking/mocks.mocks.dart';
 
 void main() {
@@ -77,6 +79,7 @@ void main() {
         final sut = CreateAccountPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false))
         ]);
 
         await tester.dragUntilVisible(
@@ -162,13 +165,14 @@ void main() {
         final sut = CreateAccountPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false))
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
         await tester.enterText(find.byType(PasswordFormField).first, 'password123');
         await tester.enterText(find.byType(PasswordFormField).last, 'password123');
         await tester.tap(find.byType(PrimaryButton));
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         verify(
           mockAuthRepository.createAccount(email: 'test@example.com', password: 'password123'),

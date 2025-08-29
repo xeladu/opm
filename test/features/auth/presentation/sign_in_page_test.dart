@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:open_password_manager/features/auth/domain/entities/offline_auth_data.dart';
 import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
@@ -9,6 +10,7 @@ import 'package:open_password_manager/features/settings/infrastructure/providers
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_list_page.dart';
 import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
+import 'package:open_password_manager/shared/application/providers/offline_mode_available_provider.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
@@ -17,6 +19,7 @@ import 'package:open_password_manager/shared/presentation/buttons/primary_button
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
 import 'package:open_password_manager/shared/presentation/inputs/password_form_field.dart';
+import 'package:open_password_manager/shared/utils/crypto_helper.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../helper/app_setup.dart';
@@ -57,6 +60,7 @@ void main() {
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]);
 
         expect(
@@ -76,6 +80,7 @@ void main() {
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]);
 
         await tester.tap(find.byType(SecondaryButton));
@@ -91,6 +96,7 @@ void main() {
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), '');
@@ -108,6 +114,7 @@ void main() {
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
@@ -125,6 +132,7 @@ void main() {
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'invalid-email');
@@ -154,6 +162,9 @@ void main() {
         when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(false));
 
         when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
+        when(mockCryptoService.exportOfflineCryptoUtils(any)).thenAnswer(
+          (_) => Future.value(CryptoUtils(encryptedMasterKey: "abcdef", salt: "123456")),
+        );
 
         when(
           mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate')),
@@ -168,6 +179,7 @@ void main() {
           storageServiceProvider.overrideWithValue(mockStorageService),
           cryptoServiceProvider.overrideWithValue(mockCryptoService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
@@ -177,6 +189,20 @@ void main() {
 
         verify(
           mockAuthRepository.signIn(email: 'test@example.com', password: 'password123'),
+        ).called(1);
+        verify(
+          mockStorageService.storeOfflineAuthData(
+            OfflineAuthData(
+              salt: "123456",
+              email: "test@example.com",
+              kdf: CryptoHelper.kdfParams(),
+            ),
+          ),
+        ).called(1);
+        verify(
+          mockStorageService.storeOfflineCryptoUtils(
+            CryptoUtils(salt: "123456", encryptedMasterKey: "abcdef"),
+          ),
         ).called(1);
         verify(mockAuthRepository.getCurrentUser()).called(1);
         verify(mockCryptoService.init(any, any, false)).called(1);
@@ -210,6 +236,7 @@ void main() {
           settingsProvider.overrideWith(
             () => FakeSettingState(Settings.empty().copyWith(newBiometricAuthEnabled: true)),
           ),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]);
 
         // wait for biometric auth
@@ -243,6 +270,9 @@ void main() {
         when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(true));
 
         when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
+        when(
+          mockCryptoService.exportOfflineCryptoUtils(any),
+        ).thenAnswer((_) => Future.value(CryptoUtils.empty()));
 
         when(
           mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate')),
@@ -260,6 +290,7 @@ void main() {
           settingsProvider.overrideWith(
             () => FakeSettingState(Settings.empty().copyWith(newBiometricAuthEnabled: true)),
           ),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]);
 
         // wait for biometric auth
@@ -295,6 +326,9 @@ void main() {
         when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(false));
 
         when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
+        when(
+          mockCryptoService.exportOfflineCryptoUtils(any),
+        ).thenAnswer((_) => Future.value(CryptoUtils.empty()));
 
         when(
           mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate')),
@@ -309,6 +343,7 @@ void main() {
           cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
           storageServiceProvider.overrideWithValue(mockStorageService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false))
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
@@ -355,6 +390,9 @@ void main() {
         when(mockStorageService.hasMasterKey()).thenAnswer((_) => Future.value(false));
 
         when(mockCryptoService.init(any, any, any)).thenAnswer((_) => Future.value());
+        when(
+          mockCryptoService.exportOfflineCryptoUtils(any),
+        ).thenAnswer((_) => Future.value(CryptoUtils.empty()));
 
         when(
           mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate')),
@@ -369,6 +407,7 @@ void main() {
           cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
           storageServiceProvider.overrideWithValue(mockStorageService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false))
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
@@ -417,6 +456,7 @@ void main() {
           settingsProvider.overrideWith(
             () => FakeSettingState(Settings.empty().copyWith(newBiometricAuthEnabled: false)),
           ),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false))
         ]);
 
         // wait for biometric auth
@@ -440,6 +480,7 @@ void main() {
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false))
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
@@ -447,7 +488,7 @@ void main() {
         await tester.tap(find.byType(PrimaryButton));
         await tester.pump();
 
-        expect(find.textContaining('Failed to sign in'), findsOneWidget);
+        expect(find.textContaining('Email and/or master password incorrect!'), findsOneWidget);
       });
     });
   }

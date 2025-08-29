@@ -8,6 +8,7 @@ import 'package:open_password_manager/features/vault/domain/entities/vault_entry
 import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
 
 class StorageServiceImpl {
+  // TODO allow multi user
   static AndroidOptions _getAndroidOptions() =>
       const AndroidOptions(encryptedSharedPreferences: true);
   static IOSOptions _getIosOptions() =>

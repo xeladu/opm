@@ -10,6 +10,7 @@ import 'package:open_password_manager/features/vault/infrastructure/providers/ex
 import 'package:open_password_manager/features/vault/infrastructure/providers/import_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/file_picker_service_provider.dart';
+import 'package:open_password_manager/shared/application/providers/offline_mode_available_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/sheets/export_sheet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/import_sheet.dart';
@@ -20,6 +21,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../helper/app_setup.dart';
 import '../../helper/test_data_generator.dart';
 import '../../helper/test_error_suppression.dart';
+import '../../mocking/fakes.dart';
 import '../../mocking/mocks.mocks.dart';
 
 void main() {
@@ -55,6 +57,7 @@ void main() {
       await tester.runAsync(
         () async => await AppSetup.pumpPage(tester, sut, [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]),
       );
 
@@ -154,7 +157,9 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -198,7 +203,9 @@ void main() {
 
       verify(mockImportRepository.importFromOpm(any)).called(1);
       verify(mockImportRepository.validateOpmFile(any)).called(1);
-      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
+      verify(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).called(1);
     });
 
     testWidgets("Test import 1Password", (tester) async {
@@ -210,7 +217,9 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -260,7 +269,9 @@ void main() {
 
       verify(mockImportRepository.importFrom1Password(any)).called(1);
       verify(mockImportRepository.validate1PasswordFile(any)).called(1);
-      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
+      verify(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).called(1);
     });
 
     testWidgets("Test import LastPass", (tester) async {
@@ -272,7 +283,9 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -322,7 +335,9 @@ void main() {
 
       verify(mockImportRepository.importFromLastPass(any)).called(1);
       verify(mockImportRepository.validateLastPassFile(any)).called(1);
-      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
+      verify(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).called(1);
     });
 
     testWidgets("Test import Bitwarden", (tester) async {
@@ -334,7 +349,9 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -384,7 +401,9 @@ void main() {
 
       verify(mockImportRepository.importFromBitwarden(any)).called(1);
       verify(mockImportRepository.validateBitwardenFile(any)).called(1);
-      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
+      verify(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).called(1);
     });
 
     testWidgets("Test import KeePass", (tester) async {
@@ -396,7 +415,9 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -446,7 +467,9 @@ void main() {
 
       verify(mockImportRepository.importFromKeepass(any)).called(1);
       verify(mockImportRepository.validateKeepassFile(any)).called(1);
-      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
+      verify(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).called(1);
     });
 
     testWidgets("Test import Keeper", (tester) async {
@@ -458,7 +481,9 @@ void main() {
           TestDataGenerator.randomVaultEntry(),
         ]),
       );
-      when(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).thenAnswer(
+      when(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).thenAnswer(
         (_) => Future.value(
           FilePickerResult([
             PlatformFile(
@@ -508,7 +533,9 @@ void main() {
 
       verify(mockImportRepository.importFromKeeper(any)).called(1);
       verify(mockImportRepository.validateKeeperFile(any)).called(1);
-      verify(mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions"))).called(1);
+      verify(
+        mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
+      ).called(1);
     });
 
     testWidgets("Test settings", (tester) async {

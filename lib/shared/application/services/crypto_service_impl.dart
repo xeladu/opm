@@ -1,6 +1,8 @@
 import 'package:open_password_manager/shared/domain/exceptions/crypto_service_exception.dart';
 import 'package:open_password_manager/shared/domain/repositories/crypto_utils_repository.dart';
+import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
 import 'package:open_password_manager/shared/application/services/storage_service.dart';
+import 'package:open_password_manager/shared/utils/crypto_helper.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:pointycastle/export.dart' as pc;
@@ -19,6 +21,7 @@ class CryptoServiceImpl {
   final StorageService storageService;
 
   Uint8List _masterEncryptionKey = Uint8List(0);
+  Uint8List? _lastSalt;
 
   CryptoServiceImpl({required this.cryptoUtilsRepo, required this.storageService});
 
@@ -31,7 +34,7 @@ class CryptoServiceImpl {
     final cryptoUtils = await cryptoUtilsRepo.getCryptoUtils(userId);
 
     if (password != null) {
-      final salt = cryptoUtils.salt.isNotEmpty ? base64Decode(cryptoUtils.salt) : _generateSalt();
+      final salt = cryptoUtils.salt.isNotEmpty ? base64Decode(cryptoUtils.salt) : _randomBytes(32);
       await _initWithPassword(userId, password, salt);
     }
 
@@ -51,13 +54,14 @@ class CryptoServiceImpl {
   Future<void> _initWithPassword(String userId, String password, Uint8List salt) async {
     // derive key from password and salt and create a new
     // shared master encryption key or use an existing one.
-    final derivationKey = await _deriveKey(password, salt);
+    _lastSalt = salt;
+    final derivationKey = await CryptoHelper.deriveKey(password, salt);
 
     final cryptoUtils = await cryptoUtilsRepo.getCryptoUtils(userId);
 
     // get or generate shared encrypted master encryption key
     if (cryptoUtils.encryptedMasterKey.isEmpty) {
-      final newMasterEncryptionKey = _generateMasterEncryptionKey();
+      final newMasterEncryptionKey = _randomBytes(32);
       final newEncryptedMasterEncryptionKey = await _encryptInternal(
         derivationKey,
         base64Encode(newMasterEncryptionKey),
@@ -78,6 +82,42 @@ class CryptoServiceImpl {
     }
   }
 
+  /// Exports a versioned [CryptoUtils] object suitable for storing locally
+  /// so the app can later initialize the crypto stack while offline.
+  /// This derives a key from [password] using the last used salt and
+  /// returns the encrypted master encryption key (encMek) encrypted with
+  /// the derived key.
+  Future<CryptoUtils> exportOfflineCryptoUtils(String password) async {
+    if (_lastSalt == null || _lastSalt!.isEmpty) {
+      throw CryptoServiceException('No salt available to export offline crypto utils');
+    }
+
+    final derivationKey = await CryptoHelper.deriveKey(password, _lastSalt!);
+    final encMek = await _encryptInternal(derivationKey, base64Encode(_masterEncryptionKey));
+
+    return CryptoUtils(salt: base64Encode(_lastSalt!), encryptedMasterKey: encMek);
+  }
+
+  /// Initialize crypto service using an externally provided [cryptoUtils]
+  /// blob (for example read from secure local storage) instead of fetching
+  /// it from remote storage. This enables offline initialization.
+  Future<void> initWithOfflineCryptoUtils(CryptoUtils cryptoUtils, String password) async {
+    final salt = cryptoUtils.salt.isNotEmpty ? base64Decode(cryptoUtils.salt) : _randomBytes(32);
+    _lastSalt = salt;
+    final derivationKey = await CryptoHelper.deriveKey(password, salt);
+
+    if (cryptoUtils.encryptedMasterKey.isEmpty) {
+      // No encMek present in the offline blob; can't initialize offline.
+      throw CryptoServiceException('No encrypted MEK found in offline crypto utils');
+    }
+
+    _masterEncryptionKey = base64Decode(
+      await _decryptInternal(derivationKey, cryptoUtils.encryptedMasterKey),
+    );
+
+    return;
+  }
+
   Future<void> _initWithBiometricKey() async {
     final loadedKey = await storageService.loadBiometricMasterEncryptionKey();
     if (loadedKey.isEmpty) {
@@ -88,7 +128,7 @@ class CryptoServiceImpl {
   }
 
   Future<String> _encryptInternal(Uint8List key, String plainText) async {
-    final ivBytes = _generateSecureRandomBytes(12);
+    final ivBytes = _randomBytes(12);
     final cipher = pc.GCMBlockCipher(pc.AESEngine());
     cipher.init(true, pc.AEADParameters(pc.KeyParameter(key), 128, ivBytes, Uint8List(0)));
     final input = Uint8List.fromList(utf8.encode(plainText));
@@ -109,31 +149,5 @@ class CryptoServiceImpl {
     return utf8.decode(output);
   }
 
-  static Uint8List _generateSalt() {
-    return _generateSecureRandomBytes(32);
-  }
-
-  static Uint8List _generateMasterEncryptionKey() {
-    return _generateSecureRandomBytes(32);
-  }
-
-  static Future<Uint8List> _deriveKey(String password, Uint8List salt) async {
-    const int iterations = 100;
-    const int keyLength = 32;
-
-    final pbkdf2 = pc.PBKDF2KeyDerivator(pc.HMac(pc.SHA256Digest(), 64));
-    pbkdf2.init(pc.Pbkdf2Parameters(salt, iterations, keyLength));
-    return pbkdf2.process(Uint8List.fromList(utf8.encode(password)));
-  }
-
-  static Uint8List _generateSecureRandomBytes(int length) {
-    final random = pc.SecureRandom('Fortuna');
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final entropy = Uint8List(32);
-    for (int i = 0; i < 32; i++) {
-      entropy[i] = (timestamp >> (i % 8)) & 0xFF;
-    }
-    random.seed(pc.KeyParameter(entropy));
-    return random.nextBytes(length);
-  }
+  static Uint8List _randomBytes(int length) => CryptoHelper.generateSecureRandomBytes(length);
 }
