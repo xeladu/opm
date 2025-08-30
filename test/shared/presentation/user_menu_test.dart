@@ -223,7 +223,7 @@ void main() {
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
       verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+      verify(mockStorageService.storeOfflineVaultData(any)).called(2);
     });
 
     testWidgets("Test import 1Password", (tester) async {
@@ -301,7 +301,7 @@ void main() {
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
       verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+      verify(mockStorageService.storeOfflineVaultData(any)).called(2);
     });
 
     testWidgets("Test import LastPass", (tester) async {
@@ -379,7 +379,7 @@ void main() {
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
       verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+      verify(mockStorageService.storeOfflineVaultData(any)).called(2);
     });
 
     testWidgets("Test import Bitwarden", (tester) async {
@@ -457,7 +457,7 @@ void main() {
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
       verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+      verify(mockStorageService.storeOfflineVaultData(any)).called(2);
     });
 
     testWidgets("Test import KeePass", (tester) async {
@@ -535,7 +535,7 @@ void main() {
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
       verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+      verify(mockStorageService.storeOfflineVaultData(any)).called(2);
     });
 
     testWidgets("Test import Keeper", (tester) async {
@@ -613,7 +613,7 @@ void main() {
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
       verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+      verify(mockStorageService.storeOfflineVaultData(any)).called(2);
     });
 
     testWidgets("Test settings", (tester) async {

@@ -95,6 +95,8 @@ void main() {
         mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate")),
       ).thenAnswer((_) => Future.value([TestDataGenerator.vaultEntry()]));
 
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
+
       final sut = Material(
         child: Scaffold(
           body: VaultListDesktop(
@@ -170,7 +172,7 @@ void main() {
       expect(find.byType(VaultEntryActions), findsNothing);
 
       verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+      verify(mockStorageService.storeOfflineVaultData(any)).called(3);
     });
 
     testWidgets("Test edit entry and cancel", (tester) async {
@@ -312,7 +314,7 @@ void main() {
       expect(find.byType(VaultEntryActions), findsNothing);
 
       verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+      verify(mockStorageService.storeOfflineVaultData(any)).called(2);
     });
 
     testWidgets("Test delete entry", (tester) async {
@@ -368,7 +370,7 @@ void main() {
       expect(find.byType(VaultEntryActions), findsNothing);
 
       verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+      verify(mockStorageService.storeOfflineVaultData(any)).called(2);
     });
 
     testWidgets("Test offline dialogs", (tester) async {

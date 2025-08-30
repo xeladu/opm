@@ -50,7 +50,6 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   final _formKey = GlobalKey<ShadFormState>();
   bool _isLoading = false;
   bool _offlineModeAvailable = false;
-  bool _isDeviceOffline = false;
 
   @override
   void initState() {
@@ -59,6 +58,24 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkOfflineMode();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant SignInForm oldWidget) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkOfflineMode();
+    });
+
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didChangeDependencies() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkOfflineMode();
+    });
+
+    super.didChangeDependencies();
   }
 
   @override
@@ -130,7 +147,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   Future<void> _handleSignIn() async {
     if (!(_formKey.currentState?.saveAndValidate() ?? false)) return;
 
-    if (!_isDeviceOffline) {
+    if (!ref.read(noConnectionProvider)) {
       await _handleOnlineSignIn();
       return;
     }
@@ -270,13 +287,6 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     // Start the connection listener side-effect provider so it begins
     // updating `noConnectionProvider` and then listen to `noConnectionProvider`.
     ref.read(connectionListenerProvider);
-
-    await Future.delayed(Duration.zero);
-
-    final deviceOffline = ref.read(noConnectionProvider);
-    setState(() {
-      _isDeviceOffline = deviceOffline;
-    });
   }
 
   void _showBiometricLogin() {

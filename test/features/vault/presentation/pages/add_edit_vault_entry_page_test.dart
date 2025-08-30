@@ -93,7 +93,7 @@ void main() {
         expect(saved, isTrue);
 
         verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
-        verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+        verify(mockStorageService.storeOfflineVaultData(any)).called(2);
       });
 
       testWidgets('Test cancel with dialog ($deviceSizeName)', (tester) async {

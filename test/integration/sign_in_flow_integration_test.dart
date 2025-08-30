@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
 import 'package:open_password_manager/shared/application/providers/offline_mode_available_provider.dart';
 import 'package:open_password_manager/shared/application/services/crypto_service.dart';
 import 'package:open_password_manager/shared/application/services/crypto_service_impl.dart';
@@ -9,8 +11,6 @@ import 'package:open_password_manager/features/vault/presentation/pages/vault_li
 import 'dart:convert';
 import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
 import 'package:open_password_manager/features/auth/domain/entities/offline_auth_data.dart';
-// import 'package:open_password_manager/shared/utils/crypto_helper.dart';
-
 import '../helper/test_data_generator.dart';
 import '../mocking/mocks.mocks.dart';
 import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart';
@@ -55,6 +55,8 @@ void main() {
         ).thenAnswer((_) async {});
         when(mockAuthRepository.getCurrentUser()).thenAnswer((_) async => OpmUser.empty());
         when(mockAuthRepository.isSessionExpired()).thenAnswer((_) async => true);
+        when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
+        when(mockCryptographyRepository.decrypt(any)).thenAnswer((_) => Future.value("decrypted"));
 
         // Capture saved CryptoUtils so CryptoServiceImpl can generate a real encMek
         CryptoUtils? savedCryptoUtils;
@@ -67,6 +69,18 @@ void main() {
         });
         when(mockBiometricAuthRepository.isSupported()).thenAnswer((_) async => false);
         when(mockStorageService.hasMasterKey()).thenAnswer((_) async => false);
+        when(mockStorageService.loadOfflineAuthData()).thenAnswer(
+          (_) => Future.value(OfflineAuthData(email: "test@example.com", salt: "abc", kdf: {})),
+        );
+        when(mockStorageService.loadOfflineVaultData()).thenAnswer(
+          (_) => Future.value([
+            TestDataGenerator.randomVaultEntry(),
+            TestDataGenerator.randomVaultEntry(),
+          ]),
+        );
+        when(
+          mockStorageService.loadOfflineCryptoUtils(),
+        ).thenAnswer((_) => Future.value(savedCryptoUtils));
         when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
           (_) => Future.value([
             TestDataGenerator.randomVaultEntry(),
@@ -91,7 +105,7 @@ void main() {
           ),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
           settingsProvider.overrideWith(() => FakeSettingState(Settings.empty())),
-          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(true)),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
@@ -142,11 +156,22 @@ void main() {
         await tester.tap(find.text('Log out'));
         await tester.pumpAndSettle();
 
+        final container = ProviderScope.containerOf(tester.element(find.byType(SignInPage)));
+        container.read(noConnectionProvider.notifier).setConnectionState(true);
+
         // Back to sign in page
         verify(mockAuthRepository.signOut()).called(1);
         expect(find.byType(SignInPage), findsOneWidget);
 
-        // TODO Test offline auth once available
+        await tester.enterText(find.byType(EmailFormField), 'test@example.com');
+        await tester.enterText(find.byType(PasswordFormField), 'password123');
+        await tester.tap(find.byType(PrimaryButton));
+        await tester.pumpAndSettle();
+
+        verify(mockStorageService.loadOfflineAuthData()).called(1);
+        verify(mockStorageService.loadOfflineCryptoUtils()).called(1);
+
+        expect(find.byType(VaultListPage), findsOneWidget);
       });
     }
   });

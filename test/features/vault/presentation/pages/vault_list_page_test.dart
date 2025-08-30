@@ -6,6 +6,8 @@ import 'package:open_password_manager/features/vault/presentation/widgets/add_en
 import 'package:open_password_manager/features/vault/presentation/widgets/desktop/vault_list_desktop.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/mobile/vault_list_mobile.dart';
 import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -19,10 +21,14 @@ void main() {
   for (var sizeEntry in DisplaySizes.sizes.entries) {
     group('VaultListPage', () {
       late MockVaultRepository mockVaultRepository;
+      late MockStorageService mockStorageService;
+      late MockCryptographyRepository mockCryptographyRepository;
       final deviceSizeName = sizeEntry.key;
 
       setUp(() {
         mockVaultRepository = MockVaultRepository();
+        mockStorageService = MockStorageService();
+        mockCryptographyRepository = MockCryptographyRepository();
       });
 
       testWidgets('Test default elements ($deviceSizeName)', (tester) async {
@@ -36,9 +42,55 @@ void main() {
           ]),
         );
 
+        when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
+
         final sut = VaultListPage();
         await AppSetup.pumpPage(tester, sut, [
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
+        ]);
+
+        expect(find.byType(ResponsiveAppFrame), findsOneWidget);
+        expect(
+          find.byType(VaultListDesktop),
+          DisplaySizeHelper.isMobile(sizeEntry.value) ? findsNothing : findsOneWidget,
+        );
+        expect(
+          find.byType(VaultListMobile),
+          DisplaySizeHelper.isMobile(sizeEntry.value) ? findsOneWidget : findsNothing,
+        );
+        expect(
+          find.byType(AddEntryButton),
+          DisplaySizeHelper.isMobile(sizeEntry.value) ? findsOneWidget : findsNothing,
+        );
+      });
+
+      testWidgets('Test default elements offline ($deviceSizeName)', (tester) async {
+        await DisplaySizeHelper.setSize(tester, sizeEntry.value);
+
+        when(mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate'))).thenAnswer(
+          (_) => Future.value([
+            TestDataGenerator.randomVaultEntry(),
+            TestDataGenerator.randomVaultEntry(),
+            TestDataGenerator.randomVaultEntry(),
+          ]),
+        );
+
+        when(mockCryptographyRepository.decrypt(any)).thenAnswer((_) => Future.value("decrypted"));
+        when(mockStorageService.loadOfflineVaultData()).thenAnswer(
+          (_) => Future.value([
+            TestDataGenerator.randomVaultEntry(),
+            TestDataGenerator.randomVaultEntry(),
+          ]),
+        );
+
+        final sut = VaultListPage();
+        await AppSetup.pumpPage(tester, sut, [
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
+          noConnectionProvider.overrideWith(() => FakeNoConnectionState(true)),
         ]);
 
         expect(find.byType(ResponsiveAppFrame), findsOneWidget);
@@ -70,10 +122,20 @@ void main() {
           ]),
         );
 
+        when(mockCryptographyRepository.decrypt(any)).thenAnswer((_) => Future.value("decrypted"));
+        when(mockStorageService.loadOfflineVaultData()).thenAnswer(
+          (_) => Future.value([
+            TestDataGenerator.randomVaultEntry(),
+            TestDataGenerator.randomVaultEntry(),
+          ]),
+        );
+
         final sut = VaultListPage();
         await AppSetup.pumpPage(tester, sut, [
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
-          noConnectionProvider.overrideWith(() => FakeNoConnectionState(true))
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
+          noConnectionProvider.overrideWith(() => FakeNoConnectionState(true)),
         ]);
 
         await tester.tap(find.byType(AddEntryButton));

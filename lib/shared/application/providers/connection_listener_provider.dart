@@ -6,6 +6,8 @@ import 'package:open_password_manager/shared/application/providers/no_connection
 /// `noConnectionProvider` whenever connectivity changes. This provider does
 /// not itself emit values for consumers; it only runs the side-effect listener.
 final connectionListenerProvider = Provider.autoDispose<void>((ref) {
+  ref.keepAlive();
+  
   final provider = ref.read(noConnectionProvider.notifier);
   final connectivity = Connectivity();
 

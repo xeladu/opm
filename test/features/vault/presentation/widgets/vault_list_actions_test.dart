@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_actions.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -14,9 +16,13 @@ import '../../../../mocking/mocks.mocks.dart';
 void main() {
   group("VaultListActions", () {
     late MockVaultRepository mockVaultRepository;
+    late MockStorageService mockStorageService;
+    late MockCryptographyRepository mockCryptographyRepository;
 
     setUp(() {
       mockVaultRepository = MockVaultRepository();
+      mockCryptographyRepository = MockCryptographyRepository();
+      mockStorageService = MockStorageService();
     });
 
     testWidgets("Test default elements", (tester) async {
@@ -39,6 +45,8 @@ void main() {
         ]),
       );
 
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
+
       final sut = Material(
         child: Scaffold(
           body: VaultListActions(
@@ -51,6 +59,8 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, [
         vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
 
       await tester.tap(find.byType(SecondaryButton));
@@ -72,6 +82,8 @@ void main() {
         ]),
       );
 
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
+
       final sut = Material(
         child: Scaffold(
           body: VaultListActions(
@@ -84,6 +96,8 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, [
         vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
 
       await tester.tap(find.byType(SecondaryButton));

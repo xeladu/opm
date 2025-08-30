@@ -5,6 +5,8 @@ import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/vault/application/providers/active_folder_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/show_search_field_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
@@ -20,8 +22,13 @@ import '../../mocking/mocks.mocks.dart';
 void main() {
   group("ResponsiveAppFrame", () {
     late MockVaultRepository mockVaultRepository;
+    late MockStorageService mockStorageService;
+    late MockCryptographyRepository mockCryptographyRepository;
+
     setUp(() {
       mockVaultRepository = MockVaultRepository();
+      mockStorageService = MockStorageService();
+      mockCryptographyRepository = MockCryptographyRepository();
     });
 
     testWidgets("Test default elements", (tester) async {
@@ -104,12 +111,16 @@ void main() {
         ),
       );
 
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
+
       final sut = ResponsiveAppFrame(
         content: Text("mobile"),
         mobileButton: FloatingActionButton(child: Text("mobile"), onPressed: () {}),
       );
       await AppSetup.pumpPage(tester, sut, [
         vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
 
       final providerContainer = ProviderScope.containerOf(

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
@@ -15,8 +17,13 @@ import '../../mocking/mocks.mocks.dart';
 void main() {
   group("Dialog service", () {
     late MockVaultRepository mockVaultRepository;
+    late MockStorageService mockStorageService;
+    late MockCryptographyRepository mockCryptographyRepository;
+
     setUp(() {
       mockVaultRepository = MockVaultRepository();
+      mockStorageService = MockStorageService();
+      mockCryptographyRepository = MockCryptographyRepository();
     });
 
     Future<void> pumpDialog(WidgetTester tester, String type, Function(dynamic) onClose) async {
@@ -54,6 +61,8 @@ void main() {
 
       await AppSetup.pumpPage(tester, sut, [
         vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
     }
 
@@ -272,6 +281,8 @@ void main() {
           TestDataGenerator.vaultEntry(folder: "folder2"),
         ]),
       );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       String? result;
       await pumpFolderDialog(tester, (res) => result = res);

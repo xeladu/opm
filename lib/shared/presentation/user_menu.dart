@@ -12,12 +12,14 @@ import 'package:open_password_manager/features/vault/domain/exceptions/import_ex
 import 'package:open_password_manager/features/vault/infrastructure/providers/export_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/import_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
+import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
 import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/sheets/export_sheet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/import_sheet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/settings_sheet.dart';
+import 'package:open_password_manager/shared/utils/dialog_service.dart';
 import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/popup_service.dart';
 import 'package:open_password_manager/shared/utils/toast_service.dart';
@@ -126,6 +128,11 @@ class UserMenu extends ConsumerWidget {
     String fileType,
   ) async {
     try {
+      if (ref.read(noConnectionProvider)) {
+        await DialogService.showNoConnectionDialog(context);
+        return false;
+      }
+
       final importRepo = ref.read(importRepositoryProvider);
       final vaultRepo = ref.read(vaultRepositoryProvider);
 
