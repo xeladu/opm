@@ -4,6 +4,7 @@ import 'package:open_password_manager/features/auth/application/use_cases/sign_o
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
+import 'package:open_password_manager/features/vault/application/use_cases/cache_vault.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/export_vault.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/import_vault.dart';
 import 'package:open_password_manager/features/vault/domain/exceptions/export_exception.dart';
@@ -12,6 +13,8 @@ import 'package:open_password_manager/features/vault/infrastructure/providers/ex
 import 'package:open_password_manager/features/vault/infrastructure/providers/import_repository_provider.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/opm_user_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/sheets/export_sheet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/import_sheet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/settings_sheet.dart';
@@ -130,6 +133,13 @@ class UserMenu extends ConsumerWidget {
       await useCase(provider, fileContent, fileType);
 
       ref.invalidate(allEntriesProvider);
+
+      // update cache
+      final storageService = ref.read(storageServiceProvider);
+      final cryptoRepo = ref.read(cryptographyRepositoryProvider);
+      final allEntries = await ref.read(allEntriesProvider.future);
+      await CacheVault(storageService, cryptoRepo).call(allEntries);
+
       if (context.mounted) {
         ToastService.show(context, "Vault import completed!");
       }

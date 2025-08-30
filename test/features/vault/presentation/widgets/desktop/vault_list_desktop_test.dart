@@ -12,6 +12,9 @@ import 'package:open_password_manager/features/vault/presentation/widgets/vault_
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_actions.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_search_field.dart';
+import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
@@ -20,15 +23,33 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../../../../helper/app_setup.dart';
 import '../../../../../helper/test_data_generator.dart';
 import '../../../../../helper/test_error_suppression.dart';
+import '../../../../../mocking/fakes.dart';
 import '../../../../../mocking/mocks.mocks.dart';
 
 void main() {
-  group("VaultListMobile", () {
+  group("VaultListDesktop", () {
     late MockVaultRepository mockVaultRepository;
+    late MockStorageService mockStorageService;
+    late MockCryptographyRepository mockCryptographyRepository;
 
     setUp(() {
       mockVaultRepository = MockVaultRepository();
+      mockStorageService = MockStorageService();
+      mockCryptographyRepository = MockCryptographyRepository();
     });
+
+    Future<void> expectNoConnectionDialog(WidgetTester tester, Finder trigger) async {
+      await tester.tap(trigger);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ShadDialog), findsOneWidget);
+      expect(find.text("No Internet Connection"), findsOneWidget);
+
+      await tester.tap(find.text("Close"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ShadDialog), findsNothing);
+    }
 
     testWidgets("Test default elements", (tester) async {
       final sut = Material(
@@ -84,6 +105,8 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, [
         vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
 
       await tester.tap(find.byType(SecondaryButton));
@@ -105,6 +128,7 @@ void main() {
         mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate")),
       ).thenAnswer((_) => Future.value([TestDataGenerator.vaultEntry()]));
       when(mockVaultRepository.editEntry(any)).thenAnswer((_) => Future.value());
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       final sut = Material(
         child: Scaffold(
@@ -116,6 +140,8 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, [
         vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
 
       await tester.tap(find.byType(VaultListEntry).first);
@@ -142,6 +168,9 @@ void main() {
       expect(find.byType(AddEditForm), findsNothing);
       expect(find.byType(VaultEntryDetails), findsNothing);
       expect(find.byType(VaultEntryActions), findsNothing);
+
+      verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
     });
 
     testWidgets("Test edit entry and cancel", (tester) async {
@@ -159,7 +188,9 @@ void main() {
           ),
         ),
       );
-      await AppSetup.pumpPage(tester, sut, []);
+      await AppSetup.pumpPage(tester, sut, [
+        storageServiceProvider.overrideWithValue(mockStorageService),
+      ]);
 
       final container = ProviderScope.containerOf(tester.element(find.byType(VaultListDesktop)));
       container.read(allEntriesProvider);
@@ -199,6 +230,8 @@ void main() {
       expect(find.byType(AddEditForm), findsNothing);
       expect(find.byType(VaultEntryDetails), findsNothing);
       expect(find.byType(VaultEntryActions), findsNothing);
+
+      verifyNever(mockStorageService.storeOfflineVaultData(any));
     });
 
     testWidgets("Test view entry", (tester) async {
@@ -228,6 +261,14 @@ void main() {
 
     testWidgets("Test duplicate entry", (tester) async {
       when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       final sut = Material(
         child: Scaffold(
@@ -239,6 +280,8 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, [
         vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
       ]);
 
       await tester.tap(find.byType(VaultListEntry).first);
@@ -267,10 +310,21 @@ void main() {
       expect(find.byType(AddEditForm), findsNothing);
       expect(find.byType(VaultEntryDetails), findsNothing);
       expect(find.byType(VaultEntryActions), findsNothing);
+
+      verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
     });
 
     testWidgets("Test delete entry", (tester) async {
       when(mockVaultRepository.deleteEntry(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       final sut = Material(
         child: Scaffold(
@@ -282,6 +336,8 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, [
         vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
 
       await tester.tap(find.byType(VaultListEntry).first);
@@ -310,6 +366,50 @@ void main() {
       expect(find.byType(AddEditForm), findsNothing);
       expect(find.byType(VaultEntryDetails), findsNothing);
       expect(find.byType(VaultEntryActions), findsNothing);
+
+      verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
+    });
+
+    testWidgets("Test offline dialogs", (tester) async {
+      final sut = Material(
+        child: Scaffold(
+          body: VaultListDesktop(
+            entries: [TestDataGenerator.randomVaultEntry(), TestDataGenerator.randomVaultEntry()],
+            vaultEmpty: false,
+          ),
+        ),
+      );
+      await AppSetup.pumpPage(tester, sut, [
+        noConnectionProvider.overrideWith(() => FakeNoConnectionState(true)),
+      ]);
+
+      await tester.tap(find.byType(VaultListEntry).first);
+      await tester.pump(Duration(milliseconds: 500));
+
+      // delete button
+      await expectNoConnectionDialog(tester, find.byIcon(LucideIcons.trash));
+
+      // edit button
+      await expectNoConnectionDialog(tester, find.byIcon(LucideIcons.pen));
+
+      // duplicate button
+      await expectNoConnectionDialog(
+        tester,
+        find.byWidgetPredicate(
+          (w) =>
+              w is GlyphButton && w.style == IconButtonStyle.standard && w.icon == LucideIcons.copy,
+        ),
+      );
+
+      await tester.tap(find.byType(VaultListEntry).first);
+      await tester.pump(Duration(milliseconds: 500));
+
+      // add button
+      await expectNoConnectionDialog(
+        tester,
+        find.byWidgetPredicate((w) => w is SecondaryButton && w.caption == "Add new entry"),
+      );
     });
   });
 }

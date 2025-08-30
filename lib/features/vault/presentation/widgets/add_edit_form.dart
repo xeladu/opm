@@ -5,10 +5,13 @@ import 'package:open_password_manager/features/vault/application/providers/all_e
 import 'package:open_password_manager/features/vault/application/providers/has_changes_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/selected_entry_provider.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/add_entry.dart';
+import 'package:open_password_manager/features/vault/application/use_cases/cache_vault.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/edit_entry.dart';
 import 'package:open_password_manager/features/vault/domain/entities/folder.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
@@ -312,6 +315,12 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
           ? await AddEntry(repo).call(entry)
           : await EditEntry(repo).call(entry);
 
+      // update cache
+      final storageService = ref.read(storageServiceProvider);
+      final cryptoRepo = ref.read(cryptographyRepositoryProvider);
+      final allEntries = await ref.read(allEntriesProvider.future);
+      await CacheVault(storageService, cryptoRepo).call(allEntries);
+
       ref.read(hasChangesProvider.notifier).setHasChanges(false);
       widget.onSave();
     }
@@ -372,10 +381,9 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
       Folder(
         name: "No folder",
         isDefaultFolder: true,
-        entryCount: ref.read(allEntriesProvider).maybeWhen(
-              data: (list) => list.length,
-              orElse: () => 0,
-            ),
+        entryCount: ref
+            .read(allEntriesProvider)
+            .maybeWhen(data: (list) => list.length, orElse: () => 0),
       ),
     );
   }

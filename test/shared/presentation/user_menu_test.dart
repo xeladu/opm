@@ -11,6 +11,8 @@ import 'package:open_password_manager/features/vault/infrastructure/providers/im
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/file_picker_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/offline_mode_available_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/sheets/export_sheet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/import_sheet.dart';
@@ -31,6 +33,8 @@ void main() {
     late MockVaultRepository mockVaultRepository;
     late MockImportRepository mockImportRepository;
     late MockFilePickerService mockFilePickerService;
+    late MockStorageService mockStorageService;
+    late MockCryptographyRepository mockCryptographyRepository;
 
     setUp(() {
       mockAuthRepository = MockAuthRepository();
@@ -38,6 +42,8 @@ void main() {
       mockVaultRepository = MockVaultRepository();
       mockImportRepository = MockImportRepository();
       mockFilePickerService = MockFilePickerService();
+      mockStorageService = MockStorageService();
+      mockCryptographyRepository = MockCryptographyRepository();
     });
 
     testWidgets("Test default elements", (tester) async {
@@ -76,7 +82,7 @@ void main() {
 
     testWidgets("Test JSON export", (tester) async {
       when(mockExportRepository.exportPasswordEntriesJson(any)).thenAnswer((_) => Future.value());
-      when(mockVaultRepository.getAllEntries()).thenAnswer(
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
         (_) => Future.value([
           TestDataGenerator.randomVaultEntry(),
           TestDataGenerator.randomVaultEntry(),
@@ -110,7 +116,7 @@ void main() {
 
     testWidgets("Test CSV export", (tester) async {
       when(mockExportRepository.exportPasswordEntriesCsv(any)).thenAnswer((_) => Future.value());
-      when(mockVaultRepository.getAllEntries()).thenAnswer(
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
         (_) => Future.value([
           TestDataGenerator.randomVaultEntry(),
           TestDataGenerator.randomVaultEntry(),
@@ -172,6 +178,14 @@ void main() {
         ),
       );
       when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       final sut = Scaffold(body: UserMenu());
 
@@ -180,6 +194,8 @@ void main() {
           importRepositoryProvider.overrideWithValue(mockImportRepository),
           filePickerServiceProvider.overrideWithValue(mockFilePickerService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
         ]),
       );
 
@@ -206,6 +222,8 @@ void main() {
       verify(
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
+      verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
     });
 
     testWidgets("Test import 1Password", (tester) async {
@@ -232,6 +250,14 @@ void main() {
         ),
       );
       when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       final sut = Scaffold(body: UserMenu());
 
@@ -240,6 +266,8 @@ void main() {
           importRepositoryProvider.overrideWithValue(mockImportRepository),
           filePickerServiceProvider.overrideWithValue(mockFilePickerService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
         ]),
       );
 
@@ -272,6 +300,8 @@ void main() {
       verify(
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
+      verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
     });
 
     testWidgets("Test import LastPass", (tester) async {
@@ -298,6 +328,14 @@ void main() {
         ),
       );
       when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       final sut = Scaffold(body: UserMenu());
 
@@ -306,6 +344,8 @@ void main() {
           importRepositoryProvider.overrideWithValue(mockImportRepository),
           filePickerServiceProvider.overrideWithValue(mockFilePickerService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
         ]),
       );
 
@@ -338,6 +378,8 @@ void main() {
       verify(
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
+      verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
     });
 
     testWidgets("Test import Bitwarden", (tester) async {
@@ -364,6 +406,14 @@ void main() {
         ),
       );
       when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       final sut = Scaffold(body: UserMenu());
 
@@ -372,6 +422,8 @@ void main() {
           importRepositoryProvider.overrideWithValue(mockImportRepository),
           filePickerServiceProvider.overrideWithValue(mockFilePickerService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
         ]),
       );
 
@@ -404,6 +456,8 @@ void main() {
       verify(
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
+      verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
     });
 
     testWidgets("Test import KeePass", (tester) async {
@@ -430,6 +484,14 @@ void main() {
         ),
       );
       when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       final sut = Scaffold(body: UserMenu());
 
@@ -438,6 +500,8 @@ void main() {
           importRepositoryProvider.overrideWithValue(mockImportRepository),
           filePickerServiceProvider.overrideWithValue(mockFilePickerService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
         ]),
       );
 
@@ -470,6 +534,8 @@ void main() {
       verify(
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
+      verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
     });
 
     testWidgets("Test import Keeper", (tester) async {
@@ -496,6 +562,14 @@ void main() {
         ),
       );
       when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value([
+          TestDataGenerator.randomVaultEntry(),
+          TestDataGenerator.randomVaultEntry(),
+        ]),
+      );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
       final sut = Scaffold(body: UserMenu());
 
@@ -504,6 +578,8 @@ void main() {
           importRepositoryProvider.overrideWithValue(mockImportRepository),
           filePickerServiceProvider.overrideWithValue(mockFilePickerService),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
         ]),
       );
 
@@ -536,6 +612,8 @@ void main() {
       verify(
         mockFilePickerService.pickFile(allowedExtensions: anyNamed("allowedExtensions")),
       ).called(1);
+      verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+      verify(mockStorageService.storeOfflineVaultData(any)).called(1);
     });
 
     testWidgets("Test settings", (tester) async {

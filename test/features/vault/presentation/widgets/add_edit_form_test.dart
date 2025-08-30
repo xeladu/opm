@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_edit_form.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -14,8 +16,13 @@ import '../../../../mocking/mocks.mocks.dart';
 void main() {
   group("AddEditForm", () {
     late MockVaultRepository mockVaultRepository;
+    late MockStorageService mockStorageService;
+    late MockCryptographyRepository mockCryptographyRepository;
+
     setUp(() {
       mockVaultRepository = MockVaultRepository();
+      mockStorageService = MockStorageService();
+      mockCryptographyRepository = MockCryptographyRepository();
     });
 
     testWidgets("Test add form", (tester) async {
@@ -111,8 +118,11 @@ void main() {
     testWidgets("Test save", (tester) async {
       bool saved = false;
 
-      final mockVaultRepository = MockVaultRepository();
-
+      when(
+        mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate")),
+      ).thenAnswer((_) => Future.value([TestDataGenerator.randomVaultEntry()]));
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
+      
       final sut = Material(
         child: Scaffold(
           body: AddEditForm(
@@ -125,6 +135,8 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, [
         vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
 
       when(mockVaultRepository.addEntry(any)).thenAnswer((_) => Future.value());

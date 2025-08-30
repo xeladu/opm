@@ -4,6 +4,7 @@ import 'package:open_password_manager/features/vault/application/providers/all_e
 import 'package:open_password_manager/features/vault/application/providers/add_edit_mode_active_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/selected_entry_provider.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/add_entry.dart';
+import 'package:open_password_manager/features/vault/application/use_cases/cache_vault.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/delete_entry.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
@@ -15,6 +16,8 @@ import 'package:open_password_manager/features/vault/presentation/widgets/vault_
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_search_field.dart';
 import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/separator.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
 import 'package:open_password_manager/style/ui.dart';
@@ -60,8 +63,8 @@ class VaultListDesktop extends ConsumerWidget {
         ),
         Separator.horizontal(),
         VaultListActions(
-          enabled: ref.watch(selectedEntryProvider) == null && !ref.watch(noConnectionProvider),
-          onAdd: () => _addNewEntry(ref),
+          enabled: ref.watch(selectedEntryProvider) == null,
+          onAdd: () => _addNewEntry(context, ref),
         ),
       ],
     );
@@ -110,7 +113,12 @@ class VaultListDesktop extends ConsumerWidget {
     );
   }
 
-  void _addNewEntry(WidgetRef ref) {
+  Future<void> _addNewEntry(BuildContext context, WidgetRef ref) async {
+    if (ref.read(noConnectionProvider)) {
+      await DialogService.showNoConnectionDialog(context);
+      return;
+    }
+
     if (ref.read(addEditModeActiveProvider)) return;
 
     ref.read(selectedEntryProvider.notifier).setEntry(null);
@@ -160,6 +168,12 @@ class VaultListDesktop extends ConsumerWidget {
 
     ref.read(selectedEntryProvider.notifier).setEntry(null);
     ref.invalidate(allEntriesProvider);
+
+    // update cache
+    final storageService = ref.read(storageServiceProvider);
+    final cryptoRepo = ref.read(cryptographyRepositoryProvider);
+    final allEntries = await ref.read(allEntriesProvider.future);
+    await CacheVault(storageService, cryptoRepo).call(allEntries);
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
@@ -178,6 +192,12 @@ class VaultListDesktop extends ConsumerWidget {
       await useCase.call(selectedPasswordEntry!.id);
       ref.read(selectedEntryProvider.notifier).setEntry(null);
       ref.invalidate(allEntriesProvider);
+
+      // update cache
+      final storageService = ref.read(storageServiceProvider);
+      final cryptoRepo = ref.read(cryptographyRepositoryProvider);
+      final allEntries = await ref.read(allEntriesProvider.future);
+      await CacheVault(storageService, cryptoRepo).call(allEntries);
     }
   }
 }

@@ -11,6 +11,7 @@ import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
 import 'package:open_password_manager/features/auth/domain/entities/offline_auth_data.dart';
 // import 'package:open_password_manager/shared/utils/crypto_helper.dart';
 
+import '../helper/test_data_generator.dart';
 import '../mocking/mocks.mocks.dart';
 import 'package:open_password_manager/features/auth/domain/entities/opm_user.dart';
 import '../mocking/fakes.dart';
@@ -34,7 +35,11 @@ void main() {
   group('Sign-in flow integration', () {
     for (var sizeEntry in DisplaySizes.sizes.entries) {
       final deviceSizeName = sizeEntry.key;
-      testWidgets('Test sign in/sign out flow ($deviceSizeName)', (tester) async {
+      testWidgets('Test sign in/sign out flow with offline mode ($deviceSizeName)', (tester) async {
+        // 1) sign in => offline data is cached
+        // 2) sign out
+        // 3) simulate no connection
+        // 4) sign in with cached offline data
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
         suppressOverflowErrors();
 
@@ -62,9 +67,12 @@ void main() {
         });
         when(mockBiometricAuthRepository.isSupported()).thenAnswer((_) async => false);
         when(mockStorageService.hasMasterKey()).thenAnswer((_) async => false);
-        when(
-          mockVaultRepository.getAllEntries(onUpdate: anyNamed('onUpdate')),
-        ).thenAnswer((_) async => []);
+        when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+          (_) => Future.value([
+            TestDataGenerator.randomVaultEntry(),
+            TestDataGenerator.randomVaultEntry(),
+          ]),
+        );
 
         final sut = SignInPage();
         await AppSetup.pumpPage(tester, sut, [
@@ -83,7 +91,7 @@ void main() {
           ),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
           settingsProvider.overrideWith(() => FakeSettingState(Settings.empty())),
-          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false))
+          offlineModeAvailableProvider.overrideWith(() => FakeOfflineModeAvailableState(false)),
         ]);
 
         await tester.enterText(find.byType(EmailFormField), 'test@example.com');
@@ -91,9 +99,12 @@ void main() {
         await tester.tap(find.byType(PrimaryButton));
         await tester.pumpAndSettle();
 
+        // verify sign in
         verify(
           mockAuthRepository.signIn(email: 'test@example.com', password: 'password123'),
         ).called(1);
+
+        // verify offline storage
         verify(
           mockStorageService.storeOfflineAuthData(
             argThat(

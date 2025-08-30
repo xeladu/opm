@@ -12,10 +12,13 @@ import 'package:open_password_manager/features/vault/presentation/pages/vault_en
 import 'package:open_password_manager/features/vault/presentation/widgets/favicon.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry_popup.dart';
+import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../../helper/app_setup.dart';
 import '../../../../helper/display_size.dart';
 import '../../../../helper/test_data_generator.dart';
+import '../../../../mocking/fakes.dart';
 import '../../../../mocking/mocks.mocks.dart';
 
 void main() {
@@ -110,6 +113,30 @@ void main() {
           expect(container.read(selectedEntryProvider), vaultEntry);
           expect(container.read(addEditModeActiveProvider), true);
         }
+      });
+
+      testWidgets("Test offline double tap ($deviceSize)", (tester) async {
+        when(
+          mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate")),
+        ).thenAnswer((_) => Future.value([VaultEntry.empty()]));
+        final sut = Material(
+          child: Scaffold(
+            body: VaultListEntry(selected: false, isMobile: isMobile, entry: vaultEntry),
+          ),
+        );
+        await AppSetup.pumpPage(tester, sut, [
+          vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          noConnectionProvider.overrideWith(() => FakeNoConnectionState(true)),
+        ]);
+
+        final detector =
+            find.byKey(ValueKey("entry-${vaultEntry.id}")).evaluate().first.widget
+                as GestureDetector;
+        detector.onDoubleTap!();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ShadDialog), findsOneWidget);
+        expect(find.text("No Internet Connection"), findsOneWidget);
       });
 
       testWidgets("Test secondary tap ($deviceSize)", (tester) async {

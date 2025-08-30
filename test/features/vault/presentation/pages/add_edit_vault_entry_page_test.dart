@@ -6,6 +6,8 @@ import 'package:open_password_manager/features/vault/application/providers/has_c
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/add_edit_vault_entry_page.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_edit_form.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
 import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
@@ -21,10 +23,15 @@ void main() {
   for (var sizeEntry in DisplaySizes.sizes.entries) {
     group('AddEditVaultEntryPage', () {
       late MockVaultRepository mockVaultRepository;
+      late MockStorageService mockStorageService;
+      late MockCryptographyRepository mockCryptographyRepository;
+
       final deviceSizeName = sizeEntry.key;
 
       setUp(() {
         mockVaultRepository = MockVaultRepository();
+        mockStorageService = MockStorageService();
+        mockCryptographyRepository = MockCryptographyRepository();
       });
 
       testWidgets('Test default elements (edit) ($deviceSizeName)', (tester) async {
@@ -59,6 +66,14 @@ void main() {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
 
         when(mockVaultRepository.editEntry(any)).thenAnswer((_) => Future.value());
+        when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+          (_) => Future.value([
+            TestDataGenerator.randomVaultEntry(),
+            TestDataGenerator.randomVaultEntry(),
+          ]),
+        );
+
+        when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
         final sut = AddEditVaultEntryPage(
           entry: TestDataGenerator.randomVaultEntry(),
@@ -68,12 +83,17 @@ void main() {
         );
         await AppSetup.pumpPage(tester, sut, [
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+          storageServiceProvider.overrideWithValue(mockStorageService),
+          cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
         ]);
 
         await tester.tap(find.byType(PrimaryButton));
         await tester.pumpAndSettle();
 
         expect(saved, isTrue);
+
+        verify(mockCryptographyRepository.encrypt(any)).callCount > 0;
+        verify(mockStorageService.storeOfflineVaultData(any)).called(1);
       });
 
       testWidgets('Test cancel with dialog ($deviceSizeName)', (tester) async {
@@ -101,7 +121,9 @@ void main() {
 
         expect(find.byType(ShadDialog), findsOneWidget);
 
-        await tester.tap(find.byWidgetPredicate((w) => w is SecondaryButton && w.caption == "Stay"));
+        await tester.tap(
+          find.byWidgetPredicate((w) => w is SecondaryButton && w.caption == "Stay"),
+        );
         await tester.pumpAndSettle();
 
         expect(find.byType(AddEditVaultEntryPage), findsOneWidget);

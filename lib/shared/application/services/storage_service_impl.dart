@@ -58,7 +58,7 @@ class StorageServiceImpl {
   Future<void> storeOfflineVaultData(List<VaultEntry> data) async {
     await _storage.write(
       key: _offlineVaultDataKey,
-      value: jsonEncode(data.map((entry) => entry.toJson())),
+      value: jsonEncode(data.map((entry) => entry.toJson()).toList()),
     );
   }
 

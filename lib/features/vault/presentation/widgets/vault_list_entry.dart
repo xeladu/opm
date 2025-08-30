@@ -4,6 +4,7 @@ import 'package:open_password_manager/features/vault/application/providers/all_e
 import 'package:open_password_manager/features/vault/application/providers/has_changes_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/add_edit_mode_active_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/selected_entry_provider.dart';
+import 'package:open_password_manager/features/vault/application/use_cases/cache_vault.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/delete_entry.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
@@ -12,7 +13,9 @@ import 'package:open_password_manager/features/vault/presentation/pages/vault_en
 import 'package:open_password_manager/features/vault/presentation/widgets/favicon.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/vault_list_entry_popup.dart';
 import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
+import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
+import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
 import 'package:open_password_manager/shared/utils/navigation_service.dart';
 import 'package:open_password_manager/shared/utils/popup_service.dart';
@@ -250,6 +253,12 @@ class VaultListEntry extends ConsumerWidget {
         await useCase.call(entry.id);
         ref.read(selectedEntryProvider.notifier).setEntry(null);
         ref.invalidate(allEntriesProvider);
+
+        // update cache
+        final storageService = ref.read(storageServiceProvider);
+        final cryptoRepo = ref.read(cryptographyRepositoryProvider);
+        final allEntries = await ref.read(allEntriesProvider.future);
+        await CacheVault(storageService, cryptoRepo).call(allEntries);
       }
     }
   }
