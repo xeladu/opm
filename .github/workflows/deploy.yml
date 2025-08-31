@@ -1,0 +1,93 @@
+name: Deploy Workflow
+on:
+  push:
+    branches:
+      - 'release/**'
+
+jobs:
+  check-branch:
+    name: Check if on a release branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          BRANCH_NAME=${{ github.ref }}
+          if [[ "$BRANCH_NAME" != "refs/heads/release/"* ]]; then
+            echo "This workflow can only be run on release branches!"
+            echo "Create a release branch x.y.z and execute the workflow on that branch!"
+            exit 1
+          fi
+
+  prepare:
+    name: Sets up the Flutter environment, prepares the code, and validates it
+    runs-on: ubuntu-latest
+    needs: check-branch
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Code
+
+      - name: Prepare Flutter
+        uses: ./.github/workflows/steps/prepare-flutter
+        with:
+          firebase_api_key: ${{ secrets.FIREBASE_API_KEY }}
+          firebase_auth_domain: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          firebase_project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
+          firebase_storage_bucket: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          firebase_messaging_sender_id: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          firebase_app_id: ${{ secrets.FIREBASE_APP_ID }}
+          firebase_measurement_id: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          firebase_vault_collection_prefix: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
+          firebase_utils_collection_name: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+
+  deploy-web:
+    name: Deploy production web app
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build web app
+        run: flutter build web
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_OPM_TOOL }}
+          channelId: live
+          projectId: opm-tool
+
+  create-release:
+    name: Create tag and release
+    needs: deploy-web
+    runs-on: ubuntu-latest
+    continue-on-error: true 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from branch name
+        id: extract_version
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/release/}
+          TAG_NAME="v$BRANCH_NAME"
+          echo "RELEASE_VERSION=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "::set-output name=tag::$TAG_NAME"
+
+      - name: Create Git tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          git tag -a "${TAG_NAME}" -m "${TAG_NAME}"
+          git push origin "${TAG_NAME}"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
