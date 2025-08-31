@@ -34,7 +34,7 @@ jobs:
         shell: bash
 
       - name: Upload Configuration File
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: generated-config
           path: config.json
@@ -95,7 +95,7 @@ jobs:
         name: Checkout Code
 
       - name: Download Configuration File
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v5
         with:
           name: generated-config
           path: .
