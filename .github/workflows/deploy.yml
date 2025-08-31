@@ -2,7 +2,7 @@ name: Deploy Workflow
 on:
   push:
     branches:
-      - 'release/**'
+      - "release/**"
 
 jobs:
   check-branch:
@@ -26,24 +26,87 @@ jobs:
       - uses: actions/checkout@v4
         name: Checkout Code
 
-      - name: Prepare Flutter
-        uses: ./.github/workflows/steps/prepare-flutter
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v2
         with:
-          firebase_api_key: ${{ secrets.FIREBASE_API_KEY }}
-          firebase_auth_domain: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
-          firebase_project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
-          firebase_storage_bucket: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          firebase_messaging_sender_id: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-          firebase_app_id: ${{ secrets.FIREBASE_APP_ID }}
-          firebase_measurement_id: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
-          firebase_vault_collection_prefix: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
-          firebase_utils_collection_name: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+          flutter-version-file: pubspec.yaml
+          channel: "stable"
+
+      - name: Generate Firebase Configuration File
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
+          FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+        run: dart run scripts/generate_config.dart config.json
+        shell: bash
+
+      - name: Get Flutter Dependencies
+        run: flutter pub get
+        shell: bash
+
+      - name: Analyze Project
+        run: flutter analyze
+        shell: bash
+
+      - name: Run Tests
+        run: |
+          flutter test --coverage
+
+          LH_TOTAL=0
+          LF_TOTAL=0
+
+          while IFS= read -r line; do
+            if [[ $line == LH:* ]]; then
+              LH_VALUE=${line#LH:}
+              ((LH_TOTAL+=LH_VALUE))
+            elif [[ $line == LF:* ]]; then
+              LF_VALUE=${line#LF:}
+              ((LF_TOTAL+=LF_VALUE))
+            fi
+          done < coverage/lcov.info
+
+          if [[ $LF_TOTAL -gt 0 ]]; then
+            # pass shell vars into awk to avoid any quoting issues
+            TOTAL_COVERAGE=$(awk -v lh="$LH_TOTAL" -v lf="$LF_TOTAL" 'BEGIN { if (lf > 0) printf "%.1f", (lh/lf)*100; else printf "0" }')
+          else
+            TOTAL_COVERAGE=0
+          fi
+
+          if (( $(echo "$TOTAL_COVERAGE > 90" | bc -l) )); then
+            ICON="✅✅✅"
+          elif (( $(echo "$TOTAL_COVERAGE > 80" | bc -l) )); then
+            ICON="✅✅"
+          elif (( $(echo "$TOTAL_COVERAGE > 70" | bc -l) )); then
+            ICON="✅"
+          elif (( $(echo "$TOTAL_COVERAGE > 50" | bc -l) )); then
+            ICON="⚠️"
+          else
+            ICON="❌"
+          fi
+
+          echo "$ICON Total Coverage: $TOTAL_COVERAGE%"
+        shell: bash
 
   deploy-web:
     name: Deploy production web app
     needs: prepare
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        name: Checkout Code
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: "stable"
+
       - name: Build web app
         run: flutter build web
 
@@ -58,7 +121,7 @@ jobs:
     name: Create tag and release
     needs: deploy-web
     runs-on: ubuntu-latest
-    continue-on-error: true 
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
