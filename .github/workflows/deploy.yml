@@ -6,7 +6,7 @@ on:
 
 jobs:
   check-branch:
-    name: Check if on a release branch
+    name: Validate branch
     runs-on: ubuntu-latest
     steps:
       - name: Check branch name
@@ -19,7 +19,7 @@ jobs:
           fi
 
   prepare:
-    name: Sets up the Flutter environment, prepares the code, and validates it
+    name: Prepare environment
     runs-on: ubuntu-latest
     needs: check-branch
     steps:
@@ -46,15 +46,11 @@ jobs:
         run: dart run scripts/generate_config.dart config.json
         shell: bash
 
-      - name: Push Configuration File
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add config.json || true
-          git commit -m "add generated config.json"
-          BRANCH_NAME=${GITHUB_REF#refs/heads/}
-          git push origin "HEAD:${BRANCH_NAME}"
-        shell: bash
+      - name: Upload Configuration File
+        uses: actions/upload-artifact@v3
+        with:
+          name: generated-config
+          path: config.json
 
       - name: Get Flutter Dependencies
         run: flutter pub get
@@ -110,6 +106,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         name: Checkout Code
+
+      - name: Download Configuration File
+        uses: actions/download-artifact@v3
+        with:
+          name: generated-config
+          path: .
 
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
