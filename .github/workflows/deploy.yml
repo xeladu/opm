@@ -31,6 +31,7 @@ jobs:
         with:
           flutter-version-file: pubspec.yaml
           channel: "stable"
+          cache: true
 
       - name: Generate Firebase Configuration File
         env:
@@ -118,6 +119,7 @@ jobs:
         with:
           flutter-version-file: pubspec.yaml
           channel: "stable"
+          cache: true
 
       - name: Build web app
         run: flutter build web
