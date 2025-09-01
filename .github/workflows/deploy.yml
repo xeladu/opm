@@ -153,7 +153,6 @@ jobs:
           cache: true
 
       - name: Decode Android keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
