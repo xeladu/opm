@@ -8,6 +8,7 @@ import 'package:open_password_manager/features/vault/domain/repositories/vault_r
 import 'package:open_password_manager/features/vault/domain/repositories/password_generator_repository.dart';
 import 'package:open_password_manager/shared/application/services/crypto_service.dart';
 import 'package:open_password_manager/shared/application/services/file_picker_service.dart';
+import 'package:open_password_manager/shared/application/services/package_info_service.dart';
 import 'package:open_password_manager/shared/application/services/storage_service.dart';
 import 'package:open_password_manager/shared/domain/repositories/clipboard_repository.dart';
 import 'package:open_password_manager/shared/domain/repositories/cryptography_repository.dart';
@@ -25,6 +26,7 @@ import 'package:open_password_manager/shared/domain/repositories/crypto_utils_re
   CryptoUtilsRepository,
   SettingsRepository,
   StorageService,
+  PackageInfoService,
   PasswordGeneratorRepository,
   VaultRepository,
 ])

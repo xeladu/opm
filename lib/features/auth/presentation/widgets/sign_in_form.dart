@@ -28,6 +28,7 @@ import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
 import 'package:open_password_manager/shared/presentation/buttons/loading_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
+import 'package:open_password_manager/shared/presentation/buttons/transparent_button.dart';
 import 'package:open_password_manager/shared/presentation/inputs/email_form_field.dart';
 import 'package:open_password_manager/shared/presentation/inputs/password_form_field.dart';
 import 'package:open_password_manager/shared/utils/crypto_helper.dart';
@@ -139,11 +140,8 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 ),
                 const SizedBox(height: sizeS),
                 Center(
-                  child: ShadButton.ghost(
-                    child: Text(
-                      "Request data deletion",
-                      style: ShadTheme.of(context).textTheme.muted,
-                    ),
+                  child: TransparentButton(
+                    caption: "Request data deletion",
                     onPressed: () async => _isLoading
                         ? null
                         : await launchUrl(Uri.parse("https://opm.quickcoder.org#data-deletion")),

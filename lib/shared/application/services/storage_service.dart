@@ -3,55 +3,28 @@ import 'dart:typed_data';
 import 'package:open_password_manager/features/auth/domain/entities/offline_auth_data.dart';
 import 'package:open_password_manager/features/settings/domain/entities/settings.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
-import 'package:open_password_manager/shared/application/services/storage_service_impl.dart';
 import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
 
-class StorageService {
-  final StorageServiceImpl _storageService;
+abstract class StorageService {
+  Future<bool> hasMasterKey();
 
-  StorageService(this._storageService);
+  Future<void> storeBiometricMasterEncryptionKey(Uint8List key);
 
-  Future<bool> hasMasterKey() async {
-    return await _storageService.hasMasterKey();
-  }
+  Future<Uint8List> loadBiometricMasterEncryptionKey();
 
-  Future<void> storeBiometricMasterEncryptionKey(Uint8List key) async {
-    return await _storageService.storeBiometricMasterEncryptionKey(key);
-  }
+  Future<void> storeAppSettings(Settings settings);
 
-  Future<Uint8List> loadBiometricMasterEncryptionKey() async {
-    return await _storageService.loadBiometricMasterEncryptionKey();
-  }
+  Future<Settings> loadAppSettings();
 
-  Future<void> storeAppSettings(Settings settings) async {
-    return await _storageService.storeAppSettings(settings);
-  }
+  Future<void> storeOfflineAuthData(OfflineAuthData data);
 
-  Future<Settings> loadAppSettings() async {
-    return await _storageService.loadAppSettings();
-  }
+  Future<OfflineAuthData> loadOfflineAuthData();
 
-  Future<void> storeOfflineAuthData(OfflineAuthData data) async {
-    return await _storageService.storeOfflineAuthData(data);
-  }
+  Future<void> storeOfflineVaultData(List<VaultEntry> data);
 
-  Future<OfflineAuthData> loadOfflineAuthData() async {
-    return await _storageService.loadOfflineAuthData();
-  }
+  Future<List<VaultEntry>> loadOfflineVaultData();
 
-  Future<void> storeOfflineVaultData(List<VaultEntry> data) async {
-    return await _storageService.storeOfflineVaultData(data);
-  }
+  Future<void> storeOfflineCryptoUtils(CryptoUtils data);
 
-  Future<List<VaultEntry>> loadOfflineVaultData() async {
-    return await _storageService.loadOfflineVaultData();
-  }
-
-  Future<void> storeOfflineCryptoUtils(CryptoUtils data) async {
-    return await _storageService.storeOfflineCryptoUtils(data);
-  }
-
-  Future<CryptoUtils> loadOfflineCryptoUtils() async {
-    return await _storageService.loadOfflineCryptoUtils();
-  }
+  Future<CryptoUtils> loadOfflineCryptoUtils();
 }

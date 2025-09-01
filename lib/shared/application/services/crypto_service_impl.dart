@@ -1,3 +1,4 @@
+import 'package:open_password_manager/shared/application/services/crypto_service.dart';
 import 'package:open_password_manager/shared/domain/exceptions/crypto_service_exception.dart';
 import 'package:open_password_manager/shared/domain/repositories/crypto_utils_repository.dart';
 import 'package:open_password_manager/shared/domain/entities/crypto_utils.dart';
@@ -16,7 +17,7 @@ import 'package:pointycastle/export.dart' as pc;
 /// For subsequent access, it unlocks the MEK using either the password
 /// or biometrics, enabling secure vault operations without exposing
 /// sensitive keys or credentials.
-class CryptoServiceImpl {
+class CryptoServiceImpl implements CryptoService {
   final CryptoUtilsRepository cryptoUtilsRepo;
   final StorageService storageService;
 
@@ -26,6 +27,7 @@ class CryptoServiceImpl {
   CryptoServiceImpl({required this.cryptoUtilsRepo, required this.storageService});
 
   /// Initializes the crypto service. After that, encryption and decryption can be used.
+  @override
   Future<void> init(String userId, String? password, bool? useBiometric) async {
     if (password == null && (useBiometric == null || useBiometric == false)) {
       throw CryptoServiceException("Either 'password' or 'biometricKey' needs to be set");
@@ -43,10 +45,12 @@ class CryptoServiceImpl {
     }
   }
 
+  @override
   Future<String> encrypt(String plainText) async {
     return await _encryptInternal(_masterEncryptionKey, plainText);
   }
 
+  @override
   Future<String> decrypt(String plainText) async {
     return await _decryptInternal(_masterEncryptionKey, plainText);
   }
@@ -87,6 +91,7 @@ class CryptoServiceImpl {
   /// This derives a key from [password] using the last used salt and
   /// returns the encrypted master encryption key (encMek) encrypted with
   /// the derived key.
+  @override
   Future<CryptoUtils> exportOfflineCryptoUtils(String password) async {
     if (_lastSalt == null || _lastSalt!.isEmpty) {
       throw CryptoServiceException('No salt available to export offline crypto utils');
@@ -101,6 +106,7 @@ class CryptoServiceImpl {
   /// Initialize crypto service using an externally provided [cryptoUtils]
   /// blob (for example read from secure local storage) instead of fetching
   /// it from remote storage. This enables offline initialization.
+  @override
   Future<void> initWithOfflineCryptoUtils(CryptoUtils cryptoUtils, String password) async {
     final salt = cryptoUtils.salt.isNotEmpty ? base64Decode(cryptoUtils.salt) : _randomBytes(32);
     _lastSalt = salt;

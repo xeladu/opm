@@ -13,6 +13,7 @@ import 'package:open_password_manager/features/settings/infrastructure/providers
 import 'package:open_password_manager/shared/application/providers/crypto_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/file_picker_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/init_provider.dart';
+import 'package:open_password_manager/shared/application/providers/package_info_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/clipboard_repository_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
@@ -56,6 +57,7 @@ void main() async {
     final filePickerService = serviceFactory.getFilePickerService();
     final storageService = serviceFactory.getStorageService();
     final cryptoService = serviceFactory.getCryptoService(cryptoUtilsProvider, storageService);
+    final packageInfoService = serviceFactory.getPackageInfoService();
 
     final autoRepo = repoFactory.getAuthRepository(providerConfig);
     final clipboardRepo = repoFactory.getClipboardRepository();
@@ -71,15 +73,16 @@ void main() async {
       ProviderScope(
         overrides: [
           authRepositoryProvider.overrideWithValue(autoRepo),
+          biometricAuthRepositoryProvider.overrideWithValue(biometricAuthRepo),
           clipboardRepositoryProvider.overrideWithValue(clipboardRepo),
           cryptographyRepositoryProvider.overrideWithValue(cryptoRepo),
           cryptoServiceProvider.overrideWithValue(cryptoService),
-          biometricAuthRepositoryProvider.overrideWithValue(biometricAuthRepo),
+          cryptoUtilsRepositoryProvider.overrideWithValue(cryptoUtilsProvider),
           exportRepositoryProvider.overrideWithValue(exportRepo),
           filePickerServiceProvider.overrideWithValue(filePickerService),
           importRepositoryProvider.overrideWithValue(importRepo),
+          packageInfoServiceProvider.overrideWithValue(packageInfoService),
           passwordGeneratorRepositoryProvider.overrideWithValue(passwordGeneratorRepo),
-          cryptoUtilsRepositoryProvider.overrideWithValue(cryptoUtilsProvider),
           settingsRepositoryProvider.overrideWithValue(settingsRepo),
           storageServiceProvider.overrideWithValue(storageService),
           vaultRepositoryProvider.overrideWithValue(vaultRepo),

@@ -11,6 +11,7 @@ import 'package:open_password_manager/features/vault/infrastructure/providers/im
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/file_picker_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/offline_mode_available_provider.dart';
+import 'package:open_password_manager/shared/application/providers/package_info_service_provider.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
@@ -18,6 +19,7 @@ import 'package:open_password_manager/shared/presentation/sheets/export_sheet.da
 import 'package:open_password_manager/shared/presentation/sheets/import_sheet.dart';
 import 'package:open_password_manager/shared/presentation/sheets/settings_sheet.dart';
 import 'package:open_password_manager/shared/presentation/user_menu.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../helper/app_setup.dart';
@@ -35,6 +37,7 @@ void main() {
     late MockFilePickerService mockFilePickerService;
     late MockStorageService mockStorageService;
     late MockCryptographyRepository mockCryptographyRepository;
+    late MockPackageInfoService mockPackageInfoService;
 
     setUp(() {
       mockAuthRepository = MockAuthRepository();
@@ -44,6 +47,7 @@ void main() {
       mockFilePickerService = MockFilePickerService();
       mockStorageService = MockStorageService();
       mockCryptographyRepository = MockCryptographyRepository();
+      mockPackageInfoService = MockPackageInfoService();
     });
 
     testWidgets("Test default elements", (tester) async {
@@ -628,6 +632,31 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(SettingsSheet), findsOneWidget);
+    });
+
+    testWidgets("Test about page", (tester) async {
+      suppressOverflowErrors();
+      when(mockPackageInfoService.getPackageInfo()).thenAnswer(
+        (_) =>
+            Future.value(PackageInfo(appName: '', packageName: '', version: '', buildNumber: '')),
+      );
+
+      final sut = Scaffold(body: UserMenu());
+
+      await tester.runAsync(
+        () async => await AppSetup.pumpPage(tester, sut, [
+          packageInfoServiceProvider.overrideWithValue(mockPackageInfoService),
+        ]),
+      );
+
+      await tester.tap(find.byType(UserMenu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("About"));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ShadDialog), findsOneWidget);
+      expect(find.text("About OPM"), findsOneWidget);
     });
   });
 }

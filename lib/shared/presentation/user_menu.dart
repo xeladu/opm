@@ -83,6 +83,11 @@ class UserMenu extends ConsumerWidget {
                 ),
               );
             }
+          case UserMenuSelection.about:
+            if (context.mounted) {
+              await DialogService.showAboutDialog(context, ref);
+            }
+            break;
           default:
             return;
         }
@@ -204,6 +209,18 @@ class UserMenu extends ConsumerWidget {
     const PopupMenuDivider(),
     const PopupMenuItem(
       height: sizeL,
+      value: UserMenuSelection.about,
+      child: Row(
+        spacing: sizeXS,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(LucideIcons.info, size: sizeS),
+          Text('About'),
+        ],
+      ),
+    ),
+    const PopupMenuItem(
+      height: sizeL,
       value: UserMenuSelection.logout,
       child: Row(
         spacing: sizeXS,
@@ -217,4 +234,4 @@ class UserMenu extends ConsumerWidget {
   ];
 }
 
-enum UserMenuSelection { logout, settings, import, export }
+enum UserMenuSelection { logout, settings, import, export, about }

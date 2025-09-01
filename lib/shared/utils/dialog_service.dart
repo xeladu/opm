@@ -1,10 +1,15 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_license_manager/flutter_license_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/vault/application/providers/all_entry_folders_provider.dart';
+import 'package:open_password_manager/shared/application/providers/package_info_service_provider.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/secondary_button.dart';
+import 'package:open_password_manager/shared/presentation/license_list.dart';
+import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DialogService {
   /// Shows a cancel confirmation dialog.
@@ -179,6 +184,99 @@ class DialogService {
               actions: [PrimaryButton(onPressed: onPrimary, caption: "Close")],
               crossAxisAlignment: CrossAxisAlignment.start,
               descriptionTextAlign: TextAlign.start,
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  /// Shows an about dialog with details about the app.
+  static Future<void> showAboutDialog(BuildContext context, WidgetRef ref) async {
+    final pi = await ref.read(packageInfoServiceProvider).getPackageInfo();
+    final appVersion = pi.version;
+
+    if (context.mounted) {
+      await showShadDialog<String?>(
+        context: context,
+        builder: (context) {
+          void onPrimary() => Navigator.of(context).pop();
+
+          return _DialogKeyboardWrapper(
+            onPrimary: onPrimary,
+            child: ShadDialog.alert(
+              title: const Text('About OPM'),
+              description: Text(
+                'Open Password Manager - An open source alternative with encrypted cloud storage for various hosters (v$appVersion)',
+              ),
+              actions: [PrimaryButton(onPressed: onPrimary, caption: "Close")],
+              crossAxisAlignment: CrossAxisAlignment.start,
+              descriptionTextAlign: TextAlign.start,
+              child: Column(
+                spacing: sizeXS,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SecondaryButton(
+                        caption: "Learn more",
+                        onPressed: () async {
+                          await launchUrl(Uri.parse("https://opm.quickcoder.org/"));
+                        },
+                      ),
+                      SecondaryButton(
+                        caption: "Show code",
+                        onPressed: () async {
+                          await launchUrl(Uri.parse("https://github.com/xeladu/opm"));
+                        },
+                      ),
+                      SecondaryButton(
+                        caption: "View licenses",
+                        onPressed: () async {
+                          await showLicenseDialog(context);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: sizeXS),
+                  Text("Delete account", style: ShadTheme.of(context).textTheme.large),
+                  Text(
+                    "To delete your account, proceed to the website below and follow the instructions.",
+                  ),
+                  Center(
+                    child: SecondaryButton(
+                      caption: "Request account removal",
+                      onPressed: () async {
+                        await launchUrl(Uri.parse("https://opm.quickcoder.org/#data-deletion"));
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  /// Shows a license with details about the used packages.
+  static Future<void> showLicenseDialog(BuildContext context) async {
+    final licenses = await LicenseService.loadFromLicenseRegistry();
+    if (context.mounted) {
+      await showShadDialog<String?>(
+        context: context,
+        builder: (context) {
+          void onPrimary() => Navigator.of(context).pop();
+
+          return _DialogKeyboardWrapper(
+            onPrimary: onPrimary,
+            child: ShadDialog.alert(
+              title: const Text('Licenses'),
+              actions: [PrimaryButton(onPressed: onPrimary, caption: "Close")],
+              crossAxisAlignment: CrossAxisAlignment.start,
+              child: Material(child: LicenseList(licenses: licenses)),
             ),
           );
         },

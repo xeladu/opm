@@ -4,7 +4,6 @@ import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
 import 'package:open_password_manager/shared/application/providers/offline_mode_available_provider.dart';
-import 'package:open_password_manager/shared/application/services/crypto_service.dart';
 import 'package:open_password_manager/shared/application/services/crypto_service_impl.dart';
 import 'package:open_password_manager/shared/presentation/user_menu.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_list_page.dart';
@@ -96,11 +95,9 @@ void main() {
           cryptoUtilsRepositoryProvider.overrideWithValue(mockCryptoUtilsRepository),
           storageServiceProvider.overrideWithValue(mockStorageService),
           cryptoServiceProvider.overrideWithValue(
-            CryptoService(
-              CryptoServiceImpl(
-                cryptoUtilsRepo: mockCryptoUtilsRepository,
-                storageService: mockStorageService,
-              ),
+            CryptoServiceImpl(
+              cryptoUtilsRepo: mockCryptoUtilsRepository,
+              storageService: mockStorageService,
             ),
           ),
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
