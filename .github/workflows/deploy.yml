@@ -132,7 +132,7 @@ jobs:
           projectId: opm-tool
 
   deploy-android:
-    name: Build and upload Android (internal testing)
+    name: Upload Android app
     needs: prepare
     runs-on: ubuntu-latest
     steps:
@@ -183,9 +183,97 @@ jobs:
         env:
           JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
 
+  deploy-ios:
+    name: Upload iOS app
+    needs: prepare
+    runs-on: macos-15
+    if: ${{ false }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Configuration File
+        uses: actions/download-artifact@v5
+        with:
+          name: generated-config
+          path: .
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: "stable"
+          cache: true
+
+  deploy-windows:
+    name: Upload Windows app
+    needs: prepare
+    runs-on: windows-latest
+    if: ${{ false }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Configuration File
+        uses: actions/download-artifact@v5
+        with:
+          name: generated-config
+          path: .
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: "stable"
+          cache: true
+
+  deploy-linux:
+    name: Upload Linux app
+    needs: prepare
+    runs-on: ubuntu-latest
+    if: ${{ false }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Configuration File
+        uses: actions/download-artifact@v5
+        with:
+          name: generated-config
+          path: .
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: "stable"
+          cache: true
+
+  deploy-macos:
+    name: Upload MacOS app
+    needs: prepare
+    runs-on: macos-15
+    if: ${{ false }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Configuration File
+        uses: actions/download-artifact@v5
+        with:
+          name: generated-config
+          path: .
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: "stable"
+          cache: true
+
   create-release:
     name: Create tag and release
-    needs: [deploy-web, deploy-android]
+    needs: [deploy-web, deploy-android, deploy-ios, deploy-windows, deploy-macos, deploy-linux]
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
