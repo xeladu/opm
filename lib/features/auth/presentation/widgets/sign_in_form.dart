@@ -38,6 +38,7 @@ import 'package:open_password_manager/shared/utils/toast_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SignInForm extends ConsumerStatefulWidget {
   const SignInForm({super.key});
@@ -134,6 +135,18 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                     onPressed: () async => _isLoading
                         ? null
                         : await NavigationService.replaceCurrent(context, CreateAccountPage()),
+                  ),
+                ),
+                const SizedBox(height: sizeS),
+                Center(
+                  child: ShadButton.ghost(
+                    child: Text(
+                      "Request data deletion",
+                      style: ShadTheme.of(context).textTheme.muted,
+                    ),
+                    onPressed: () async => _isLoading
+                        ? null
+                        : await launchUrl(Uri.parse("https://opm.quickcoder.org#data-deletion")),
                   ),
                 ),
               ],
