@@ -128,9 +128,9 @@ Add these attributes one by one by clicking "Create Attribute":
 2. Enable **Document Security**
 3. Set **Collection Permissions**:
    - **Create**: Role `users` (any authenticated user can create)
-   - **Read**: Role `users` 
-   - **Update**: Role `users`
-   - **Delete**: Role `users`
+   - **Read**: ❌
+   - **Update**: ❌
+   - **Delete**: ❌
 
 **Document-level permissions** will be automatically set by the app to restrict access to the document creator only.
 
@@ -153,9 +153,11 @@ Add these attributes one by one by clicking "Create Attribute":
 1. Enable **Document Security**
 2. Set **Collection Permissions**:
    - **Create**: Role `users`
-   - **Read**: Role `users`
-   - **Update**: Role `users`
-   - **Delete**: Role `users`
+   - **Read**: ❌
+   - **Update**: ❌
+   - **Delete**: ❌
+
+**Document-level permissions** will be automatically set by the app to restrict access to the document creator only.
 
 #### Create Index for Utils
 
