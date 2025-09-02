@@ -60,16 +60,13 @@ android {
 
     buildTypes {
         release {
-            // Try to use release signing config, fallback to debug if it's incomplete
             val releaseConfig = signingConfigs.getByName("release")
             signingConfig = if (releaseConfig.storeFile != null && 
                                releaseConfig.storePassword != null && 
                                releaseConfig.keyAlias != null && 
                                releaseConfig.keyPassword != null) {
-                println("Using release signing config")
                 releaseConfig
             } else {
-                println("Release signing config incomplete, using debug config")
                 signingConfigs.getByName("debug")
             }
         }
