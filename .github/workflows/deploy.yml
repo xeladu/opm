@@ -26,13 +26,9 @@ jobs:
           BRANCH_NAME=${{ github.ref }}
           BRANCH_VERSION=${BRANCH_NAME#refs/heads/release/}
 
-          CURRENT_LINE=$(grep "^version:" pubspec.yaml)
-          if [[ "$CURRENT_LINE" == *"+"* ]]; then
-            BUILD_NUMBER=$(echo "$CURRENT_LINE" | cut -d'+' -f2)
-            NEW_VERSION="$BRANCH_VERSION+$BUILD_NUMBER"
-          else
-            NEW_VERSION="$BRANCH_VERSION"
-          fi
+          echo "Updating version to: $BRANCH_VERSION"
+          
+          NEW_VERSION="$BRANCH_VERSION"
 
           sed -i "s/^version:.*/version: $NEW_VERSION/" pubspec.yaml
 
