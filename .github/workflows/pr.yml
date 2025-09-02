@@ -9,6 +9,8 @@ jobs:
   prepare:
     name: Prepare enviroment
     runs-on: ubuntu-latest
+    outputs:
+      config-json: ${{ steps.config-output.outputs.config-json }}
     steps:
       - uses: actions/checkout@v4
         name: Checkout Code
@@ -34,11 +36,12 @@ jobs:
         run: dart run scripts/generate_config.dart config.json
         shell: bash
 
-      - name: Upload Configuration File
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-config
-          path: config.json
+      - name: Set Configuration Output
+        id: config-output
+        run: |
+          CONFIG_CONTENT=$(base64 -w 0 config.json)
+          echo "config-json=$CONFIG_CONTENT" >> $GITHUB_OUTPUT
+        shell: bash
 
       - name: Get Flutter Dependencies
         run: flutter pub get
@@ -95,11 +98,10 @@ jobs:
       - uses: actions/checkout@v4
         name: Checkout Code
 
-      - name: Download Configuration File
-        uses: actions/download-artifact@v5
-        with:
-          name: generated-config
-          path: .
+      - name: Restore Configuration File
+        run: |
+          echo "${{ needs.prepare.outputs.config-json }}" | base64 -d > config.json
+        shell: bash
 
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
