@@ -48,8 +48,6 @@ jobs:
     name: Prepare environment
     runs-on: ubuntu-latest
     needs: check-branch
-    outputs:
-      config-json: ${{ steps.config-output.outputs.config-json }}
     steps:
       - uses: actions/checkout@v4
         name: Checkout Code
@@ -76,13 +74,6 @@ jobs:
           FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
           FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
         run: dart run scripts/generate_config.dart config.json
-        shell: bash
-
-      - name: Set Configuration Output
-        id: config-output
-        run: |
-          CONFIG_CONTENT=$(base64 -w 0 config.json)
-          echo "config-json=$CONFIG_CONTENT" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Get Flutter Dependencies
@@ -143,17 +134,26 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Restore Configuration File
-        run: |
-          echo "${{ needs.prepare.outputs.config-json }}" | base64 -d > config.json
-        shell: bash
-
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           flutter-version-file: pubspec.yaml
           channel: "stable"
           cache: true
+
+      - name: Generate Firebase Configuration File
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
+          FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+        run: dart run scripts/generate_config.dart config.json
+        shell: bash
 
       - name: Build web app
         run: flutter build web
@@ -176,17 +176,26 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Restore Configuration File
-        run: |
-          echo "${{ needs.prepare.outputs.config-json }}" | base64 -d > config.json
-        shell: bash
-
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           flutter-version-file: pubspec.yaml
           channel: "stable"
           cache: true
+
+      - name: Generate Firebase Configuration File
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
+          FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+        run: dart run scripts/generate_config.dart config.json
+        shell: bash
 
       - name: Decode Android keystore
         env:
@@ -204,17 +213,17 @@ jobs:
           echo "storeFile=keystore.jks" >> android/key.properties
         shell: bash
 
-      - name: Build Android app bundle (release)
+      - name: Build Android app bundle
         run: flutter build appbundle --release
         shell: bash
 
-      - name: Upload to Google Play (internal testing)
+      - name: Upload to Google Play
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: org.quickcoder.open_password_manager
           releaseFiles: build/app/outputs/bundle/release/*.aab
-          track: internal
+          track: production
           status: completed
         env:
           JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
@@ -231,17 +240,26 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Restore Configuration File
-        run: |
-          echo "${{ needs.prepare.outputs.config-json }}" | base64 -d > config.json
-        shell: bash
-
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           flutter-version-file: pubspec.yaml
           channel: "stable"
           cache: true
+
+      - name: Generate Firebase Configuration File
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
+          FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+        run: dart run scripts/generate_config.dart config.json
+        shell: bash
 
   deploy-windows:
     name: Upload Windows app
@@ -255,17 +273,26 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Restore Configuration File
-        run: |
-          echo "${{ needs.prepare.outputs.config-json }}" | base64 -d > config.json
-        shell: bash
-
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           flutter-version-file: pubspec.yaml
           channel: "stable"
           cache: true
+
+      - name: Generate Firebase Configuration File
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
+          FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+        run: dart run scripts/generate_config.dart config.json
+        shell: bash
 
   deploy-linux:
     name: Upload Linux app
@@ -279,17 +306,26 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Restore Configuration File
-        run: |
-          echo "${{ needs.prepare.outputs.config-json }}" | base64 -d > config.json
-        shell: bash
-
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           flutter-version-file: pubspec.yaml
           channel: "stable"
           cache: true
+
+      - name: Generate Firebase Configuration File
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
+          FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+        run: dart run scripts/generate_config.dart config.json
+        shell: bash
 
   deploy-macos:
     name: Upload MacOS app
@@ -303,17 +339,26 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Restore Configuration File
-        run: |
-          echo "${{ needs.prepare.outputs.config-json }}" | base64 -d > config.json
-        shell: bash
-
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           flutter-version-file: pubspec.yaml
           channel: "stable"
           cache: true
+
+      - name: Generate Firebase Configuration File
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          FIREBASE_VAULT_COLLECTION_PREFIX: ${{ secrets.FIREBASE_VAULT_COLLECTION_PREFIX }}
+          FIREBASE_UTILS_COLLECTION_NAME: ${{ secrets.FIREBASE_UTILS_COLLECTION_NAME }}
+        run: dart run scripts/generate_config.dart config.json
+        shell: bash
 
   create-release:
     name: Create tag and release
