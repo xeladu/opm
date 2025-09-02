@@ -3,11 +3,8 @@ import 'dart:typed_data';
 import 'package:pointycastle/export.dart' as pc;
 
 class CryptoHelper {
-  // TODO Check iterations. 1000 seems ok, higher values might be too slow. Need to recreate accounts or migrate stored encryption keys
-  static final int _iterations = 100;
+  static final int _iterations = 10000;
   static final int _keyLength = 32;
-  static final String _algorithm = "PBKDF2";
-  static final String _hash = "SHA-256";
   static final int _version = 1;
 
   static Future<Uint8List> deriveKey(String password, Uint8List salt) async {
@@ -31,8 +28,6 @@ class CryptoHelper {
   /// them alongside encrypted blobs for migration/versioning.
   static Map<String, dynamic> kdfParams() {
     return {
-      'algo': _algorithm,
-      'hash': _hash,
       'iters': _iterations,
       'dkLen': _keyLength,
       'version': _version,
