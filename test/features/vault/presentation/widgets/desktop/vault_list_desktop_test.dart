@@ -114,6 +114,9 @@ void main() {
       await tester.tap(find.byType(SecondaryButton));
       await tester.pumpAndSettle();
 
+      await tester.tap(find.text("Credentials"));
+      await tester.pumpAndSettle();
+
       expect(find.text("2 entries found"), findsOneWidget);
       expect(find.byType(VaultSearchField), findsOneWidget);
       expect(find.byType(VaultListEntry), findsNWidgets(2));

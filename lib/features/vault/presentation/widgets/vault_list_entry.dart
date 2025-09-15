@@ -7,6 +7,7 @@ import 'package:open_password_manager/features/vault/application/providers/selec
 import 'package:open_password_manager/features/vault/application/use_cases/cache_vault.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/delete_entry.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/add_edit_vault_entry_page.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/vault_entry_detail_page.dart';
@@ -225,6 +226,9 @@ class VaultListEntry extends ConsumerWidget {
       await NavigationService.goTo(
         context,
         AddEditVaultEntryPage(
+          template: VaultEntryType.values.firstWhere(
+            (t) => t.name.toLowerCase().contains(entry.type.toLowerCase()),
+          ),
           entry: entry,
           onSave: () async {
             ref.invalidate(allEntriesProvider);

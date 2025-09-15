@@ -7,18 +7,14 @@ class PopupService {
     List<PopupMenuEntry<T>> menuItems,
     Offset? tapPosition,
   ) async {
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     final position = tapPosition ?? Offset.zero;
-    
+
     return await showMenu<T>(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: ShadTheme.of(context).radius,
-        side: BorderSide(
-          color: ShadTheme.of(context).colorScheme.border,
-          width: 1,
-        ),
+        side: BorderSide(color: ShadTheme.of(context).colorScheme.border, width: 1),
       ),
       color: ShadTheme.of(context).cardTheme.backgroundColor,
       position: RelativeRect.fromLTRB(

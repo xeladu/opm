@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:open_password_manager/features/vault/application/providers/add_edit_mode_active_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/has_changes_provider.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/add_edit_vault_entry_page.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_edit_form.dart';
@@ -38,6 +39,7 @@ void main() {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
 
         final sut = AddEditVaultEntryPage(
+          template: VaultEntryType.credential,
           onSave: () {},
           entry: TestDataGenerator.randomVaultEntry(),
         );
@@ -52,7 +54,7 @@ void main() {
       testWidgets('Test default elements (add) ($deviceSizeName)', (tester) async {
         await DisplaySizeHelper.setSize(tester, sizeEntry.value);
 
-        final sut = AddEditVaultEntryPage(onSave: () {});
+        final sut = AddEditVaultEntryPage(template: VaultEntryType.credential, onSave: () {});
         await AppSetup.pumpPage(tester, sut, []);
 
         expect(find.byType(ResponsiveAppFrame), findsOneWidget);
@@ -76,6 +78,7 @@ void main() {
         when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
 
         final sut = AddEditVaultEntryPage(
+          template: VaultEntryType.credential,
           entry: TestDataGenerator.randomVaultEntry(),
           onSave: () {
             saved = true;
@@ -103,6 +106,7 @@ void main() {
         when(mockVaultRepository.editEntry(any)).thenAnswer((_) => Future.value());
 
         final sut = AddEditVaultEntryPage(
+          template: VaultEntryType.credential,
           entry: TestDataGenerator.randomVaultEntry(),
           onSave: () {},
         );

@@ -51,7 +51,7 @@ class ImportRepositoryImpl extends ImportRepository {
 
       final map = CsvHelper.mapCsvRowToHeader(header, row);
       entries.add(
-        VaultEntry(
+        VaultEntry.empty().copyWith(
           id: Uuid().v4(),
           name: map['Title'] ?? '',
           username: map['Username'] ?? '',
@@ -103,7 +103,7 @@ class ImportRepositoryImpl extends ImportRepository {
 
       final map = CsvHelper.mapCsvRowToHeader(header, row);
       entries.add(
-        VaultEntry(
+        VaultEntry.empty().copyWith(
           id: Uuid().v4(),
           name: map['name'] ?? '',
           username: map['login_username'] ?? '',
@@ -147,7 +147,7 @@ class ImportRepositoryImpl extends ImportRepository {
 
       final map = CsvHelper.mapCsvRowToHeader(header, row);
       entries.add(
-        VaultEntry(
+        VaultEntry.empty().copyWith(
           id: Uuid().v4(),
           name: map['Account'] ?? '',
           username: map['Login Name'] ?? '',
@@ -194,7 +194,7 @@ class ImportRepositoryImpl extends ImportRepository {
 
       final map = CsvHelper.mapCsvRowToHeader(header, row);
       entries.add(
-        VaultEntry(
+        VaultEntry.empty().copyWith(
           id: Uuid().v4(),
           name: map['Title'] ?? '',
           username: map['Login'] ?? '',
@@ -242,7 +242,7 @@ class ImportRepositoryImpl extends ImportRepository {
 
       final map = CsvHelper.mapCsvRowToHeader(header, row);
       entries.add(
-        VaultEntry(
+        VaultEntry.empty().copyWith(
           id: Uuid().v4(),
           name: map['name'] ?? '',
           username: map['username'] ?? '',
@@ -288,7 +288,7 @@ class ImportRepositoryImpl extends ImportRepository {
 
       final map = CsvHelper.mapCsvRowToHeader(header, row);
       entries.add(
-        VaultEntry(
+        VaultEntry.empty().copyWith(
           id: Uuid().v4(),
           name: map['name'] ?? '',
           username: map['user'] ?? '',
@@ -362,7 +362,7 @@ class ImportRepositoryImpl extends ImportRepository {
       final folder = e['folder'] is String ? e['folder'] as String : '';
 
       result.add(
-        VaultEntry(
+        VaultEntry.empty().copyWith(
           id: id,
           name: name,
           createdAt: createdAt,

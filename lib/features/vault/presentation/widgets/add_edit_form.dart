@@ -9,6 +9,7 @@ import 'package:open_password_manager/features/vault/application/use_cases/cache
 import 'package:open_password_manager/features/vault/application/use_cases/edit_entry.dart';
 import 'package:open_password_manager/features/vault/domain/entities/folder.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
@@ -23,10 +24,17 @@ import 'package:uuid/uuid.dart';
 
 class AddEditForm extends ConsumerStatefulWidget {
   final VaultEntry? entry;
+  final VaultEntryType template;
   final VoidCallback onCancel;
   final VoidCallback onSave;
 
-  const AddEditForm({super.key, this.entry, required this.onCancel, required this.onSave});
+  const AddEditForm({
+    super.key,
+    this.entry,
+    required this.template,
+    required this.onCancel,
+    required this.onSave,
+  });
 
   @override
   ConsumerState<AddEditForm> createState() => _AddEditFormState();
@@ -292,7 +300,7 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
   Future<void> _save() async {
     if (_formKey.currentState?.validate() ?? false) {
       final now = DateTime.now();
-      final entry = VaultEntry(
+      final entry = VaultEntry.empty().copyWith(
         id: widget.entry == null || widget.entry!.id.isEmpty ? const Uuid().v4() : widget.entry!.id,
         name: _nameController.text,
         createdAt: widget.entry == null ? now.toIso8601String() : widget.entry!.createdAt,

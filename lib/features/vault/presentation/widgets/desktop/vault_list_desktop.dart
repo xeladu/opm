@@ -7,6 +7,7 @@ import 'package:open_password_manager/features/vault/application/use_cases/add_e
 import 'package:open_password_manager/features/vault/application/use_cases/cache_vault.dart';
 import 'package:open_password_manager/features/vault/application/use_cases/delete_entry.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_edit_form.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/empty_list.dart';
@@ -19,40 +20,48 @@ import 'package:open_password_manager/shared/application/providers/no_connection
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 import 'package:open_password_manager/shared/infrastructure/providers/cryptography_repository_provider.dart';
 import 'package:open_password_manager/shared/presentation/separator.dart';
+import 'package:open_password_manager/shared/presentation/sheets/vault_entry_type_selection_sheet.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 
-class VaultListDesktop extends ConsumerWidget {
+class VaultListDesktop extends ConsumerStatefulWidget {
   final List<VaultEntry> entries;
   final bool vaultEmpty;
 
   const VaultListDesktop({super.key, required this.entries, required this.vaultEmpty});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() => _State();
+}
+
+class _State extends ConsumerState<VaultListDesktop> {
+  VaultEntryType _selectedVaultEntryType = VaultEntryType.credential;
+
+  @override
+  Widget build(BuildContext context) {
     final selectedVaultEntry = ref.watch(selectedEntryProvider);
     final addEditModeActive = ref.watch(addEditModeActiveProvider);
 
     final leftPanelContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("${entries.length} entries found"),
+        Text("${widget.entries.length} entries found"),
         SizedBox(height: sizeXS),
         VaultSearchField(),
         SizedBox(height: sizeS),
         Expanded(
-          child: vaultEmpty
+          child: widget.vaultEmpty
               ? Center(
                   child: EmptyList(
                     message: "Your vault is empty!\r\nStart by adding your first entry",
                   ),
                 )
               : ListView.builder(
-                  itemCount: entries.length,
+                  itemCount: widget.entries.length,
                   itemBuilder: (context, index) {
-                    final entry = entries[index];
+                    final entry = widget.entries[index];
                     return VaultListEntry(
                       entry: entry,
                       selected: selectedVaultEntry?.id == entry.id,
@@ -64,7 +73,7 @@ class VaultListDesktop extends ConsumerWidget {
         Separator.horizontal(),
         VaultListActions(
           enabled: ref.watch(selectedEntryProvider) == null,
-          onAdd: () => _addNewEntry(context, ref),
+          onAdd: () => _addNewEntry(),
         ),
       ],
     );
@@ -77,8 +86,15 @@ class VaultListDesktop extends ConsumerWidget {
                 child: addEditModeActive
                     ? AddEditForm(
                         entry: selectedVaultEntry,
-                        onCancel: () => _cancel(ref),
-                        onSave: () => _save(ref),
+                        template: selectedVaultEntry == null
+                            ? _selectedVaultEntryType
+                            : VaultEntryType.values.firstWhere(
+                                (t) => t.name.toLowerCase().contains(
+                                  selectedVaultEntry.type.toLowerCase(),
+                                ),
+                              ),
+                        onCancel: () => _cancel(),
+                        onSave: () => _save(),
                       )
                     : VaultEntryDetails(
                         key: ValueKey(selectedVaultEntry!.id),
@@ -88,9 +104,9 @@ class VaultListDesktop extends ConsumerWidget {
               Separator.horizontal(),
               VaultEntryActions(
                 enabled: !addEditModeActive,
-                onDuplicate: () async => await _duplicate(context, ref),
-                onDelete: () async => await _delete(context, ref),
-                onEdit: () async => await _edit(context, ref),
+                onDuplicate: () async => await _duplicate(),
+                onDelete: () async => await _delete(),
+                onEdit: () async => await _edit(),
               ),
             ],
           );
@@ -113,9 +129,23 @@ class VaultListDesktop extends ConsumerWidget {
     );
   }
 
-  Future<void> _addNewEntry(BuildContext context, WidgetRef ref) async {
+  Future<void> _addNewEntry() async {
     if (ref.read(noConnectionProvider)) {
       await DialogService.showNoConnectionDialog(context);
+      return;
+    }
+
+    final result = await showShadSheet(
+      context: context,
+      side: ShadSheetSide.bottom,
+      builder: (context) => VaultEntryTypeSelectionSheet(
+        onSelected: (t) async {
+          _selectedVaultEntryType = t;
+        },
+      ),
+    );
+
+    if (result != true) {
       return;
     }
 
@@ -126,7 +156,7 @@ class VaultListDesktop extends ConsumerWidget {
     ref.read(addEditModeActiveProvider.notifier).setMode(true);
   }
 
-  void _save(WidgetRef ref) {
+  void _save() {
     ref.read(selectedEntryProvider.notifier).setEntry(null);
 
     ref.invalidate(allEntriesProvider);
@@ -134,13 +164,13 @@ class VaultListDesktop extends ConsumerWidget {
     ref.read(addEditModeActiveProvider.notifier).setMode(false);
   }
 
-  void _cancel(WidgetRef ref) {
+  void _cancel() {
     ref.read(selectedEntryProvider.notifier).setEntry(null);
 
     ref.read(addEditModeActiveProvider.notifier).setMode(false);
   }
 
-  Future<void> _edit(BuildContext context, WidgetRef ref) async {
+  Future<void> _edit() async {
     if (ref.read(noConnectionProvider)) {
       await DialogService.showNoConnectionDialog(context);
       return;
@@ -149,7 +179,7 @@ class VaultListDesktop extends ConsumerWidget {
     ref.read(addEditModeActiveProvider.notifier).setMode(!ref.read(addEditModeActiveProvider));
   }
 
-  Future<void> _duplicate(BuildContext context, WidgetRef ref) async {
+  Future<void> _duplicate() async {
     if (ref.read(noConnectionProvider)) {
       await DialogService.showNoConnectionDialog(context);
       return;
@@ -176,7 +206,7 @@ class VaultListDesktop extends ConsumerWidget {
     await CacheVault(storageService, cryptoRepo).call(allEntries);
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+  Future<void> _delete() async {
     if (ref.read(noConnectionProvider)) {
       await DialogService.showNoConnectionDialog(context);
       return;

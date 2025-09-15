@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 import 'package:open_password_manager/features/vault/presentation/pages/add_edit_vault_entry_page.dart';
 import 'package:open_password_manager/shared/application/providers/no_connection_provider.dart';
 import 'package:open_password_manager/shared/utils/dialog_service.dart';
@@ -26,7 +27,13 @@ class EditEntryButton extends ConsumerWidget {
 
           await NavigationService.goTo(
             context,
-            AddEditVaultEntryPage(entry: entry, onSave: () => ref.invalidate(allEntriesProvider)),
+            AddEditVaultEntryPage(
+              template: VaultEntryType.values.firstWhere(
+                (t) => t.name.toLowerCase().contains(entry.type.toLowerCase()),
+              ),
+              entry: entry,
+              onSave: () => ref.invalidate(allEntriesProvider),
+            ),
           );
         },
         child: Icon(LucideIcons.pen),

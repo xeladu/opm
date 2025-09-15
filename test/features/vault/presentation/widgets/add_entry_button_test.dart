@@ -9,16 +9,43 @@ void main() {
   group("AddEntryButton", () {
     testWidgets("Test default elements", (tester) async {
       final sut = Material(
-        child: Scaffold(
-          body: Container(),
-          floatingActionButton: AddEntryButton(),
-        ),
+        child: Scaffold(body: Container(), floatingActionButton: AddEntryButton()),
+      );
+      await AppSetup.pumpPage(tester, sut, []);
+
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+    });
+
+    testWidgets("Test cancel dialog", (tester) async {
+      final sut = Material(
+        child: Scaffold(body: Container(), floatingActionButton: AddEntryButton()),
       );
       await AppSetup.pumpPage(tester, sut, []);
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
 
       await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text("Cancel"));
+      await tester.tap(find.text("Cancel", skipOffstage: false));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AddEditVaultEntryPage), findsNothing);
+    });
+
+    testWidgets("Test choose option", (tester) async {
+      final sut = Material(
+        child: Scaffold(body: Container(), floatingActionButton: AddEntryButton()),
+      );
+      await AppSetup.pumpPage(tester, sut, []);
+
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Credentials"));
       await tester.pumpAndSettle();
 
       expect(find.byType(AddEditVaultEntryPage), findsOneWidget);

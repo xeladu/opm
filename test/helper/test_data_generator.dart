@@ -14,7 +14,7 @@ class TestDataGenerator {
     String? comments,
     String? folder,
   }) {
-    return VaultEntry(
+    return VaultEntry.empty().copyWith(
       id: id ?? "1",
       name: name ?? "my-name",
       createdAt: createdAt ?? DateTime(2020, 1, 1, 1, 1, 1).toIso8601String(),
@@ -28,7 +28,7 @@ class TestDataGenerator {
   }
 
   static VaultEntry randomVaultEntry() {
-    return VaultEntry(
+    return VaultEntry.empty().copyWith(
       id: Random().nextInt(1000).toString(),
       name: "my-name-${Random().nextInt(1000)}",
       createdAt: DateTime(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/features/vault/presentation/widgets/add_edit_form.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
@@ -28,7 +29,7 @@ void main() {
     testWidgets("Test add form", (tester) async {
       final sut = Material(
         child: Scaffold(
-          body: AddEditForm(onCancel: () {}, onSave: () {}),
+          body: AddEditForm(template: VaultEntryType.credential, onCancel: () {}, onSave: () {}),
         ),
       );
       await AppSetup.pumpPage(tester, sut, []);
@@ -39,7 +40,12 @@ void main() {
     testWidgets("Test edit form", (tester) async {
       final sut = Material(
         child: Scaffold(
-          body: AddEditForm(entry: TestDataGenerator.vaultEntry(), onCancel: () {}, onSave: () {}),
+          body: AddEditForm(
+            template: VaultEntryType.credential,
+            entry: TestDataGenerator.vaultEntry(),
+            onCancel: () {},
+            onSave: () {},
+          ),
         ),
       );
       await AppSetup.pumpPage(tester, sut, []);
@@ -62,7 +68,12 @@ void main() {
       );
       final sut = Material(
         child: Scaffold(
-          body: AddEditForm(entry: TestDataGenerator.vaultEntry(), onCancel: () {}, onSave: () {}),
+          body: AddEditForm(
+            template: VaultEntryType.credential,
+            entry: TestDataGenerator.vaultEntry(),
+            onCancel: () {},
+            onSave: () {},
+          ),
         ),
       );
       await AppSetup.pumpPage(tester, sut, [
@@ -97,6 +108,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: AddEditForm(
+            template: VaultEntryType.credential,
             onCancel: () {},
             onSave: () {
               saved = true;
@@ -122,10 +134,11 @@ void main() {
         mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate")),
       ).thenAnswer((_) => Future.value([TestDataGenerator.randomVaultEntry()]));
       when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
-      
+
       final sut = Material(
         child: Scaffold(
           body: AddEditForm(
+            template: VaultEntryType.credential,
             onCancel: () {},
             onSave: () {
               saved = true;
@@ -160,6 +173,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: AddEditForm(
+            template: VaultEntryType.credential,
             onCancel: () {
               cancel = true;
             },
@@ -183,6 +197,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: AddEditForm(
+            template: VaultEntryType.credential,
             onCancel: () {
               cancel = true;
             },
@@ -214,6 +229,7 @@ void main() {
       final sut = Material(
         child: Scaffold(
           body: AddEditForm(
+            template: VaultEntryType.credential,
             onCancel: () {
               cancel = true;
             },

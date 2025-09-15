@@ -21,7 +21,7 @@ class VaultListActions extends StatelessWidget {
           icon: LucideIcons.plus,
           onPressed: onAdd,
           enabled: enabled,
-          tooltip: "Add a new password to your vault",
+          tooltip: "Add a new entry to your vault",
         ),
         Spacer(),
         GlyphButton(
