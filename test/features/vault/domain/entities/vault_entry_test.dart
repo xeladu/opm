@@ -27,7 +27,6 @@ void main() {
       expect(e.sshPrivateKey, isEmpty);
       expect(e.cardNumber, isEmpty);
       expect(e.apiKey, isEmpty);
-      expect(e.totpSecret, isEmpty);
       expect(e.oauthAccessToken, isEmpty);
       expect(e.wifiSsid, isEmpty);
       expect(e.pgpPrivateKey, isEmpty);
@@ -67,8 +66,6 @@ void main() {
         comments: 'c',
         folder: 'f',
         cardNumber: '4111111111111111',
-        sshPublicKey: 'ignoredPub',
-        sshFingerprint: 'ignoredFp',
         cardHolderName: 'Card Holder',
         cardIssuer: 'visa',
         cardExpirationMonth: '12',
@@ -112,34 +109,6 @@ void main() {
       expect(e.oauthClientId, 'cid');
       expect(e.oauthProvider, 'provider');
       expect(e.oauthRefreshToken, 'rtoken');
-
-      expect(e.username, isEmpty);
-      expect(e.cardNumber, isEmpty);
-      expect(e.apiKey, isEmpty);
-    });
-
-    test('totp', () {
-      final e = VaultEntry.totp(
-        id: 'id-totp',
-        name: 'totp-name',
-        createdAt: 'ca',
-        updatedAt: 'ua',
-        comments: 'c',
-        folder: 'f',
-        totpIssuer: 'issuer',
-        totpSecret: 'secret',
-        totpAlgorithm: 'SHA1',
-        totpDigits: '6',
-        totpPeriod: '30',
-      );
-
-      expect(e.id, 'id-totp');
-      expect(e.type, VaultEntryType.totp.name);
-      expect(e.totpIssuer, 'issuer');
-      expect(e.totpSecret, 'secret');
-      expect(e.totpAlgorithm, 'SHA1');
-      expect(e.totpDigits, '6');
-      expect(e.totpPeriod, '30');
 
       expect(e.username, isEmpty);
       expect(e.cardNumber, isEmpty);

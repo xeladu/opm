@@ -27,9 +27,7 @@ void main() {
           value: "123",
         ),
       );
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       expect(find.text("123"), findsOneWidget);
       expect(find.text("dummy"), findsOneWidget);
@@ -57,11 +55,9 @@ void main() {
 
     testWidgets('Test toggle', (tester) async {
       final sut = Scaffold(
-        body: PlainTextFormField(label: "dummy", value: "123", canToggle: true),
+        body: PlainTextFormField(label: "dummy", value: "123", canToggle: true, noTooltip: true),
       );
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       final eyeOnButton = find.byIcon(LucideIcons.eye);
       final eyeOffButton = find.byIcon(LucideIcons.eyeOff);

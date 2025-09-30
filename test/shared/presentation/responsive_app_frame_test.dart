@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:open_password_manager/features/vault/application/providers/active_folder_provider.dart';
+import 'package:open_password_manager/features/vault/application/providers/active_filter_provider.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 import 'package:open_password_manager/features/vault/infrastructure/providers/vault_provider.dart';
 import 'package:open_password_manager/shared/application/providers/show_search_field_provider.dart';
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
@@ -10,7 +11,7 @@ import 'package:open_password_manager/shared/infrastructure/providers/cryptograp
 import 'package:open_password_manager/shared/presentation/buttons/glyph_button.dart';
 import 'package:open_password_manager/shared/presentation/buttons/primary_button.dart';
 import 'package:open_password_manager/shared/presentation/responsive_app_frame.dart';
-import 'package:open_password_manager/shared/presentation/sheets/folder_sheet.dart';
+import 'package:open_password_manager/shared/presentation/sheets/entry_filter_sheet.dart';
 import 'package:open_password_manager/shared/presentation/user_menu.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -95,7 +96,7 @@ void main() {
       expect(find.byIcon(LucideIcons.search), findsOneWidget);
       expect(providerContainer.read(showSearchFieldProvider), isTrue);
 
-      expect(find.byIcon(LucideIcons.folder), findsOneWidget);
+      expect(find.byIcon(LucideIcons.settings2), findsOneWidget);
     });
 
     testWidgets("Test folder selection", (tester) async {
@@ -127,12 +128,12 @@ void main() {
         tester.element(find.byType(ResponsiveAppFrame)),
       );
 
-      expect(find.byIcon(LucideIcons.folder), findsOneWidget);
+      expect(find.byIcon(LucideIcons.settings2), findsOneWidget);
 
-      await tester.tap(find.byIcon(LucideIcons.folder));
+      await tester.tap(find.byIcon(LucideIcons.settings2));
       await tester.pumpAndSettle();
 
-      expect(find.byType(FolderSheet), findsOneWidget);
+      expect(find.byType(EntryFilterSheet), findsOneWidget);
       expect(find.text("All entries"), findsOneWidget);
       expect(find.text("folder1"), findsOneWidget);
       expect(find.text("folder2"), findsOneWidget);
@@ -141,23 +142,88 @@ void main() {
       await tester.tap(find.text("folder2"));
       await tester.pump();
 
+      await tester.ensureVisible(find.byType(PrimaryButton));
       await tester.tap(find.byType(PrimaryButton));
       await tester.pumpAndSettle();
 
-      expect(find.byType(FolderSheet), findsNothing);
-      expect(providerContainer.read(activeFolderProvider), "folder2");
+      expect(find.byType(EntryFilterSheet), findsNothing);
+      expect(providerContainer.read(activeFilterProvider)!.displayValue, "Folder folder2");
 
-      await tester.tap(find.byIcon(LucideIcons.folder));
+      await tester.tap(find.byIcon(LucideIcons.settings2));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text("folder2"));
+      await tester.tap(find.text("All entries"));
       await tester.pump();
 
+      await tester.ensureVisible(find.byType(PrimaryButton));
       await tester.tap(find.byType(PrimaryButton));
       await tester.pumpAndSettle();
 
-      expect(find.byType(FolderSheet), findsNothing);
-      expect(providerContainer.read(activeFolderProvider), "folder2");
+      expect(find.byType(EntryFilterSheet), findsNothing);
+      expect(providerContainer.read(activeFilterProvider), isNull);
+    });
+
+    testWidgets("Test type selection", (tester) async {
+      await DisplaySizeHelper.setSize(tester, DisplaySizes.sizes.entries.first.value);
+
+      when(mockVaultRepository.getAllEntries(onUpdate: anyNamed("onUpdate"))).thenAnswer(
+        (_) => Future.value(
+          [
+            TestDataGenerator.vaultEntry(type: VaultEntryType.credential.name),
+            TestDataGenerator.vaultEntry(type: VaultEntryType.note.name),
+            TestDataGenerator.vaultEntry(type: VaultEntryType.ssh.name),
+          ].toList(),
+        ),
+      );
+
+      when(mockCryptographyRepository.encrypt(any)).thenAnswer((_) => Future.value("encrypted"));
+
+      final sut = ResponsiveAppFrame(
+        content: Text("mobile"),
+
+        mobileButton: FloatingActionButton(child: Text("mobile"), onPressed: () {}),
+      );
+      await AppSetup.pumpPage(tester, sut, [
+        vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
+        storageServiceProvider.overrideWithValue(mockStorageService),
+        cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
+      ]);
+
+      final providerContainer = ProviderScope.containerOf(
+        tester.element(find.byType(ResponsiveAppFrame)),
+      );
+
+      expect(find.byIcon(LucideIcons.settings2), findsOneWidget);
+      await tester.tap(find.byIcon(LucideIcons.settings2));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EntryFilterSheet), findsOneWidget);
+
+      await tester.tap(find.text(VaultEntryType.credential.toNiceString()));
+      await tester.pump();
+
+      await tester.ensureVisible(find.byType(PrimaryButton));
+      await tester.tap(find.byType(PrimaryButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EntryFilterSheet), findsNothing);
+      expect(
+        providerContainer.read(activeFilterProvider)!.displayValue,
+        VaultEntryType.credential.toNiceString(),
+      );
+
+      await tester.tap(find.byIcon(LucideIcons.settings2));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("All entries"));
+      await tester.pump();
+
+      await tester.ensureVisible(find.byType(PrimaryButton));
+      await tester.tap(find.byType(PrimaryButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EntryFilterSheet), findsNothing);
+      expect(providerContainer.read(activeFilterProvider), isNull);
     });
 
     testWidgets("Test hide mobile search field", (tester) async {

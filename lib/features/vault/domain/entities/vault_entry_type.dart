@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-enum VaultEntryType { note, credential, card, ssh, api, totp, oauth, wifi, pgp, smime }
+enum VaultEntryType { note, credential, card, ssh, api, oauth, wifi, pgp, smime }
 
 extension VaultEntryTypeExtension on VaultEntryType {
   String toNiceString() {
@@ -16,8 +16,6 @@ extension VaultEntryTypeExtension on VaultEntryType {
         return "SSH keys";
       case VaultEntryType.api:
         return "API key";
-      case VaultEntryType.totp:
-        return "TOTP";
       case VaultEntryType.oauth:
         return "OAuth";
       case VaultEntryType.wifi:
@@ -41,8 +39,6 @@ extension VaultEntryTypeExtension on VaultEntryType {
         return LucideIcons.laptop;
       case VaultEntryType.api:
         return LucideIcons.keyRound;
-      case VaultEntryType.totp:
-        return LucideIcons.qrCode;
       case VaultEntryType.oauth:
         return LucideIcons.keyRound;
       case VaultEntryType.wifi:

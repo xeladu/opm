@@ -149,6 +149,10 @@ class DialogService {
                       return "This folder already exists!";
                     }
 
+                    if (input == 'All entries') {
+                      return "'All entries' is a reserved folder name.";
+                    }
+
                     return null;
                   },
                 ),

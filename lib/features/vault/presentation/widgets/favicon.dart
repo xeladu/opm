@@ -2,13 +2,15 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 import 'package:open_password_manager/style/ui.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class Favicon extends StatefulWidget {
-  final String url;
+  final VaultEntry entry;
 
-  const Favicon({super.key, required this.url});
+  const Favicon({super.key, required this.entry});
 
   @override
   State<Favicon> createState() => _State();
@@ -22,7 +24,9 @@ class _State extends State<Favicon> {
     // If we couldn't construct a favicon URL, show a stable placeholder.
     if (faviconUrl.isEmpty) {
       return Icon(
-        LucideIcons.earth400,
+        VaultEntryType.values
+            .firstWhere((t) => widget.entry.type == t.name, orElse: () => VaultEntryType.note)
+            .toIcon(),
         size: sizeM,
         color: ShadTheme.of(context).colorScheme.mutedForeground,
       );
@@ -37,12 +41,8 @@ class _State extends State<Favicon> {
       width: sizeM,
       height: sizeM,
       fit: BoxFit.contain,
-      imageBuilder: (context, imageProvider) => Image(
-        image: imageProvider,
-        width: sizeM,
-        height: sizeM,
-        fit: BoxFit.contain,
-      ),
+      imageBuilder: (context, imageProvider) =>
+          Image(image: imageProvider, width: sizeM, height: sizeM, fit: BoxFit.contain),
       errorWidget: (context, url, error) => Icon(
         LucideIcons.earth400,
         size: sizeM,
@@ -57,7 +57,9 @@ class _State extends State<Favicon> {
   }
 
   String _getFaviconUrl() {
-    final uri = Uri.tryParse(widget.url);
+    if (widget.entry.urls.isEmpty) return "";
+
+    final uri = Uri.tryParse(widget.entry.urls.first);
 
     if (uri != null && uri.hasScheme) {
       return 'https://icons.duckduckgo.com/ip3/${uri.host}.ico';

@@ -100,27 +100,52 @@ Create a file `config.json` in the project root with the following content:
 
 ### Create Vault Entries Collection
 
-1. Inside your database, click "Create Collection"
+1. Inside your database, click "Create table"
 2. Enter details:
    - **Name**: Vault (your choice)
    - **Collection ID**: `vault` (your choice)
 3. Click "Create"
 
-#### Add Attributes to Vault Collection
+#### Add Columns to Vault Collection
 
-Add these attributes one by one by clicking "Create Attribute":
+Add these columns one by one by clicking "Create column" in the "Columns" tab:
 
-| Attribute | Type | Size | Required | Default |
+| Column | Type | Size | Required | Default |
 | --- | --- | --- | --- | --- |
 | `id` | String | 36 | ✅ | - |
 | `name` | String | 256 | ✅ | - |
 | `created_at` | String | 256 | ✅ | - |
 | `updated_at` | String | 256 | ✅ | - |
-| `username` | String | 256 | ✅ | - |
-| `password` | String | 256 | ✅ | - |
+| `username` | String | 256 | ❌ | - |
+| `password` | String | 256 | ❌ | - |
 | `urls` | String (Array) | 1024 | ❌ | - |
 | `comments` | String | 1024 | ❌ | - |
 | `folder` | String | 256 | ❌ | - |
+| `type` | String | 256 | ❌ | - |
+| `ssh_private_key` | String | 4096 | ❌ | - |
+| `ssh_public_key` | String | 4096 | ❌ | - |
+| `ssh_fingerprint` | String | 256 | ❌ | - |
+| `card_holder_name` | String | 256 | ❌ | - |
+| `card_number` | String | 256 | ❌ | - |
+| `card_expiration_month` | String | 256 | ❌ | - |
+| `card_expiration_year` | String | 256 | ❌ | - |
+| `card_security_code` | String | 256 | ❌ | - |
+| `card_issuer` | String | 256 | ❌ | - |
+| `card_pin` | String | 256 | ❌ | - |
+| `api_key` | String | 2048 | ❌ | - |
+| `oauth_provider` | String | 256 | ❌ | - |
+| `oauth_client_id` | String | 1024 | ❌ | - |
+| `oauth_access_token` | String | 4096 | ❌ | - |
+| `oauth_refresh_token` | String | 4096 | ❌ | - |
+| `wifi_ssid` | String | 256 | ❌ | - |
+| `wifi_password` | String | 2048 | ❌ | - |
+| `pgp_private_key` | String | 8192 | ❌ | - |
+| `pgp_public_key` | String | 8192 | ❌ | - |
+| `pgp_fingerprint` | String | 256 | ❌ | - |
+| `smime_certificate` | String | 8192 | ❌ | - |
+| `smime_private_key` | String | 8192 | ❌ | - |
+
+If you get an error from Appwrite that column number or size limit is reached, try a bigger size (like 50,000). It should work this way!
 
 #### Set Permissions for Vault Collection
 
@@ -140,9 +165,9 @@ Add these attributes one by one by clicking "Create Attribute":
    - **Name**: Utils (your choice) 
    - **Collection ID**: `utils` (your choice)
 
-#### Add Attributes to Utils Collection
+#### Add Columns to Utils Collection
 
-| Attribute | Type | Size | Required | Default |
+| Column | Type | Size | Required | Default |
 | --- | --- | --- | --- | --- |
 | `user_id` | String | 255 | ✅ | - |
 | `salt` | String | 255 | ✅ | - |

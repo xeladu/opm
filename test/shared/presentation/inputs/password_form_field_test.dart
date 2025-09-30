@@ -8,10 +8,8 @@ import '../../../helper/app_setup.dart';
 void main() {
   group('PasswordFormField', () {
     testWidgets('Test obscure toggle', (tester) async {
-      final sut = PasswordFormField();
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      final sut = PasswordFormField(noTooltip: true);
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       final eyeOnButton = find.byIcon(LucideIcons.eye);
       final eyeOffButton = find.byIcon(LucideIcons.eyeOff);
@@ -40,9 +38,7 @@ void main() {
       final sut = Scaffold(
         body: Form(key: formKey, child: PasswordFormField()),
       );
-      await tester.runAsync(
-        () async => await AppSetup.pumpPage(tester, sut, []),
-      );
+      await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, []));
 
       formKey.currentState!.validate();
       await tester.pump();

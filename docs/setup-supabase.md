@@ -66,19 +66,42 @@ CREATE TABLE vault (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   name text NOT NULL,
+  type text,
   created_at text NOT NULL,
   updated_at text NOT NULL,
   username text NOT NULL,
   password text NOT NULL,
   urls text[],
   comments text,
-  folder text
+  folder text,
+  ssh_private_key text,
+  ssh_public_key text,
+  ssh_fingerprint text,
+  card_holder_name text,
+  card_number text,
+  card_expiration_month text,
+  card_expiration_year text,
+  card_security_code text,
+  card_issuer text,
+  card_pin text,
+  api_key text,
+  oauth_provider text,
+  oauth_client_id text,
+  oauth_access_token text,
+  oauth_refresh_token text,
+  wifi_ssid text,
+  wifi_password text,
+  pgp_private_key text,
+  pgp_public_key text,
+  pgp_fingerprint text,
+  smime_certificate text,
+  smime_private_key text
 );
 
 -- Enable RLS
 ALTER TABLE vault ENABLE ROW LEVEL SECURITY;
 
--- Create policies for passwords table
+-- Create policies for vault table
 CREATE POLICY "Users can view own vault" ON vault
     FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
@@ -92,7 +115,7 @@ CREATE POLICY "Users can delete own vault" ON vault
     FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
 -- Create index for better performance
-CREATE INDEX idx_passwords_user_id ON vault(user_id);
+CREATE INDEX idx_vault_user_id ON vault(user_id);
 ```
 
 ### Create Utils Table

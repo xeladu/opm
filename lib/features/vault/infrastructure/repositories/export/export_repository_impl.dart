@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 import 'package:open_password_manager/features/vault/domain/repositories/export_repository.dart';
 
 import 'export_repository_web.dart' if (dart.library.io) 'export_repository_io.dart';
@@ -31,7 +32,7 @@ class ExportRepositoryImpl implements ExportRepository {
     final csvBuffer = StringBuffer();
     csvBuffer.writeln(headers.join(','));
 
-    for (final entry in entries) {
+    for (final entry in entries.where((e) => e.type == VaultEntryType.credential.name)) {
       final row = [
         entry.id,
         entry.name,
@@ -51,21 +52,7 @@ class ExportRepositoryImpl implements ExportRepository {
 
   @override
   Future<void> exportPasswordEntriesJson(List<VaultEntry> entries) async {
-    final jsonEntries = entries
-        .map(
-          (entry) => {
-            'id': entry.id,
-            'name': entry.name,
-            'createdAt': entry.createdAt,
-            'updatedAt': entry.updatedAt,
-            'user': entry.username,
-            'password': entry.password,
-            'urls': entry.urls,
-            'comments': entry.comments,
-            'folder': entry.folder,
-          },
-        )
-        .toList();
+    final jsonEntries = entries.map((entry) => entry.toJson()).toList();
 
     final jsonData = {
       'version': '1.0',

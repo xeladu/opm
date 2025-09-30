@@ -27,8 +27,23 @@ class _State extends State<ExportSheet> {
           "You are about to export your entire vault to a cleartext file. Do not share it via email or on social media. Make sure to delete it properly as soon as possible!\n\nPlease select your desired export format and confirm.",
       primaryButtonCaption: "Export",
       content: Column(
+        spacing: sizeXS,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ShadCard(
+            child: Row(
+              spacing: sizeXS,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(LucideIcons.triangleAlert, color: Colors.orange, size: sizeL),
+                Expanded(
+                  child: Text(
+                    "Choose JSON to get a full export. CSV export is limited to credential entries!",
+                  ),
+                ),
+              ],
+            ),
+          ),
           ShadSelect<ExportOption>(
             enabled: !_exporting,
             maxWidth: selectSmallWidth,

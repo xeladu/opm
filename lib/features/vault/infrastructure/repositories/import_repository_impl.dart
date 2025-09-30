@@ -318,62 +318,8 @@ class ImportRepositoryImpl extends ImportRepository {
 
     final result = <VaultEntry>[];
 
-    for (final e in entries) {
-      if (e is! Map<String, dynamic>) continue;
-
-      final id = (e['id'] is String && (e['id'] as String).isNotEmpty)
-          ? e['id'] as String
-          : Uuid().v4();
-      final name = e['name'] is String ? e['name'] as String : '';
-
-      String createdAt;
-      if (e['createdAt'] is String) {
-        try {
-          createdAt = DateTime.parse(e['createdAt'] as String).toIso8601String();
-        } catch (_) {
-          createdAt = DateTime.now().toIso8601String();
-        }
-      } else {
-        createdAt = DateTime.now().toIso8601String();
-      }
-
-      String updatedAt;
-      if (e['updatedAt'] is String) {
-        try {
-          updatedAt = DateTime.parse(e['updatedAt'] as String).toIso8601String();
-        } catch (_) {
-          updatedAt = DateTime.now().toIso8601String();
-        }
-      } else {
-        updatedAt = DateTime.now().toIso8601String();
-      }
-
-      final username = e['user'] is String ? e['user'] as String : '';
-      final password = e['password'] is String ? e['password'] as String : '';
-
-      final urls = <String>[];
-      if (e['urls'] is List) {
-        for (final u in e['urls']) {
-          if (u is String) urls.add(u);
-        }
-      }
-
-      final comments = e['comments'] is String ? e['comments'] as String : '';
-      final folder = e['folder'] is String ? e['folder'] as String : '';
-
-      result.add(
-        VaultEntry.empty().copyWith(
-          id: id,
-          name: name,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          username: username,
-          password: password,
-          urls: urls,
-          comments: comments,
-          folder: folder,
-        ),
-      );
+    for(final entry in entries){
+      result.add(VaultEntry.fromJson(entry));
     }
 
     return result;
@@ -638,14 +584,37 @@ class ImportRepositoryImpl extends ImportRepository {
     // Required fields per entry
     final requiredEntryFields = [
       'id',
+      'type',
       'name',
-      'createdAt',
-      'updatedAt',
-      'user',
-      'password',
-      'urls',
+      'created_at',
+      'updated_at',
       'comments',
       'folder',
+      'username',
+      'password',
+      'urls',
+      'ssh_private_key',
+      'ssh_public_key',
+      'ssh_fingerprint',
+      'card_holder_name',
+      'card_number',
+      'card_expiration_month',
+      'card_expiration_year',
+      'card_security_code',
+      'card_issuer',
+      'card_pin',
+      'api_key',
+      'oauth_provider',
+      'oauth_client_id',
+      'oauth_access_token',
+      'oauth_refresh_token',
+      'wifi_ssid',
+      'wifi_password',
+      'pgp_private_key',
+      'pgp_public_key',
+      'pgp_fingerprint',
+      'smime_certificate',
+      'smime_private_key',
     ];
 
     for (var i = 0; i < entries.length; i++) {

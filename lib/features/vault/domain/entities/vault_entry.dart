@@ -33,13 +33,6 @@ class VaultEntry extends Equatable {
   // API
   final String apiKey;
 
-  // TOTP
-  final String totpSecret;
-  final String totpIssuer;
-  final String totpDigits;
-  final String totpPeriod;
-  final String totpAlgorithm;
-
   // OAuth
   final String oauthProvider;
   final String oauthClientId;
@@ -90,13 +83,6 @@ class VaultEntry extends Equatable {
     // API
     required this.apiKey,
 
-    // TOTP
-    required this.totpSecret,
-    required this.totpIssuer,
-    required this.totpDigits,
-    required this.totpPeriod,
-    required this.totpAlgorithm,
-
     // OAuth
     required this.oauthProvider,
     required this.oauthClientId,
@@ -116,6 +102,25 @@ class VaultEntry extends Equatable {
     required this.smimeCertificate,
     required this.smimePrivateKey,
   });
+
+  factory VaultEntry.note({
+    required String id,
+    required String name,
+    required String createdAt,
+    required String updatedAt,
+    required String comments,
+    required String folder,
+  }) {
+    return VaultEntry.empty().copyWith(
+      id: id,
+      type: VaultEntryType.note.name,
+      name: name,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      comments: comments,
+      folder: folder,
+    );
+  }
 
   factory VaultEntry.credential({
     required String id,
@@ -175,8 +180,6 @@ class VaultEntry extends Equatable {
     required String comments,
     required String folder,
     required String cardNumber,
-    required String sshPublicKey,
-    required String sshFingerprint,
     required String cardHolderName,
     required String cardIssuer,
     required String cardExpirationMonth,
@@ -226,35 +229,6 @@ class VaultEntry extends Equatable {
       oauthClientId: oauthClientId,
       oauthProvider: oauthProvider,
       oauthRefreshToken: oauthRefreshToken,
-    );
-  }
-
-  factory VaultEntry.totp({
-    required String id,
-    required String name,
-    required String createdAt,
-    required String updatedAt,
-    required String comments,
-    required String folder,
-    required String totpIssuer,
-    required String totpSecret,
-    required String totpAlgorithm,
-    required String totpDigits,
-    required String totpPeriod,
-  }) {
-    return VaultEntry.empty().copyWith(
-      id: id,
-      type: VaultEntryType.totp.name,
-      name: name,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      comments: comments,
-      folder: folder,
-      totpIssuer: totpIssuer,
-      totpSecret: totpSecret,
-      totpAlgorithm: totpAlgorithm,
-      totpDigits: totpDigits,
-      totpPeriod: totpPeriod,
     );
   }
 
@@ -382,13 +356,6 @@ class VaultEntry extends Equatable {
         // API
         apiKey: '',
 
-        // TOTP
-        totpIssuer: '',
-        totpPeriod: '',
-        totpDigits: '',
-        totpAlgorithm: '',
-        totpSecret: '',
-
         // OAuth
         oauthProvider: '',
         oauthClientId: '',
@@ -431,11 +398,6 @@ class VaultEntry extends Equatable {
     String? cardIssuer,
     String? cardPin,
     String? apiKey,
-    String? totpSecret,
-    String? totpIssuer,
-    String? totpDigits,
-    String? totpPeriod,
-    String? totpAlgorithm,
     String? oauthProvider,
     String? oauthClientId,
     String? oauthAccessToken,
@@ -470,11 +432,6 @@ class VaultEntry extends Equatable {
       cardIssuer: cardIssuer ?? this.cardIssuer,
       cardPin: cardPin ?? this.cardPin,
       apiKey: apiKey ?? this.apiKey,
-      totpSecret: totpSecret ?? this.totpSecret,
-      totpIssuer: totpIssuer ?? this.totpIssuer,
-      totpDigits: totpDigits ?? this.totpDigits,
-      totpPeriod: totpPeriod ?? this.totpPeriod,
-      totpAlgorithm: totpAlgorithm ?? this.totpAlgorithm,
       oauthProvider: oauthProvider ?? this.oauthProvider,
       oauthClientId: oauthClientId ?? this.oauthClientId,
       oauthAccessToken: oauthAccessToken ?? this.oauthAccessToken,
@@ -511,97 +468,84 @@ class VaultEntry extends Equatable {
           : const [],
 
       // SSH
-      sshPrivateKey: json.containsKey('sshPrivateKey') && json['sshPrivateKey'] is String
-          ? json['sshPrivateKey']
+      sshPrivateKey: json.containsKey('ssh_private_key') && json['ssh_private_key'] is String
+          ? json['ssh_private_key']
           : '',
-      sshPublicKey: json.containsKey('sshPublicKey') && json['sshPublicKey'] is String
-          ? json['sshPublicKey']
+      sshPublicKey: json.containsKey('ssh_public_key') && json['ssh_public_key'] is String
+          ? json['ssh_public_key']
           : '',
-      sshFingerprint: json.containsKey('sshFingerprint') && json['sshFingerprint'] is String
-          ? json['sshFingerprint']
+      sshFingerprint: json.containsKey('ssh_fingerprint') && json['ssh_fingerprint'] is String
+          ? json['ssh_fingerprint']
           : '',
 
       // Card
-      cardHolderName: json.containsKey('cardHolderName') && json['cardHolderName'] is String
-          ? json['cardHolderName']
+      cardHolderName: json.containsKey('card_holder_name') && json['card_holder_name'] is String
+          ? json['card_holder_name']
           : '',
-      cardNumber: json.containsKey('cardNumber') && json['cardNumber'] is String
-          ? json['cardNumber']
+      cardNumber: json.containsKey('card_number') && json['card_number'] is String
+          ? json['card_number']
           : '',
       cardExpirationMonth:
-          json.containsKey('cardExpirationMonth') && json['cardExpirationMonth'] is String
-          ? json['cardExpirationMonth']
+          json.containsKey('card_expiration_month') && json['card_expiration_month'] is String
+          ? json['card_expiration_month']
           : '1',
       cardExpirationYear:
-          json.containsKey('cardExpirationYear') && json['cardExpirationYear'] is String
-          ? json['cardExpirationYear']
+          json.containsKey('card_expiration_year') && json['card_expiration_year'] is String
+          ? json['card_expiration_year']
           : '2020',
-      cardSecurityCode: json.containsKey('cardSecurityCode') && json['cardSecurityCode'] is String
-          ? json['cardSecurityCode']
+      cardSecurityCode:
+          json.containsKey('card_security_code') && json['card_security_code'] is String
+          ? json['card_security_code']
           : '',
-      cardIssuer: json.containsKey('cardIssuer') && json['cardIssuer'] is String
-          ? json['cardIssuer']
+      cardIssuer: json.containsKey('card_issuer') && json['card_issuer'] is String
+          ? json['card_issuer']
           : '',
-      cardPin: json.containsKey('cardPin') && json['cardPin'] is String ? json['cardPin'] : '',
+      cardPin: json.containsKey('card_pin') && json['card_pin'] is String ? json['card_pin'] : '',
 
       // API
-      apiKey: json.containsKey('apiKey') && json['apiKey'] is String ? json['apiKey'] : '',
-
-      // TOTP
-      totpSecret: json.containsKey('totpSecret') && json['totpSecret'] is String
-          ? json['totpSecret']
-          : '',
-      totpIssuer: json.containsKey('totpIssuer') && json['totpIssuer'] is String
-          ? json['totpIssuer']
-          : '',
-      totpDigits: json.containsKey('totpDigits') && json['totpDigits'] is String
-          ? json['totpDigits']
-          : '6',
-      totpPeriod: json.containsKey('totpPeriod') && json['totpPeriod'] is String
-          ? json['totpPeriod']
-          : '30',
-      totpAlgorithm: json.containsKey('totpAlgorithm') && json['totpAlgorithm'] is String
-          ? json['totpAlgorithm']
-          : 'SHA1',
+      apiKey: json.containsKey('api_key') && json['api_key'] is String ? json['api_key'] : '',
 
       // OAuth
-      oauthProvider: json.containsKey('oauthProvider') && json['oauthProvider'] is String
-          ? json['oauthProvider']
+      oauthProvider: json.containsKey('oauth_provider') && json['oauth_provider'] is String
+          ? json['oauth_provider']
           : '',
-      oauthClientId: json.containsKey('oauthClientId') && json['oauthClientId'] is String
-          ? json['oauthClientId']
+      oauthClientId: json.containsKey('oauth_client_id') && json['oauth_client_id'] is String
+          ? json['oauth_client_id']
           : '',
-      oauthAccessToken: json.containsKey('oauthAccessToken') && json['oauthAccessToken'] is String
-          ? json['oauthAccessToken']
+      oauthAccessToken:
+          json.containsKey('oauth_access_token') && json['oauth_access_token'] is String
+          ? json['oauth_access_token']
           : '',
       oauthRefreshToken:
-          json.containsKey('oauthRefreshToken') && json['oauthRefreshToken'] is String
-          ? json['oauthRefreshToken']
+          json.containsKey('oauth_refresh_token') && json['oauth_refresh_token'] is String
+          ? json['oauth_refresh_token']
           : '',
 
       // Wifi
-      wifiSsid: json.containsKey('wifiSsid') && json['wifiSsid'] is String ? json['wifiSsid'] : '',
-      wifiPassword: json.containsKey('wifiPassword') && json['wifiPassword'] is String
-          ? json['wifiPassword']
+      wifiSsid: json.containsKey('wifi_ssid') && json['wifi_ssid'] is String
+          ? json['wifi_ssid']
+          : '',
+      wifiPassword: json.containsKey('wifi_password') && json['wifi_password'] is String
+          ? json['wifi_password']
           : '',
 
       // PGP
-      pgpPrivateKey: json.containsKey('pgpPrivateKey') && json['pgpPrivateKey'] is String
-          ? json['pgpPrivateKey']
+      pgpPrivateKey: json.containsKey('pgp_private_key') && json['pgp_private_key'] is String
+          ? json['pgp_private_key']
           : '',
-      pgpPublicKey: json.containsKey('pgpPublicKey') && json['pgpPublicKey'] is String
-          ? json['pgpPublicKey']
+      pgpPublicKey: json.containsKey('pgp_public_key') && json['pgp_public_key'] is String
+          ? json['pgp_public_key']
           : '',
-      pgpFingerprint: json.containsKey('pgpFingerprint') && json['pgpFingerprint'] is String
-          ? json['pgpFingerprint']
+      pgpFingerprint: json.containsKey('pgp_fingerprint') && json['pgp_fingerprint'] is String
+          ? json['pgp_fingerprint']
           : '',
 
       // S-MIME
-      smimeCertificate: json.containsKey('smimeCertificate') && json['smimeCertificate'] is String
-          ? json['smimeCertificate']
+      smimeCertificate: json.containsKey('smime_certificate') && json['smime_certificate'] is String
+          ? json['smime_certificate']
           : '',
-      smimePrivateKey: json.containsKey('smimePrivateKey') && json['smimePrivateKey'] is String
-          ? json['smimePrivateKey']
+      smimePrivateKey: json.containsKey('smime_private_key') && json['smime_private_key'] is String
+          ? json['smime_private_key']
           : '',
     );
   }
@@ -622,47 +566,40 @@ class VaultEntry extends Equatable {
       'urls': urls,
 
       // SSH
-      'sshPrivateKey': sshPrivateKey,
-      'sshPublicKey': sshPublicKey,
-      'sshFingerprint': sshFingerprint,
+      'ssh_private_key': sshPrivateKey,
+      'ssh_public_key': sshPublicKey,
+      'ssh_fingerprint': sshFingerprint,
 
       // Card
-      'cardHolderName': cardHolderName,
-      'cardNumber': cardNumber,
-      'cardExpirationMonth': cardExpirationMonth,
-      'cardExpirationYear': cardExpirationYear,
-      'cardSecurityCode': cardSecurityCode,
-      'cardIssuer': cardIssuer.toString().split('.').last,
-      'cardPin': cardPin,
+      'card_holder_name': cardHolderName,
+      'card_number': cardNumber,
+      'card_expiration_month': cardExpirationMonth,
+      'card_expiration_year': cardExpirationYear,
+      'card_security_code': cardSecurityCode,
+      'card_issuer': cardIssuer,
+      'card_pin': cardPin,
 
       // API
-      'apiKey': apiKey,
-
-      // TOTP
-      'totpSecret': totpSecret,
-      'totpIssuer': totpIssuer,
-      'totpDigits': totpDigits,
-      'totpPeriod': totpPeriod,
-      'totpAlgorithm': totpAlgorithm,
+      'api_key': apiKey,
 
       // OAuth
-      'oauthProvider': oauthProvider,
-      'oauthClientId': oauthClientId,
-      'oauthAccessToken': oauthAccessToken,
-      'oauthRefreshToken': oauthRefreshToken,
+      'oauth_provider': oauthProvider,
+      'oauth_client_id': oauthClientId,
+      'oauth_access_token': oauthAccessToken,
+      'oauth_refresh_token': oauthRefreshToken,
 
       // Wifi
-      'wifiSsid': wifiSsid,
-      'wifiPassword': wifiPassword,
+      'wifi_ssid': wifiSsid,
+      'wifi_password': wifiPassword,
 
       // PGP
-      'pgpPrivateKey': pgpPrivateKey,
-      'pgpPublicKey': pgpPublicKey,
-      'pgpFingerprint': pgpFingerprint,
+      'pgp_private_key': pgpPrivateKey,
+      'pgp_public_key': pgpPublicKey,
+      'pgp_fingerprint': pgpFingerprint,
 
       // S-MIME
-      'smimeCertificate': smimeCertificate,
-      'smimePrivateKey': smimePrivateKey,
+      'smime_certificate': smimeCertificate,
+      'smime_private_key': smimePrivateKey,
     };
   }
 
@@ -695,13 +632,6 @@ extension PasswordEntryEncryptionExtions on VaultEntry {
       cardIssuer: await encryptFunc(cardIssuer),
       cardPin: await encryptFunc(cardPin),
       apiKey: await encryptFunc(apiKey),
-
-      // TOTP
-      totpSecret: await encryptFunc(totpSecret),
-      totpIssuer: await encryptFunc(totpIssuer),
-      totpDigits: await encryptFunc(totpDigits),
-      totpPeriod: await encryptFunc(totpPeriod),
-      totpAlgorithm: await encryptFunc(totpAlgorithm),
 
       // OAuth
       oauthProvider: await encryptFunc(oauthProvider),
@@ -771,13 +701,6 @@ extension PasswordEntryEncryptionExtions on VaultEntry {
 
       // API
       apiKey: await safeDecrypt(apiKey),
-
-      // TOTP
-      totpSecret: await safeDecrypt(totpSecret),
-      totpIssuer: await safeDecrypt(totpIssuer),
-      totpDigits: await safeDecrypt(totpDigits),
-      totpPeriod: await safeDecrypt(totpPeriod),
-      totpAlgorithm: await safeDecrypt(totpAlgorithm),
 
       // OAuth
       oauthProvider: await safeDecrypt(oauthProvider),

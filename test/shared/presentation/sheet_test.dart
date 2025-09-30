@@ -27,7 +27,7 @@ void main() {
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 
-      expect(find.byType(SafeArea), findsOneWidget);
+      expect(find.byType(SafeArea), findsNWidgets(2));
       expect(find.byType(Sheet), findsOneWidget);
       expect(find.text("My title"), findsOneWidget);
       expect(find.byType(Card), findsOneWidget);
@@ -74,7 +74,7 @@ void main() {
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 
-      expect(find.byType(SafeArea), findsOneWidget);
+      expect(find.byType(SafeArea), findsNWidgets(2));
       expect(find.byType(Sheet), findsOneWidget);
       expect(find.text("My title"), findsOneWidget);
       expect(find.text("Hello"), findsOneWidget);

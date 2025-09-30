@@ -72,7 +72,7 @@ class _State extends ConsumerState<VaultListDesktop> {
         ),
         Separator.horizontal(),
         VaultListActions(
-          enabled: ref.watch(selectedEntryProvider) == null,
+          enabled: selectedVaultEntry == null && !addEditModeActive,
           onAdd: () => _addNewEntry(),
         ),
       ],
@@ -135,9 +135,11 @@ class _State extends ConsumerState<VaultListDesktop> {
       return;
     }
 
+    if (ref.read(addEditModeActiveProvider)) return;
+
     final result = await showShadSheet(
       context: context,
-      side: ShadSheetSide.bottom,
+      side: ShadSheetSide.right,
       builder: (context) => VaultEntryTypeSelectionSheet(
         onSelected: (t) async {
           _selectedVaultEntryType = t;
@@ -148,8 +150,6 @@ class _State extends ConsumerState<VaultListDesktop> {
     if (result != true) {
       return;
     }
-
-    if (ref.read(addEditModeActiveProvider)) return;
 
     ref.read(selectedEntryProvider.notifier).setEntry(null);
 

@@ -95,7 +95,7 @@ class VaultListEntry extends ConsumerWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-        leading: Favicon(url: entry.urls.isEmpty ? "" : entry.urls.first),
+        leading: Favicon(entry: entry),
         trailing: isMobile
             ? VaultListEntryPopup(
                 entry: entry,

@@ -15,6 +15,10 @@ class PlainTextFormField extends ConsumerStatefulWidget {
   final bool readOnly;
   final int? maxLines;
 
+  // Tooltips produce errors in widget tests. This property is only to disable them during testing.
+  // https://github.com/nank1ro/flutter-shadcn-ui/issues/294
+  final bool noTooltip;
+
   const PlainTextFormField({
     super.key,
     required this.label,
@@ -23,6 +27,7 @@ class PlainTextFormField extends ConsumerStatefulWidget {
     this.canCopy = false,
     this.canToggle = false,
     this.readOnly = false,
+    this.noTooltip = false,
     this.maxLines,
   });
 
@@ -116,7 +121,7 @@ class _State extends ConsumerState<PlainTextFormField> {
                           _obscured = !_obscured;
                         });
                       },
-                      tooltip: "Show/hide value",
+                      tooltip: widget.noTooltip ? null : "Show/hide value",
                     ),
                   ),
               ],

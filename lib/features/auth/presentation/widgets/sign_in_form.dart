@@ -7,10 +7,11 @@ import 'package:open_password_manager/features/auth/domain/entities/offline_auth
 import 'package:open_password_manager/features/auth/infrastructure/providers/auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/infrastructure/providers/biometric_auth_repository_provider.dart';
 import 'package:open_password_manager/features/auth/presentation/pages/create_account_page.dart';
-import 'package:open_password_manager/features/vault/application/providers/active_folder_provider.dart';
+import 'package:open_password_manager/features/vault/application/providers/active_filter_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/add_edit_mode_active_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/all_entries_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/all_entry_folders_provider.dart';
+import 'package:open_password_manager/features/vault/application/providers/all_type_groups_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/filter_query_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/has_changes_provider.dart';
 import 'package:open_password_manager/features/vault/application/providers/selected_entry_provider.dart';
@@ -386,9 +387,10 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
   void _resetProviders() {
     ref.invalidate(allEntriesProvider);
-    ref.invalidate(activeFolderProvider);
+    ref.invalidate(activeFilterProvider);
     ref.invalidate(addEditModeActiveProvider);
     ref.invalidate(allEntryFoldersProvider);
+    ref.invalidate(allTypeGroupsProvider);
     ref.invalidate(filterQueryProvider);
     ref.invalidate(hasChangesProvider);
     ref.invalidate(selectedEntryProvider);

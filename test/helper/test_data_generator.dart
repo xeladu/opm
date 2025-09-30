@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:open_password_manager/features/vault/domain/entities/vault_entry.dart';
+import 'package:open_password_manager/features/vault/domain/entities/vault_entry_type.dart';
 
 class TestDataGenerator {
   static VaultEntry vaultEntry({
@@ -13,9 +14,11 @@ class TestDataGenerator {
     List<String>? urls,
     String? comments,
     String? folder,
+    String? type,
   }) {
     return VaultEntry.empty().copyWith(
       id: id ?? "1",
+      type: type ?? VaultEntryType.note.name,
       name: name ?? "my-name",
       createdAt: createdAt ?? DateTime(2020, 1, 1, 1, 1, 1).toIso8601String(),
       updatedAt: updatedAt ?? DateTime(2021, 1, 1, 1, 1, 1).toIso8601String(),
@@ -30,6 +33,7 @@ class TestDataGenerator {
   static VaultEntry randomVaultEntry() {
     return VaultEntry.empty().copyWith(
       id: Random().nextInt(1000).toString(),
+      type: VaultEntryType.values[Random().nextInt(VaultEntryType.values.length - 1)].name,
       name: "my-name-${Random().nextInt(1000)}",
       createdAt: DateTime(
         2020,
