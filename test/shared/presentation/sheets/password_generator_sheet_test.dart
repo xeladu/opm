@@ -111,9 +111,7 @@ void main() {
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(PasswordGeneratorSheet)),
-      );
+      final container = tester.container();
       container
           .read(selectedEntryProvider.notifier)
           .setEntry(VaultEntry.empty());

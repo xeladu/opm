@@ -153,7 +153,7 @@ void main() {
         await tester.tap(find.text('Log out'));
         await tester.pumpAndSettle();
 
-        final container = ProviderScope.containerOf(tester.element(find.byType(SignInPage)));
+        final container = tester.container();
         container.read(noConnectionProvider.notifier).setConnectionState(true);
 
         // Back to sign in page

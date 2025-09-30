@@ -25,9 +25,7 @@ void main() {
       expect(find.byType(ShadSelect<ColorSchemeObject>), findsOneWidget);
       expect(find.text("Neutral color scheme"), findsOneWidget);
 
-      final containerProvider = ProviderScope.containerOf(
-        tester.element(find.byType(ColorSchemeSetting)),
-      );
+      final containerProvider = tester.container();
 
       expect(
         containerProvider.read(settingsProvider).darkColorScheme,
@@ -57,9 +55,7 @@ void main() {
 
       expect(find.text("Rose color scheme"), findsOneWidget);
 
-      final containerProvider = ProviderScope.containerOf(
-        tester.element(find.byType(ColorSchemeSetting)),
-      );
+      final containerProvider = tester.container();
 
       expect(containerProvider.read(settingsProvider).darkColorScheme, ShadRoseColorScheme.dark());
       expect(

@@ -114,9 +114,7 @@ void main() {
           vaultRepositoryProvider.overrideWithValue(mockVaultRepository),
         ]);
 
-        final container = ProviderScope.containerOf(
-          tester.element(find.byType(AddEditVaultEntryPage)),
-        );
+        final container = tester.container();
         container.read(hasChangesProvider.notifier).setHasChanges(true);
         container.read(addEditModeActiveProvider.notifier).setMode(true);
 

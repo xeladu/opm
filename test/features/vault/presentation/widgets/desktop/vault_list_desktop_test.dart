@@ -197,7 +197,7 @@ void main() {
         storageServiceProvider.overrideWithValue(mockStorageService),
       ]);
 
-      final container = ProviderScope.containerOf(tester.element(find.byType(VaultListDesktop)));
+      final container = tester.container();
       container.read(allEntriesProvider);
       await tester.pumpAndSettle();
 

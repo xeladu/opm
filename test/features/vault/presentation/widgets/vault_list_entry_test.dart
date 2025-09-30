@@ -65,7 +65,7 @@ void main() {
         if (isMobile) {
           expect(find.byType(VaultEntryDetailPage), findsOneWidget);
         } else {
-          final container = ProviderScope.containerOf(tester.element(find.byType(VaultListEntry)));
+          final container = tester.container();
           expect(container.read(selectedEntryProvider), vaultEntry);
         }
       });
@@ -109,7 +109,7 @@ void main() {
         if (isMobile) {
           expect(find.byType(AddEditVaultEntryPage), findsOneWidget);
         } else {
-          final container = ProviderScope.containerOf(tester.element(find.byType(VaultListEntry)));
+          final container = tester.container();
           expect(container.read(selectedEntryProvider), vaultEntry);
           expect(container.read(addEditModeActiveProvider), true);
         }

@@ -83,9 +83,7 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, []);
 
-      final providerContainer = ProviderScope.containerOf(
-        tester.element(find.byType(ResponsiveAppFrame)),
-      );
+      final providerContainer = tester.container();
 
       expect(find.byIcon(LucideIcons.search), findsOneWidget);
       expect(providerContainer.read(showSearchFieldProvider), isFalse);
@@ -124,9 +122,7 @@ void main() {
         cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
 
-      final providerContainer = ProviderScope.containerOf(
-        tester.element(find.byType(ResponsiveAppFrame)),
-      );
+      final providerContainer = tester.container();
 
       expect(find.byIcon(LucideIcons.settings2), findsOneWidget);
 
@@ -189,9 +185,7 @@ void main() {
         cryptographyRepositoryProvider.overrideWithValue(mockCryptographyRepository),
       ]);
 
-      final providerContainer = ProviderScope.containerOf(
-        tester.element(find.byType(ResponsiveAppFrame)),
-      );
+      final providerContainer = tester.container();
 
       expect(find.byIcon(LucideIcons.settings2), findsOneWidget);
       await tester.tap(find.byIcon(LucideIcons.settings2));

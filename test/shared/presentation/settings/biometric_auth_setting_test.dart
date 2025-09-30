@@ -31,9 +31,7 @@ void main() {
       expect(find.byType(ShadSwitch), findsOneWidget);
       expect(find.byType(ShadCard), findsOneWidget);
 
-      final containerProvider = ProviderScope.containerOf(
-        tester.element(find.byType(BiometricAuthSetting)),
-      );
+      final containerProvider = tester.container();
 
       expect(containerProvider.read(settingsProvider).biometricAuthEnabled, false);
       expect(find.textContaining("security risks"), findsOneWidget);
@@ -50,9 +48,7 @@ void main() {
       expect(find.byType(ShadSwitch), findsOneWidget);
       expect(find.byType(ShadCard), findsOneWidget);
 
-      final containerProvider = ProviderScope.containerOf(
-        tester.element(find.byType(BiometricAuthSetting)),
-      );
+      final containerProvider = tester.container();
 
       expect(containerProvider.read(settingsProvider).biometricAuthEnabled, false);
 
@@ -75,9 +71,7 @@ void main() {
       expect(find.byType(ShadSwitch), findsOneWidget);
       expect(find.byType(ShadCard), findsOneWidget);
 
-      final containerProvider = ProviderScope.containerOf(
-        tester.element(find.byType(BiometricAuthSetting)),
-      );
+      final containerProvider = tester.container();
 
       expect(containerProvider.read(settingsProvider).biometricAuthEnabled, false);
       expect(find.byWidgetPredicate((w) => w is ShadSwitch && !w.value), findsOneWidget);

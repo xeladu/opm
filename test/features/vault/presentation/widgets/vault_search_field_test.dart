@@ -27,9 +27,7 @@ void main() {
       expect(find.byType(ShadInput), findsOneWidget);
       expect(find.byIcon(LucideIcons.x), findsOneWidget);
 
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(VaultSearchField)),
-      );
+      final container = tester.container();
       expect(container.read(filterQueryProvider), "abc");
     });
 
@@ -40,9 +38,7 @@ void main() {
       await tester.enterText(find.byType(ShadInput), "abc");
       await tester.pump();
 
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(VaultSearchField)),
-      );
+      final container = tester.container();
       expect(container.read(filterQueryProvider), "abc");
       expect(find.byIcon(LucideIcons.x), findsOneWidget);
 

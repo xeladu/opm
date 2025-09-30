@@ -64,9 +64,7 @@ void main() {
       );
       await AppSetup.pumpPage(tester, sut, []);
 
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(VaultListMobile)),
-      );
+      final container = tester.container();
       container.read(showSearchFieldProvider.notifier).setState(true);
       await tester.pumpAndSettle();
 

@@ -6,11 +6,11 @@ import 'package:open_password_manager/features/auth/infrastructure/providers/bio
 import 'package:open_password_manager/shared/application/providers/storage_service_provider.dart';
 
 final biometricAuthAvailableProvider =
-    AutoDisposeAsyncNotifierProvider<BiometricAuthAvailableState, bool>(
+    AsyncNotifierProvider<BiometricAuthAvailableState, bool>(
       BiometricAuthAvailableState.new,
     );
 
-class BiometricAuthAvailableState extends AutoDisposeAsyncNotifier<bool> {
+class BiometricAuthAvailableState extends AsyncNotifier<bool> {
   @override
   FutureOr<bool> build() async {
     final biometricAuthRepoProvider = ref.read(biometricAuthRepositoryProvider);

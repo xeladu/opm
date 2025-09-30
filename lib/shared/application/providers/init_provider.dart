@@ -6,7 +6,7 @@ import 'package:open_password_manager/features/settings/infrastructure/providers
 
 final initProvider = AsyncNotifierProvider.autoDispose<InitState, void>(InitState.new);
 
-class InitState extends AutoDisposeAsyncNotifier<void> {
+class InitState extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() async {
     final settings = await ref.read(settingsRepositoryProvider).load();

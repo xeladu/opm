@@ -25,9 +25,7 @@ void main() {
       expect(find.byType(ShadSelect<ThemeMode>), findsOneWidget);
       expect(find.text("System mode"), findsOneWidget);
 
-      final containerProvider = ProviderScope.containerOf(
-        tester.element(find.byType(ThemeModeSetting)),
-      );
+      final containerProvider = tester.container();
 
       expect(containerProvider.read(settingsProvider).themeMode, ThemeMode.system);
     });
@@ -50,9 +48,7 @@ void main() {
 
       expect(find.text("Light mode"), findsOneWidget);
 
-      final containerProvider = ProviderScope.containerOf(
-        tester.element(find.byType(ThemeModeSetting)),
-      );
+      final containerProvider = tester.container();
 
       expect(containerProvider.read(settingsProvider).themeMode, ThemeMode.light);
     });

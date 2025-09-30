@@ -28,7 +28,7 @@ void main() {
 
       await tester.runAsync(() async => await AppSetup.pumpPage(tester, sut, [], pump: true));
 
-      final container = ProviderScope.containerOf(tester.element(find.byType(Loading)));
+      final container = tester.container();
       container.read(loadingTextStateProvider.notifier).setState("abc");
       container.read(loadingValueStateProvider.notifier).setState(0.5);
 

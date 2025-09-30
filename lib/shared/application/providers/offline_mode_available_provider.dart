@@ -12,11 +12,11 @@ import 'package:open_password_manager/shared/application/providers/storage_servi
 /// - Vault data is cached (usually cached after decryption)
 /// - Crypto utils are cached (usually cached after crypto service initialization)
 final offlineModeAvailableProvider =
-    AutoDisposeAsyncNotifierProvider<OfflineModeAvailableState, bool>(
+    AsyncNotifierProvider.autoDispose<OfflineModeAvailableState, bool>(
       OfflineModeAvailableState.new,
     );
 
-class OfflineModeAvailableState extends AutoDisposeAsyncNotifier<bool> {
+class OfflineModeAvailableState extends AsyncNotifier<bool> {
   @override
   FutureOr<bool> build() async {
     // contains cached auth information to perform a sign in
