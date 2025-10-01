@@ -289,16 +289,23 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   }
 
   void _checkOfflineMode() async {
-    // Check if offline mode is supported (required data has been cached before)
-    final offlineModeAvailable = await ref.watch(offlineModeAvailableProvider.future);
-    setState(() {
-      _offlineModeAvailable = offlineModeAvailable;
-    });
+    if (!mounted) return;
 
-    // Check if internet connection is available or not.
-    // Start the connection listener side-effect provider so it begins
-    // updating `noConnectionProvider` and then listen to `noConnectionProvider`.
-    ref.read(connectionListenerProvider);
+    try {
+      // Check if offline mode is supported (required data has been cached before)
+      final offlineModeAvailable = await ref.read(offlineModeAvailableProvider.future);
+
+      setState(() {
+        _offlineModeAvailable = offlineModeAvailable;
+      });
+
+      // Check if internet connection is available or not.
+      // Start the connection listener side-effect provider so it begins
+      // updating `noConnectionProvider` and then listen to `noConnectionProvider`.
+      ref.read(connectionListenerProvider);
+    } catch (_) {
+      // during widget rebuild a ProviderException could happen due to the async nature
+    }
   }
 
   void _showBiometricLogin() {
