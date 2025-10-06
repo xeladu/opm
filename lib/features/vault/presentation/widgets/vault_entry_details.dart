@@ -13,8 +13,6 @@ class VaultEntryDetails extends StatelessWidget {
 
   const VaultEntryDetails({super.key, required this.entry});
 
-  // TODO make context menus type aware (offer useful options depening on entry type)
-
   @override
   Widget build(BuildContext context) {
     final df = DateFormat("yyyy/dd/MM, HH:mm:ss");
@@ -171,20 +169,21 @@ class VaultEntryDetails extends StatelessWidget {
                   ),
 
                 // wifi
-                if (entry.wifiPassword.isNotEmpty)
+                if (entry.wifiSsid.isNotEmpty)
+                  PlainTextFormField.readOnly(
+                    label: "WiFi SSID",
+                    value: entry.wifiSsid,
+                    canCopy: true,
+                  ),
+                if (entry.wifiPassword.isNotEmpty) ...[
                   PlainTextFormField.readOnly(
                     label: "WiFi Password",
                     value: entry.wifiPassword,
                     canToggle: true,
                     canCopy: true,
                   ),
-                if (entry.wifiSsid.isNotEmpty)
-                  PlainTextFormField.readOnly(
-                    label: "WiFi SSID",
-                    value: entry.wifiSsid,
-                    canToggle: true,
-                    canCopy: true,
-                  ),
+                  StrengthIndicator(password: entry.wifiPassword),
+                ],
 
                 // oauth
                 if (entry.oauthAccessToken.isNotEmpty)

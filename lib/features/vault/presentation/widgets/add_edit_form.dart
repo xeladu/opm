@@ -1186,18 +1186,6 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
         leading: Icon(LucideIcons.idCard),
         label: const Text('S-MIME Certificate'),
         placeholder: const Text("Your S-MIME Certificate"),
-      ),
-    ];
-  }
-
-  List<Widget> _addWifiFields() {
-    return [
-      ShadInputFormField(
-        key: ValueKey("wifiPassword"),
-        controller: _wifiPasswordController,
-        leading: Icon(LucideIcons.lock),
-        label: const Text('Wifi Password'),
-        placeholder: const Text("Your Wifi Password"),
         obscureText: _obscureSecrets,
         trailing: SizedBox(
           width: sizeS,
@@ -1211,12 +1199,62 @@ class _AddEditFormState extends ConsumerState<AddEditForm> {
           ),
         ),
       ),
+    ];
+  }
+
+  List<Widget> _addWifiFields() {
+    return [
       ShadInputFormField(
         key: ValueKey("wifiSsid"),
         controller: _wifiSsidController,
         leading: Icon(LucideIcons.idCard),
         label: const Text('Wifi SSID'),
         placeholder: const Text("Your Wifi SSID"),
+      ),
+      ShadInputFormField(
+        key: ValueKey("wifiPassword"),
+        controller: _wifiPasswordController,
+        leading: Icon(LucideIcons.lock),
+        label: const Text('Wifi Password'),
+        placeholder: const Text("Your Wifi Password"),
+        obscureText: _obscureSecrets,
+        trailing: Row(
+          spacing: sizeXS,
+          children: [
+            SizedBox(
+              width: sizeS,
+              height: sizeS,
+              child: GlyphButton.ghost(
+                tooltip: "Generate password",
+                icon: LucideIcons.packagePlus,
+                onTap: () async {
+                  await showShadSheet(
+                    side: ShadSheetSide.right,
+                    context: context,
+                    builder: (context) => PasswordGeneratorSheet(
+                      onGeneratePassword: (newPassword) {
+                        setState(() {
+                          _wifiPasswordController.text = newPassword;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            SizedBox(
+              width: sizeS,
+              height: sizeS,
+              child: GlyphButton.ghost(
+                tooltip: "Show/hide value",
+                icon: _obscureSecrets ? LucideIcons.eyeOff : LucideIcons.eye,
+                onTap: () {
+                  setState(() => _obscureSecrets = !_obscureSecrets);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     ];
   }

@@ -112,6 +112,8 @@ void main() {
             expect(find.byType(ShadInputFormField), findsNWidgets(2));
           case VaultEntryType.credential:
             expect(find.byType(ShadInputFormField), findsNWidgets(5));
+            expect(find.byIcon(LucideIcons.packagePlus), findsOneWidget);
+            expect(find.byIcon(LucideIcons.eyeOff), findsOneWidget);
             expect(find.text("my-user"), findsOneWidget);
             expect(find.text("my-pass"), findsOneWidget);
             expect(find.textContaining("url1"), findsOneWidget);
@@ -120,6 +122,7 @@ void main() {
             expect(find.byType(ShadInputFormField), findsNWidgets(6));
             expect(find.byType(ShadSelectFormField<CardIssuer>), findsNWidgets(1));
             expect(find.byType(ShadSelectFormField<int>), findsNWidgets(2));
+            expect(find.byIcon(LucideIcons.eyeOff), findsNWidgets(2));
             expect(find.text("2"), findsOneWidget);
             expect(find.text("1999"), findsOneWidget);
             expect(find.text("my-card-pin"), findsOneWidget);
@@ -129,29 +132,35 @@ void main() {
             expect(find.text("VISA"), findsOneWidget);
           case VaultEntryType.ssh:
             expect(find.byType(ShadInputFormField), findsNWidgets(5));
+            expect(find.byIcon(LucideIcons.eyeOff), findsOneWidget);
             expect(find.text("my-ssh-private-key"), findsOneWidget);
             expect(find.text("my-ssh-public-key"), findsOneWidget);
             expect(find.text("my-ssh-fingerprint"), findsOneWidget);
           case VaultEntryType.api:
             expect(find.byType(ShadInputFormField), findsNWidgets(3));
+            expect(find.byIcon(LucideIcons.eyeOff), findsOneWidget);
             expect(find.text("my-api-key"), findsOneWidget);
           case VaultEntryType.oauth:
             expect(find.byType(ShadInputFormField), findsNWidgets(6));
+            expect(find.byIcon(LucideIcons.eyeOff), findsNWidgets(2));
             expect(find.text("my-oauth-access-token"), findsOneWidget);
             expect(find.text("my-oauth-refresh-token"), findsOneWidget);
             expect(find.text("my-oauth-provider"), findsOneWidget);
             expect(find.text("my-oauth-client-id"), findsOneWidget);
           case VaultEntryType.wifi:
             expect(find.byType(ShadInputFormField), findsNWidgets(4));
+            expect(find.byIcon(LucideIcons.eyeOff), findsOneWidget);
             expect(find.text("my-wifi-pass"), findsOneWidget);
             expect(find.text("my-wifi-ssid"), findsOneWidget);
           case VaultEntryType.pgp:
             expect(find.byType(ShadInputFormField), findsNWidgets(5));
+            expect(find.byIcon(LucideIcons.eyeOff), findsOneWidget);
             expect(find.text("my-pgp-private-key"), findsOneWidget);
             expect(find.text("my-pgp-public-key"), findsOneWidget);
             expect(find.text("my-pgp-fingerprint"), findsOneWidget);
           case VaultEntryType.smime:
             expect(find.byType(ShadInputFormField), findsNWidgets(4));
+            expect(find.byIcon(LucideIcons.eyeOff), findsNWidgets(2));
             expect(find.text("my-smime-private-key"), findsOneWidget);
             expect(find.text("my-smime-certificate"), findsOneWidget);
         }
