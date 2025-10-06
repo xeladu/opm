@@ -127,7 +127,7 @@ class VaultListEntry extends ConsumerWidget {
   Future<void> showPopup(BuildContext context, WidgetRef ref, Offset? tapPosition) async {
     final selection = await PopupService.showPopup<PopupSelection>(
       context,
-      VaultListEntryPopup.menuItems,
+      VaultListEntryPopupItemsBuilder(type: entry.type).build(),
       tapPosition ?? Offset.zero,
     );
 
@@ -149,18 +149,90 @@ class VaultListEntry extends ConsumerWidget {
         isMobile
             ? await _handleViewMobile(context, ref, entry)
             : await _handleViewDesktop(context, ref, entry);
+        break;
       case PopupSelection.edit:
         isMobile
             ? await _handleEditMobile(context, ref, entry)
             : await _handleEditDesktop(context, ref, entry);
+        break;
       case PopupSelection.delete:
         await _delete(context, ref, entry);
+        break;
       case PopupSelection.copyUser:
         await _handleCopy(context, ref, entry.username, "User");
+        break;
       case PopupSelection.copyPassword:
         await _handleCopy(context, ref, entry.password, "Password");
+        break;
       case PopupSelection.openUrl:
         await _openUrl(entry);
+        break;
+      case PopupSelection.copySshPrivateKey:
+        await _handleCopy(context, ref, entry.sshPrivateKey, "SSH private key");
+        break;
+      case PopupSelection.copySshPublicKey:
+        await _handleCopy(context, ref, entry.sshPrivateKey, "SSH public key");
+        break;
+      case PopupSelection.copySshFingerprint:
+        await _handleCopy(context, ref, entry.sshFingerprint, "SSH fingerprint");
+        break;
+      case PopupSelection.copyCardHolderName:
+        await _handleCopy(context, ref, entry.cardHolderName, "Card holder");
+        break;
+      case PopupSelection.copyCardNumber:
+        await _handleCopy(context, ref, entry.cardNumber, "Card number");
+        break;
+      case PopupSelection.copyCardExpirationMonth:
+        await _handleCopy(context, ref, entry.cardExpirationMonth, "Card expiration month");
+        break;
+      case PopupSelection.copyCardExpirationYear:
+        await _handleCopy(context, ref, entry.cardExpirationYear, "Card expiration year");
+        break;
+      case PopupSelection.copyCardSecurityCode:
+        await _handleCopy(context, ref, entry.cardSecurityCode, "Card security code");
+        break;
+      case PopupSelection.copyCardIssuer:
+        await _handleCopy(context, ref, entry.cardIssuer, "Card issuer");
+        break;
+      case PopupSelection.copyCardPin:
+        await _handleCopy(context, ref, entry.cardPin, "Card pin");
+        break;
+      case PopupSelection.copyOauthProvider:
+        await _handleCopy(context, ref, entry.oauthProvider, "OAuth provider");
+        break;
+      case PopupSelection.copyOauthClientId:
+        await _handleCopy(context, ref, entry.oauthClientId, "OAuth client id");
+        break;
+      case PopupSelection.copyOauthAccessToken:
+        await _handleCopy(context, ref, entry.oauthAccessToken, "OAuth access token");
+        break;
+      case PopupSelection.copyOauthRefreshToken:
+        await _handleCopy(context, ref, entry.oauthRefreshToken, "OAuth refresh token");
+        break;
+      case PopupSelection.copyWifiSsid:
+        await _handleCopy(context, ref, entry.wifiSsid, "WiFi SSID");
+        break;
+      case PopupSelection.copyWifiPassword:
+        await _handleCopy(context, ref, entry.wifiPassword, "WiFi password");
+        break;
+      case PopupSelection.copyPgpPrivateKey:
+        await _handleCopy(context, ref, entry.pgpPrivateKey, "GPG private key");
+        break;
+      case PopupSelection.copyPgpPublicKey:
+        await _handleCopy(context, ref, entry.pgpPublicKey, "PGP public key");
+        break;
+      case PopupSelection.copyPgpFingerprint:
+        await _handleCopy(context, ref, entry.pgpFingerprint, "PGP fingerprint");
+        break;
+      case PopupSelection.copySmimeCertificate:
+        await _handleCopy(context, ref, entry.smimeCertificate, "S/MIME certificate");
+        break;
+      case PopupSelection.copySmimePrivateKey:
+        await _handleCopy(context, ref, entry.smimePrivateKey, "S/MIME private key");
+        break;
+      case PopupSelection.copyApiKey:
+        await _handleCopy(context, ref, entry.apiKey, "API key");
+        break;
     }
   }
 
